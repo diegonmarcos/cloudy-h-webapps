@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const local = join(root, 'scripts/fallback-services.json');
-const url = process.env.FALLBACK_SERVICES_URL || 'https://raw.githubusercontent.com/diegonmarcos/cloud-u-containers/main/_shared/fallback-services.json';
+const url = process.env.FALLBACK_SERVICES_URL || 'https://raw.githubusercontent.com/diegonmarcos/cloudy-u-containers/main/_shared/fallback-services.json';
 const res = await fetch(url);
 if (!res.ok) { console.error('FAIL fetch', url, res.status); process.exit(1); }
 const remote = await res.text();
