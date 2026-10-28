@@ -1,0 +1,15 @@
+{
+  "name": "Cloud KG Store",
+  "framework": "vanilla",
+  "src": "src",
+  "dist": "dist",
+  "build": [
+    {
+      "_doc": "Copy the static landing page to dist.",
+      "mod": "copy",
+      "files": "*.html",
+      "from": "src"
+    }
+  ],
+  "deploy": {}
+}

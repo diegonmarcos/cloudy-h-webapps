@@ -46,30 +46,6 @@
       "title": "Tools Primary",
       "tiles": [
         {
-          "id": "wallet",
-          "label": "Wallet",
-          "icon": "sa/ic_wallet",
-          "target": "extapp:cloud-wallet"
-        },
-        {
-          "id": "keyboard",
-          "label": "Keyboard",
-          "icon": "sa/ic_keyboard",
-          "target": "extapp:cloud-keyboard"
-        },
-        {
-          "id": "calc",
-          "label": "Calc",
-          "icon": "sa/ic_calc",
-          "target": "extapp:cloud-calc"
-        },
-        {
-          "id": "writer",
-          "label": "Writer",
-          "icon": "sa/ic_writer",
-          "target": "extapp:cloud-writer"
-        },
-        {
           "id": "browser",
           "label": "Browser",
           "icon": "sa/ic_world",
@@ -88,16 +64,34 @@
           "target": "extapp:cloud-camera"
         },
         {
+          "id": "calc",
+          "label": "Calc",
+          "icon": "sa/ic_calc",
+          "target": "extapp:cloud-calc"
+        },
+        {
+          "id": "keyboard",
+          "label": "Keyboard",
+          "icon": "sa/ic_keyboard",
+          "target": "extapp:cloud-keyboard"
+        },
+        {
+          "id": "writer",
+          "label": "Writer",
+          "icon": "sa/ic_writer",
+          "target": "extapp:cloud-writer"
+        },
+        {
+          "id": "wallet",
+          "label": "Wallet",
+          "icon": "sa/ic_wallet",
+          "target": "extapp:cloud-wallet"
+        },
+        {
           "id": "vault",
           "label": "Vault",
           "icon": "sa/ic_vault",
           "target": "extapp:cloud-vault"
-        },
-        {
-          "id": "tools-account",
-          "label": "Account",
-          "icon": "sa/ic_p_accounts",
-          "target": "page:config/profile"
         }
       ]
     },
@@ -155,6 +149,12 @@
       "title": "Me",
       "tiles": [
         {
+          "id": "tools-account",
+          "label": "Account",
+          "icon": "sa/ic_p_accounts",
+          "target": "page:config/profile"
+        },
+        {
           "id": "me",
           "label": "Me",
           "icon": "sa/ic_vcard",
@@ -164,34 +164,43 @@
           "separator": true
         },
         {
-          "id": "mysocials",
-          "label": "MySocials",
-          "icon": "sa/ic_p_identities",
-          "target": "https://diegonmarcos.github.io/mySocials/"
-        },
-        {
-          "id": "myburo",
-          "label": "MyBuro",
-          "icon": "sa/ic_p_folder",
-          "target": "extapp:cloud-me#page:buro/summary"
-        },
-        {
           "id": "myhealth",
-          "label": "MyHealth",
+          "label": "Me-Health",
           "icon": "sa/ic_heart",
-          "target": "extapp:cloud-me#page:projects/health"
+          "target": "extapp:cloud-me#page:health/home"
         },
         {
           "id": "mystudy",
-          "label": "MyStudy",
+          "label": "Me-Study",
           "icon": "sa/ic_file_stack",
-          "target": "extapp:cloud-me#page:projects/studying"
+          "target": "extapp:cloud-me#page:study/cv"
         },
         {
-          "id": "mytrips",
-          "label": "MyTrips",
+          "id": "myachieves",
+          "label": "Me-Achieves",
           "icon": "sa/ic_map_pin",
-          "target": "extapp:cloud-me#page:projects/trips"
+          "target": "extapp:cloud-me#page:achieves/personal"
+        },
+        {
+          "separator": true
+        },
+        {
+          "id": "myduties",
+          "label": "Me-Duties",
+          "icon": "sa/ic_check_all",
+          "target": "extapp:cloud-me#page:duties/tasks"
+        },
+        {
+          "id": "myburo",
+          "label": "Me-Buro",
+          "icon": "sa/ic_p_folder",
+          "target": "extapp:cloud-me#page:buro/ids"
+        },
+        {
+          "id": "myllc",
+          "label": "Me-LLC",
+          "icon": "sa/ic_p_llc",
+          "target": "extapp:cloud-me#page:llc/employed"
         }
       ]
     },
@@ -199,10 +208,10 @@
       "title": "AGI",
       "tiles": [
         {
-          "id": "search",
-          "label": "Search",
-          "icon": "sa/ic_cloud_search",
-          "target": "extapp:cloud-search"
+          "id": "si",
+          "label": "SI",
+          "icon": "sa/ic_si",
+          "target": "extapp:cloud-superintel"
         },
         {
           "id": "ai-chat",
@@ -211,16 +220,37 @@
           "target": "intent://resolve?domain=Cloud_agent_claude_bot#Intent;scheme=tg;package=org.telegram.messenger;S.browser_fallback_url=https%3A%2F%2Ft.me%2FCloud_agent_claude_bot;end"
         },
         {
+          "separator": true
+        },
+        {
+          "id": "search",
+          "label": "Search",
+          "icon": "sa/ic_cloud_search",
+          "target": "extapp:cloud-search"
+        },
+        {
           "id": "code",
           "label": "Code",
           "icon": "sa/ic_ide",
           "target": "extapp:cloud-code"
         },
         {
+          "separator": true
+        },
+        {
+          "id": "kg-store",
+          "label": "KG Store",
+          "icon": "sa/ic_kgs",
+          "target": "extapp:cloud-kg-store"
+        },
+        {
           "id": "tools-small-llms",
           "label": "Tools",
           "icon": "sa/ic_tools_small_llms",
           "target": "extapp:cloud-tools-small-llms"
+        },
+        {
+          "separator": true
         },
         {
           "id": "drive",
@@ -240,27 +270,51 @@
       "title": "Projects W",
       "tiles": [
         {
-          "id": "pm-c3-dp-7321",
-          "label": "PM C3-D&P-7321",
+          "id": "lf-dp-cloud-apk",
+          "label": "Lf.y-D&P-Cloud-apk",
+          "icon": "sa/ic_p_sol_other",
+          "target": "https://paca.diegonmarcos.com/projects"
+        },
+        {
+          "id": "lf-dp-cloud-c3",
+          "label": "Lf.y-D&P-Cloud-C3",
           "icon": "sa/ic_p_c3_reports",
           "target": "https://paca.diegonmarcos.com/projects/9d336534-d0d6-4b9d-aebb-cbd59fde4d0d"
         },
         {
-          "id": "mqpm-stochbates",
-          "label": "MQPM-StochBates",
-          "icon": "sa/ic_p_markets_prices",
-          "target": "https://paca.diegonmarcos.com/projects"
-        },
-        {
-          "id": "pmx",
-          "label": "PM X",
+          "id": "lf-cg-galaxy",
+          "label": "Lf.y-CG-Galaxy",
           "icon": "sa/ic_pm_boards",
           "target": "https://paca.diegonmarcos.com/projects"
         },
         {
-          "id": "pm-zirkus",
-          "label": "PM Zirkus",
+          "id": "lf-cg-zirkus",
+          "label": "Lf.y-CG-Zirkus",
           "icon": "sa/ic_p_sol_pro",
+          "target": "https://paca.diegonmarcos.com/projects"
+        },
+        {
+          "separator": true
+        },
+        {
+          "id": "nx-cm-mqpm",
+          "label": "Nx.z-CM-MQPM",
+          "icon": "sa/ic_p_markets_prices",
+          "target": "https://paca.diegonmarcos.com/projects"
+        },
+        {
+          "id": "nx-cm-blmbrg",
+          "label": "Nx.z-CM-Blmbrg",
+          "icon": "sa/ic_p_markets_prices",
+          "target": "https://paca.diegonmarcos.com/projects"
+        },
+        {
+          "separator": true
+        },
+        {
+          "id": "st-deepsc-x",
+          "label": "St.x-DeepSc-X",
+          "icon": "sa/ic_p_sol_tools",
           "target": "https://paca.diegonmarcos.com/projects"
         }
       ]
@@ -293,7 +347,7 @@
         },
         {
           "id": "configs-controls",
-          "label": "Controls",
+          "label": "Quick Actions",
           "icon": "sa/ic_home",
           "target": "page:config/controls"
         },
