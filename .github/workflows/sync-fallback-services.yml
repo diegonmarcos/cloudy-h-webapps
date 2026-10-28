@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: node scripts/sync-fallback-services.mjs
+      - run: node scripts/sync-fallback-services.mjs && node scripts/gen-nav.mjs
       - name: Commit, test, publish
         env:
           GH_TOKEN: ${{ github.token }}
