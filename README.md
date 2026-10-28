@@ -1,4 +1,4 @@
-# cloud-webapps
+# cloud-h-webapps (renamed from cloud-webapps, 2026-10-28; the published Pages path stays /cloud-webapps/)
 
 One independent site per Cloud APK (cloud-mail, cloud-drive, ...), all sharing one generated top nav (`_shared/dist/nav.js`).
 Moved out of `diegonmarcos.github.io/cloud-webapps` (#1062). Pages is still served by diegonmarcos.github.io,
