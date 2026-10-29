@@ -5,6 +5,7 @@
   "label": "cloudy-h-webapps",
   "code": "1.1.7.1",
   "kind": "repo",
+  "variant": "repo",
   "description": "Cloud web apps: per-app independent sites with a shared top nav",
   "visibility": "public",
   "url": "https://github.com/diegonmarcos/cloudy-h-webapps",
