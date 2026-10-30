@@ -1590,7 +1590,7 @@
               {
                 "id": "omniverse",
                 "label": "Omniverse",
-                "icon": "ic_world",
+                "icon": "ic_p_sol_other",
                 "target": "page:cloud/omniverse"
               },
               {
@@ -1601,7 +1601,7 @@
               {
                 "id": "finterm",
                 "label": "FinTerm",
-                "icon": "ic_fin",
+                "icon": "ic_p_markets_terminal",
                 "target": "section:finterm"
               },
               {
@@ -1612,13 +1612,13 @@
               {
                 "id": "cad",
                 "label": "CAD",
-                "icon": "ic_p_c3_stack",
+                "icon": "ic_p_sol_pro",
                 "target": "page:cloud/cad"
               },
               {
                 "id": "sim2real",
                 "label": "Sim2Real",
-                "icon": "ic_robot",
+                "icon": "ic_p_sol_tools",
                 "target": "page:cloud/sim2real"
               }
             ]
