@@ -4,15 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 node scripts/gen-nav.mjs --check
 node scripts/test-embed.mjs
-for s in c3-mail c3-security-network c3-dns-routing c3-observability c3-mcp-apis; do
-  f=$s/src/index.html
-  [ -f "$f" ] && cmp -s "$f" "$s/dist/index.html" || { echo "FAIL $s src/dist"; exit 1; }
-  grep -q '^var MOCK=' "$f" || { echo "FAIL $s no MOCK"; exit 1; }
-  sed -n 's/^var MOCK=\(.*\);$/\1/p' "$f" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' || { echo "FAIL $s MOCK json"; exit 1; }
-  if grep -Eq 'ghp_|github_pat_|api\.github\.com' "$f"; then echo "FAIL $s github token/api in browser"; exit 1; fi
-  grep -q 'Bearer' "$f" || { echo "FAIL $s no bearer fetch"; exit 1; }
-  grep -q "^var EP=\"https://cloud-me-api.app/me/config/$s\";" "$f" || { echo "FAIL $s EP is not the mesh-only cloud-me-api dataset endpoint"; exit 1; }
-done
+# (the c3-* web-only stub pages and their MOCK checks retired with the stub folders, #1320 M7: /cloudy-c3/ has its own tests)
 # Service fallback pages: generated from the vendored build.json service data; one page per service, current, public-safe.
 node scripts/gen-fallback.mjs --check
 n=$(node -e 'console.log(require("./scripts/fallback-services.json").services.length)')
