@@ -1,7 +1,9 @@
 // The web FinTerm engine (#1342): a port of the APK's Engine.kt / Providers.kt / FredCsv.kt / Forward.kt / Priority. Pure apart from the
 // `get` it is given. It builds every request from the GENERATED declarations (nav/finterm.json: endpoint + path + params); no address is typed
 // here. Source order of a panel: the own-fleet primary (fin-api on the private mesh) when it is declared, feeds the entry and answers, series by
-// series; then the panel's own key-free public source; a keyed source or one a browser cannot reach is a dashed placeholder with its reason.
+// series; then the panel's own key-free public source; then its declared second-priority source (DBnomics: the Fed H.15 / H.10 mirror); a keyed
+// source or one a browser cannot reach is a dashed placeholder with its reason. A source declared `cors: false` (FRED and IMF send no
+// Access-Control-Allow-Origin) is never asked from the browser: the engine goes straight to the next source, so the page never waits on it.
 
 export type Obs = { date: string; value: number };
 export type ChartPoint = { label: string; x: number; y: number };
@@ -10,13 +12,15 @@ export type PanelData = { columns: string[]; rows: string[][]; links: string[]; 
 export type Feed = { tab: string; entries: string[] };
 export type Source = {
   id: string; name: string; category?: string; primary?: boolean; priority: number; coverage?: string; endpoint: string; fleet_endpoint?: string; docs?: string;
-  paths?: Record<string, string>; connector?: string | null; feeds: Feed[]; attribution?: string; user_endpoint?: boolean; auth: { type: string; signup?: string };
+  cors?: boolean; paths?: Record<string, string>; connector?: string | null; feeds: Feed[]; attribution?: string; user_endpoint?: boolean; auth: { type: string; signup?: string };
 };
 export type Fetch = {
   provider: string; lookback_days?: number; path?: string; params?: Record<string, unknown>; countries?: string[]; country_names?: Record<string, string>; labels?: Record<string, string>;
-  series?: { id: string; label: string; years?: number; ccy?: string; quote?: string; pair?: string }[];
+  series?: { id: string; label: string; years?: number; ccy?: string; quote?: string; pair?: string; dbnomics?: string }[];
   forward?: { grid: number[][]; curve_length?: number; curve_max_start?: number };
   primary?: { source: string; topic: string };
+  /** The second-priority public source; a series carries its code there as `dbnomics` ("<provider>/<dataset>/<series>"). */
+  fallback?: { source: string };
 };
 export type Panel = {
   id: string; title: string; source: string; view: string; derive?: string; fetch?: Fetch; columns?: string[]; unit?: string; chart_value?: string; change_unit?: string;
@@ -92,6 +96,12 @@ const latestOf = (s: Series): [string, number] | null => {
   for (let i = s.values.length - 1; i >= 0; i--) if (s.values[i] !== null) return [s.periods[i] ?? '', s.values[i] as number];
   return null;
 };
+/** The observations of a series' DBnomics answer (the first doc): periods with a numeric value; "NA" and other non-numbers are dropped. */
+export function dbnomicsObs(json: string): Obs[] {
+  const s = parseDbnomics(json)[0];
+  if (!s) return [];
+  return s.periods.flatMap((p, i) => (s.values[i] === null || s.values[i] === undefined ? [] : [{ date: p, value: s.values[i] as number }]));
+}
 export type CountryValue = { code: string; name: string; year: string; value: number };
 export function parseWorldBank(json: string): CountryValue[] {
   const rows = safe(json)?.[1];
@@ -165,6 +175,10 @@ const years = (v: number) => (v === Math.floor(v) ? String(v) : num(v, 1));
 export type PrimaryRoute = { source: Source; base: string; topic: string; peek: string };
 export type Ctx = { get: Get; today: string; sources: Source[]; mesh: Record<string, string>; reachable: (healthUrl: string) => Promise<boolean> };
 
+/** A browser can read a source unless it declares `cors: false` (no Access-Control-Allow-Origin header). */
+export const browserReadable = (s: Source | undefined): boolean => !!s && s.cors !== false;
+const blocked = (s: Source) => new FetchError('blocked', `${s.name} sends no CORS header`);
+
 const feedsEntry = (s: Source, tab: string, entry: string) => s.feeds.some((f) => f.tab === tab && (f.entries.includes('*') || f.entries.includes(entry)));
 
 /** The panel's preferred route: the declared primary source (priority below the panel's own, feeds the entry, has a mesh base) when it answers its health path; else null. */
@@ -181,12 +195,14 @@ export async function primaryRoute(panel: Panel, dash: Dashboard, ctx: Pick<Ctx,
   return { source: src, base, topic: p.topic, peek };
 }
 
-type FredSeries = { spec: NonNullable<Fetch['series']>[number]; obs: Obs[]; viaPrimary: boolean; last: Obs; prev?: Obs };
+type FredSeries = { spec: NonNullable<Fetch['series']>[number]; obs: Obs[]; viaPrimary: boolean; viaFallback: boolean; last: Obs; prev?: Obs };
 
 export async function loadPanel(panel: Panel, dash: Dashboard, ctx: Ctx): Promise<PanelData> {
   const f = panel.fetch;
   const source = ctx.sources.find((s) => s.id === panel.source);
   if (!f || !source) throw new Error(`panel ${panel.id} has no fetch`);
+  const fred = ['latest_curve', 'forward_grid', 'level_change', 'fx_spot', 'fx_cross'].includes(panel.derive ?? '');
+  if (!fred && !browserReadable(source)) throw blocked(source); // no request: the source is known to be CORS-blocked
   let data: PanelData;
   switch (panel.derive) {
     case 'latest_curve': case 'forward_grid': case 'level_change': case 'fx_spot': case 'fx_cross': data = await fredPanel(panel, dash, source, f, ctx); break;
@@ -206,7 +222,11 @@ export const alloc = (panel: Panel, legs: [string, number][]): PanelData => ({
 });
 
 async function fredPanel(panel: Panel, dash: Dashboard, source: Source, f: Fetch, ctx: Ctx): Promise<PanelData> {
+  const fb = f.fallback ? ctx.sources.find((s) => s.id === f.fallback!.source) : undefined;
+  const second = fb && fb.id !== source.id && feedsEntry(fb, dash.tab, dash.entry) && browserReadable(fb) ? fb : undefined;
+  const own = browserReadable(source);
   const route = await primaryRoute(panel, dash, ctx);
+  if (!route && !own && !second) throw blocked(source); // every route is known to be unreadable: no request at all
   const lookback = f.lookback_days ?? 30;
   const from = minusDays(ctx.today, lookback);
   const specs = f.series ?? [];
@@ -214,6 +234,7 @@ async function fredPanel(panel: Panel, dash: Dashboard, source: Source, f: Fetch
   const got = await Promise.all(specs.map(async (spec): Promise<FredSeries | null> => {
     let obs: Obs[] = [];
     let via = false;
+    let viaFallback = false;
     if (route) {
       try {
         const url = buildUrl(route.base, route.peek, [], { topic: route.topic.split('{id}').join(spec.id) });
@@ -221,15 +242,25 @@ async function fredPanel(panel: Panel, dash: Dashboard, source: Source, f: Fetch
         via = obs.length > 0;
       } catch { obs = []; } // a topic the container has not published (404) or a mesh that stopped answering: this series comes from the public source
     }
-    if (!obs.length) {
+    if (!obs.length && own) {
       try { obs = parseFredCsv(await ctx.get(fredUrl(source.endpoint, spec.id, ctx.today, lookback)))[spec.id] ?? []; } catch (e) { errs.push(e); obs = []; }
     }
-    return obs.length ? { spec, obs, viaPrimary: via, last: obs[obs.length - 1], prev: obs[obs.length - 2] } : null;
+    if (!obs.length && second && spec.dbnomics) {
+      try {
+        obs = dbnomicsObs(await ctx.get(buildUrl(second.endpoint, `/series/${spec.dbnomics}`, [['observations', '1'], ['metadata', '0']]))).filter((o) => o.date >= from);
+        viaFallback = obs.length > 0;
+      } catch (e) { errs.push(e); obs = []; }
+    }
+    return obs.length ? { spec, obs, viaPrimary: via, viaFallback, last: obs[obs.length - 1], prev: obs[obs.length - 2] } : null;
   }));
   const series = got.filter((s): s is FredSeries => !!s);
   if (!series.length) throw errs[0] ?? new Error('no data');
-  const viaPrimary = series.filter((s) => s.viaPrimary).length;
-  const servedBy = !route || !viaPrimary ? '' : viaPrimary === series.length ? route.source.name : `${route.source.name} + ${source.name}`;
+  const names = [
+    route && series.some((s) => s.viaPrimary) ? route.source.name : '',
+    series.some((s) => !s.viaPrimary && !s.viaFallback) ? source.name : '',
+    second && series.some((s) => s.viaFallback) ? second.name : '',
+  ].filter(Boolean);
+  const servedBy = names.length === 1 && names[0] === source.name ? '' : names.join(' + ');
   const asOf = series.reduce((m, s) => (s.last.date > m ? s.last.date : m), '');
   const missing = specs.length - series.length;
   return { ...derived(panel, f, series, asOf, missing ? `${missing} series unavailable` : ''), servedBy };

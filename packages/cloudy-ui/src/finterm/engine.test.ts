@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { FINTERM } from './catalog';
-import { FetchError, alloc, buildUrl, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
+import { FetchError, alloc, browserReadable, buildUrl, dbnomicsObs, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
 
 const dash = (id: string) => FINTERM.dashboards.find((d) => d.id === id) as Dashboard;
 const fred = FINTERM.sources.find((s) => s.id === 'fred')!;
 const fin = FINTERM.sources.find((s) => s.id === 'cloud_fincept')!;
+const dbn = FINTERM.sources.find((s) => s.id === 'dbnomics')!;
 const MESH = FINTERM.mesh[fin.fleet_endpoint!];
+/** The declared catalog with FRED forced browser-readable: the tests of the FRED leg of the order use it (FRED itself declares cors false). */
+const FRED_OPEN = FINTERM.sources.map((s) => (s.id === 'fred' ? { ...s, cors: undefined } : s));
 const TODAY = '2026-10-30';
 
 describe('FRED CSV parse', () => {
@@ -62,11 +65,12 @@ describe('requests are built from declarations, never typed', () => {
 
 // ---- the source fallback order -------------------------------------------------------------------------------------------------------
 const csv = (id: string) => `observation_date,${id}\n2026-10-27,4.10\n2026-10-28,4.20\n`;
-function harness(opts: { meshUp: boolean; peek?: 'ok' | '404' | 'partial'; fred?: 'ok' | 'blocked' }) {
+const H15 = (code: string) => `{"series":{"docs":[{"series_code":"${code.split('/').pop()}","series_name":"x","period":["2026-10-01","2026-10-27","2026-10-28","2026-10-29"],"value":[1,6,6.5,"NA"]}]}}`;
+function harness(opts: { meshUp: boolean; peek?: 'ok' | '404' | 'partial'; fred?: 'ok' | 'blocked'; sources?: typeof FINTERM.sources }) {
   const calls: string[] = [];
   const peekHost = new URL(MESH).host;
   const ctx: Ctx = {
-    today: TODAY, sources: FINTERM.sources, mesh: FINTERM.mesh,
+    today: TODAY, sources: opts.sources ?? FRED_OPEN, mesh: FINTERM.mesh,
     reachable: async (u) => { calls.push(`health ${new URL(u).host}`); return opts.meshUp; },
     get: async (u) => {
       const url = new URL(u);
@@ -75,6 +79,10 @@ function harness(opts: { meshUp: boolean; peek?: 'ok' | '404' | 'partial'; fred?
         const id = /econ:fred:([^/]+)/.exec(decodeURIComponent(url.pathname))![1];
         if (opts.peek === '404' || (opts.peek === 'partial' && id !== 'DGS10')) throw new FetchError('http', 'HTTP 404', 404);
         return JSON.stringify({ series_id: id, observations: [{ date: '2026-10-28', value: 4.9 }, { date: '2026-10-29', value: 5.0 }] });
+      }
+      if (url.host === new URL(dbn.endpoint).host) {
+        calls.push(`dbnomics ${decodeURIComponent(url.pathname)}`);
+        return H15(url.pathname);
       }
       calls.push(`public ${url.host}`);
       if (opts.fred === 'blocked') throw new FetchError('blocked', 'Failed to fetch');
@@ -107,8 +115,8 @@ describe('source order: fin-api on the mesh first, then the public source, then 
     expect(d.servedBy).toBe('');
     expect(d.rows.length).toBe(ust().fetch!.series!.length);
   });
-  it('public source blocked (CORS) off the mesh: the load fails with a blocked error -> placeholder "Mesh only / CORS"', async () => {
-    const h = harness({ meshUp: false, fred: 'blocked' });
+  it('every public source blocked (CORS) off the mesh: the load fails with a blocked error -> placeholder "Mesh only / CORS"', async () => {
+    const h = harness({ meshUp: false, fred: 'blocked', sources: FRED_OPEN.map((s) => (s.id === 'dbnomics' ? { ...s, cors: false } : s)) });
     const err = await loadPanel(ust(), dash('yield_curves'), h.ctx).then(() => null, (e) => e);
     expect(err).toBeInstanceOf(FetchError);
     const ph = failureFor(ust(), FINTERM.sources, err);
@@ -122,6 +130,66 @@ describe('source order: fin-api on the mesh first, then the public source, then 
     expect(await primaryRoute(dbn, dash('rate_probabilities'), ctx)).toBeNull(); // no primary declared for DBnomics
     const swapped = { ...ust(), fetch: { ...ust().fetch!, primary: { source: 'polygon', topic: 't' } } };
     expect(await primaryRoute(swapped, dash('yield_curves'), ctx)).toBeNull();
+  });
+});
+
+describe('CORS-blocked sources are skipped straight to the next source (FRED and IMF send no Access-Control-Allow-Origin)', () => {
+  const fredHost = new URL(fred.endpoint).host;
+  it('the declarations: FRED and IMF are cors false, DBnomics is readable and ranks right behind FRED', () => {
+    expect(fred.cors).toBe(false);
+    expect(FINTERM.sources.find((s) => s.id === 'imf')!.cors).toBe(false);
+    expect(browserReadable(dbn)).toBe(true);
+    expect(fred.priority).toBeLessThan(dbn.priority);
+    expect(ust().fetch!.fallback).toEqual({ source: 'dbnomics' });
+  });
+  it('FRED declared cors false: the web serves the curve from DBnomics and never asks FRED', async () => {
+    const h = harness({ meshUp: false, sources: FINTERM.sources });
+    const d = await loadPanel(ust(), dash('yield_curves'), h.ctx);
+    expect(h.calls.filter((c) => c.includes(fredHost) || c.startsWith('public'))).toEqual([]);
+    expect(h.calls.filter((c) => c.startsWith('dbnomics')).length).toBe(ust().fetch!.series!.length);
+    expect(h.calls).toContain('dbnomics /v22/series/FED/H15/RIFLGFCY10_N.B');
+    expect(d.servedBy).toBe(dbn.name);
+    expect(d.asOf).toBe('2026-10-28');
+    expect(d.rows[0]).toEqual(['1M', '6.50', '+50.0', '2026-10-28']);
+    expect(d.chart.length).toBe(11);
+  });
+  it('every FRED panel with DBnomics codes is served by DBnomics: curve, forwards, FX spot and cross, onshore rates (3 of 5 series have a code)', async () => {
+    for (const [id, panel] of [['forward_rates', 'fwd'], ['fx', 'spot'], ['fx', 'cross'], ['onshore_usd_rates', 'benchmarks']]) {
+      const h = harness({ meshUp: false, sources: FINTERM.sources });
+      const p = dash(id).panels.find((x) => x.id === panel)!;
+      const d = await loadPanel(p, dash(id), h.ctx);
+      expect(d.servedBy, `${id}/${panel}`).toBe(dbn.name);
+      expect(h.calls.some((c) => c.includes(fredHost) || c.startsWith('public'))).toBe(false);
+      if (panel === 'benchmarks') { expect(d.rows.length).toBe(3); expect(d.note).toBe('2 series unavailable'); }
+    }
+  });
+  it('FRED readable (cors not false): FRED is asked first and DBnomics not at all', async () => {
+    const h = harness({ meshUp: false });
+    const d = await loadPanel(ust(), dash('yield_curves'), h.ctx);
+    expect(d.servedBy).toBe('');
+    expect(h.calls.some((c) => c.startsWith('dbnomics'))).toBe(false);
+  });
+  it('FRED readable but failing: each series falls to DBnomics', async () => {
+    const h = harness({ meshUp: false, fred: 'blocked' });
+    const d = await loadPanel(ust(), dash('yield_curves'), h.ctx);
+    expect(d.servedBy).toBe(dbn.name);
+    expect(h.calls.filter((c) => c.startsWith('public')).length).toBe(11);
+  });
+  it('a panel whose only source is cors false (US equity indices on FRED, IMF) is blocked with NO request', async () => {
+    const h = harness({ meshUp: false, sources: FINTERM.sources });
+    const us = dash('world_equity_indices').panels.find((p) => p.source === 'fred' && p.fetch)!;
+    const e1 = await loadPanel(us, dash('world_equity_indices'), h.ctx).then(() => null, (e) => e);
+    expect(e1).toBeInstanceOf(FetchError);
+    expect(failureFor(us, FINTERM.sources, e1).reason).toBe('blocked');
+    const imfDash = FINTERM.dashboards.find((d) => d.panels.some((p) => p.source === 'imf' && p.fetch))!;
+    const imfPanel = imfDash.panels.find((p) => p.source === 'imf' && p.fetch)!;
+    const e2 = await loadPanel(imfPanel, imfDash, h.ctx).then(() => null, (e) => e);
+    expect(e2).toBeInstanceOf(FetchError);
+    expect(h.calls.filter((c) => !c.startsWith('health'))).toEqual([]);
+  });
+  it('the DBnomics parser keeps numeric observations only ("NA" dropped), in order', () => {
+    expect(dbnomicsObs(H15('FED/H15/X'))).toEqual([{ date: '2026-10-01', value: 1 }, { date: '2026-10-27', value: 6 }, { date: '2026-10-28', value: 6.5 }]);
+    expect(dbnomicsObs('<html>')).toEqual([]);
   });
 });
 

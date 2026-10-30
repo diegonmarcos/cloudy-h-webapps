@@ -32,6 +32,12 @@ describe('gen-finterm (pure)', () => {
     expect(JSON.stringify(o)).not.toContain('prose');
     expect(o.app_id).toBe('the-app');
   });
+  it('carries the per-source cors flag through (false = a browser cannot read it), and leaves it out when undeclared', () => {
+    const a = clone(); a.sources.sources[1].cors = false;
+    const o = buildFinterm(a);
+    expect(o.sources.find((s: { id: string }) => s.id === 'fred').cors).toBe(false);
+    expect('cors' in o.sources.find((s: { id: string }) => s.id === 'cloud_fincept')).toBe(false);
+  });
   it('fails loudly on a contradiction: unknown dashboard, entry/tab mismatch, unmapped dashboard, unknown source, undeclared container', () => {
     let a = clone(); a.build.ui.stacks.fi[0].dashboard = 'nope'; expect(() => buildFinterm(a)).toThrow(/no dashboard nope/);
     a = clone(); a.build.ui.stacks.fi[0].title = 'Other'; expect(() => buildFinterm(a)).toThrow(/ui.stacks says/);

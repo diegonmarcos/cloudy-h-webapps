@@ -51,7 +51,7 @@ export function buildFinterm({ sources, dashboards, build, services, appId }) {
   if (out.length !== byId.size) fail(`dashboards.json has ${byId.size} dashboards, ui.stacks maps ${out.length}`);
   const bySlug = new Map((services?.services ?? []).map((s) => [s.slug, s]));
   const mesh = {};
-  const keep = ['id', 'name', 'category', 'primary', 'priority', 'coverage', 'endpoint', 'fleet_endpoint', 'docs', 'paths', 'connector', 'feeds', 'attribution', 'user_endpoint'];
+  const keep = ['id', 'name', 'category', 'primary', 'priority', 'coverage', 'endpoint', 'fleet_endpoint', 'docs', 'cors', 'paths', 'connector', 'feeds', 'attribution', 'user_endpoint'];
   const slim = sources.sources.map((s) => {
     const o = Object.fromEntries(keep.filter((k) => s[k] !== undefined).map((k) => [k, strip(s[k])]));
     o.auth = { type: s.auth?.type ?? 'none', ...(s.auth?.signup ? { signup: s.auth.signup } : {}) };

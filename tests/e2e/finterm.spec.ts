@@ -86,12 +86,15 @@ test('a blocked public source is a dashed placeholder saying "Mesh only / CORS" 
   await expect(ust.getByTestId('finterm-note')).toContainText('Mesh only / CORS');
 });
 
-test('FI Yield Curves with the public source answering: chart, table, last updated and attribution', async ({ page }, info) => {
+test('FI Yield Curves: FRED is cors false so the web goes straight to DBnomics; chart, table, last updated and attribution', async ({ page }, info) => {
   const fred = src('fred');
+  const dbn = src('dbnomics');
+  const asked: string[] = [];
   await net(page, (u) => {
-    if (u.host !== new URL(fred.endpoint).host) return null;
-    const id = u.searchParams.get('id')!;
-    return { body: `observation_date,${id}\n2026-10-27,4.10\n2026-10-28,4.25\n` };
+    asked.push(u.host);
+    if (u.host !== new URL(dbn.endpoint).host) return null;
+    const code = u.pathname.split('/').pop()!;
+    return { type: 'application/json', body: JSON.stringify({ series: { docs: [{ series_code: code, series_name: 'x', period: ['2026-10-27', '2026-10-28', '2026-10-29'], value: [4.1, 4.25, 'NA'] }] } }) };
   });
   await page.goto(`${BASE}/${fin.app_id}/fi/yield-curves/`);
   await settle(page);
@@ -100,8 +103,10 @@ test('FI Yield Curves with the public source answering: chart, table, last updat
   await expect(ust.getByTestId('finterm-chart')).toBeVisible();
   await expect(ust.getByTestId('finterm-table').locator('tbody tr')).toHaveCount(11);
   await expect(ust.getByTestId('finterm-asof')).toHaveText('2026-10-28');
-  await expect(ust.getByTestId('finterm-meta')).toContainText(`Source: ${src('fred').name}`);
-  await expect(ust.getByTestId('finterm-attr')).toContainText(src('fred').name);
+  // the separator keeps its spaces: "Last updated: 2026-10-28 · Source: DBnomics"
+  await expect(ust.getByTestId('finterm-meta')).toHaveText(`Last updated: 2026-10-28 · Source: ${dbn.name}`);
+  expect(asked).not.toContain(new URL(fred.endpoint).host);
+  await expect(ust.getByTestId('finterm-attr')).toContainText(fred.name);
   // the keyed panel of the same dashboard stays dashed
   await expect(page.locator('[data-panel="sovereigns"]')).toHaveAttribute('data-state', /placeholder-/);
   await shot(page, info, 'finterm-yield-curves');
