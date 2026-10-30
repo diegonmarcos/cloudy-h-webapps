@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar'
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar | finterm-drift | finterm-order | finterm-csv | finterm-url | finterm-tab | finterm-placeholder | finterm-fred'
         required: true
 permissions:
   contents: read
@@ -30,6 +30,13 @@ jobs:
             c3-route)       sed -i "s/const page = PORTAL.find((p) => p.id === id);/const page = PORTAL.find((p) => p.id === id \&\& p.id !== 'gallery');/" sites/cloudy-c3/src/lib/server/c3.ts ;;
             old-url)        sed -i "/'cloud-media': /d" scripts/lib/old-paths.mjs ;;
             baseline-bar)   sed -i 's/background: linear-gradient(180deg, var(--f-top), var(--f-bottom));/background: #d00;/' packages/cloudy-ui/src/fleet/FleetShell.svelte ;;
+            finterm-drift)  sed -i "s/readFileSync(p, 'utf8') !== text) stale.push(rel)/readFileSync(p, 'utf8') !== text \&\& false) stale.push(rel)/" scripts/lib/android-src.mjs ;;
+            finterm-order)  sed -i "s/^  if (route) {$/  if (false) {/;s/    if (route) {/    if (false) {/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-csv)    sed -i "s/\['observation_date', 'date'\].includes(head\[0\].toLowerCase())/true/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-url)    sed -i "2i const FRED_URL = 'https://fred.stlouisfed.org/graph/fredgraph.csv';" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-tab)    sed -i 's#href: `${own.href}${dash.tab}/${dash.slug}/`#href: own.href#' sites/cloudy-webapps/src/lib/server/nav.ts ;;
+            finterm-placeholder) sed -i 's#<p class="note" data-testid="finterm-note">{st.ph.note}</p>#<p class="note" data-testid="finterm-note"></p>#' packages/cloudy-ui/src/finterm/Dashboard.svelte ;;
+            finterm-fred)   sed -i "s/\[\['id', id\], \['cosd'/[['series', id], ['cosd'/" packages/cloudy-ui/src/finterm/engine.ts ;;
             island-width)   echo "MUTATION=island-width" >> "$GITHUB_ENV" ;;
             *) echo "unknown mutation"; exit 2 ;;
           esac

@@ -16,6 +16,11 @@ if (missing.length || flat.length) {
   if (flat.length) console.error(`FAIL ${flat.length} route(s) written without the trailing slash: ${flat.slice(0, 10).join(', ')}`);
   process.exit(1);
 }
+// #1342: every FinTerm dashboard of the generated finterm.json has its page (/<app>/<tab>/<slug>/)
+const finterm = JSON.parse(readFileSync(join(root, 'packages/cloudy-ui/nav/finterm.json'), 'utf8'));
+const noDash = finterm.dashboards.filter((d) => !existsSync(join(dist, finterm.app_id, d.tab, d.slug, 'index.html'))).map((d) => `${d.tab}/${d.slug}`);
+if (noDash.length) { console.error(`FAIL ${noDash.length} FinTerm dashboard page(s) not prerendered: ${noDash.join(', ')}`); process.exit(1); }
+console.log(`ok: ${finterm.dashboards.length} FinTerm dashboard pages prerendered`);
 const sa = routes.filter((r) => ['home', 'section', 'page'].includes(r.kind)).length;
 console.log(`ok: ${routes.length} routes prerendered (${sa} SuperApp, ${routes.length - sa} fleet app)`);
 

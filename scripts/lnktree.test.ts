@@ -60,23 +60,26 @@ describe('Lnktree apps on the web', () => {
     }
   });
 
-  it('the FinTerm link is the declared container (private mesh URL), never a public internet host', () => {
-    const l = links.find((x) => x.id === fin.id)!;
-    expect(l.kind).toBe('container');
-    expect(l.mesh).toBe(true);
-    const u = new URL(l.href!);
+  it('FinTerm is a web page of this site (webapp); its fin-api backend is a separate private link (mesh URL derived from the container declaration), never a public host', () => {
+    const l = links.find((x) => x.id === fin.id) as unknown as { kind: string; href: string; mesh?: boolean; entries_open_app?: boolean; backend: { label: string; href: string; mesh: boolean; service: string } };
+    expect(l.kind).toBe('webapp');
+    expect(l.href).toBe(`/cloud-webapps/${fin.id}/`);
+    expect(l.mesh).toBeUndefined();
+    expect(l.entries_open_app).toBe(true);
+    expect(l.backend.label).toBe('Backend (mesh)');
+    expect(l.backend.mesh).toBe(true);
+    const u = new URL(l.backend.href);
     expect(u.host).toMatch(/^[a-z0-9-]+\.mesh\.diegonmarcos\.com$|^c3-pvt\.diegonmarcos\.com$/);
-    const svc = services.find((s) => s.slug === l.service)!;
+    const svc = services.find((s) => s.slug === l.backend.service)!;
     expect(svc, 'declared in cloudy-u-containers').toBeTruthy();
     expect(svc.hosts).not.toContain(u.host);
-    expect(l.entries_open_app).toBe(true);
   });
 
   it('no hand-typed URL for the container, and none for the apps in the mapping (webapp paths are root-absolute)', () => {
     for (const m of mapping.filter((x) => ['capital-stack-finterminal', 'cg-omniverse', 'hardtech-cad', 'hardtech-sim2real'].includes(x.id as string))) {
       expect(m.url, m.id as string).toBeUndefined();
       expect(m.href, m.id as string).toBeUndefined();
-      expect(JSON.stringify(m.path ?? ''), m.id as string).not.toMatch(/https?:/);
+      expect(JSON.stringify([m.path ?? '', m.backend ?? '']), m.id as string).not.toMatch(/https?:/);
     }
   });
 

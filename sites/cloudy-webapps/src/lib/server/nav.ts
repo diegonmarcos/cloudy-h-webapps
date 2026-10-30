@@ -7,6 +7,7 @@ import overlay from '@cloudy/ui/nav/nav-overlay.json';
 import appLinks from '@cloudy/ui/nav/app-links.json';
 import appsUi from '@cloudy/ui/nav/apps-ui.json';
 import { titleHierarchy, titleNav, type Entry } from '@cloudy/ui/src/fleet/fleetNav.ts';
+import { FINTERM } from '@cloudy/ui/src/finterm/catalog.ts';
 import { drawerRows, resolveTarget, joinBase, type ShellData, type Tab, type TileGroup, type TileItem } from '@cloudy/ui';
 import content from '../../apps/superapp/data/sections-content.json';
 import core from '../../apps/superapp/data/sections-core.json';
@@ -35,7 +36,7 @@ export function href(base: string, target: string | undefined | null): { href: s
 }
 
 // #1326: every fleet app resolves to its real web service (data/app-links.json -> app-links.json, GENERATED).
-export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string; entries_open_app?: boolean };
+export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string; entries_open_app?: boolean; backend?: { label: string; href: string; mesh: boolean; service: string } };
 export const LINKS = new Map((appLinks.links as AppLink[]).map((l) => [l.id, l]));
 /** The mapping entry a tile resolves through: its `extapp:<app>[#page:..]` app, else its own id (c3-bot, ai-chat). */
 export function linkOf(t: Tile): AppLink | undefined {
@@ -172,6 +173,9 @@ export function appStack(appId: string, sectionId: string | null): StackCardData
       cards.push({ title: app.name, subtitle: whatItDoes(app as never), rows: [], caption: '', href: own?.href ?? null, mesh: !!own?.mesh, external: own ? own.kind !== 'webapp' : false });
       continue;
     }
+    // FinTerm (#1342): an entry opens its own web dashboard page under the app's webapp link (generated finterm.json), never the container
+    const dash = e.kind === 'dashboard' && own?.kind === 'webapp' ? FINTERM.dashboards.find((d) => d.tab === sectionId && d.entry === e.title) : undefined;
+    if (dash && own) { cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: '', href: `${own.href}${dash.tab}/${dash.slug}/`, mesh: false, external: false }); continue; }
     if (e.kind === 'dashboard' && own) { cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: '', href: own.href, mesh: !!own.mesh, external: own.kind !== 'webapp' }); continue; }
     if (e.kind === 'dashboard' || e.kind === 'entry' || !e.kind) {
       const url = e.kind === 'dashboard' ? null : e.url ?? null;
@@ -181,6 +185,8 @@ export function appStack(appId: string, sectionId: string | null): StackCardData
     if (e.kind === 'holdings') { cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: 'Kept on the phone: a browser cannot reach it.', href: null, planned: true }); continue; }
     return null; // sources and other device-only kinds: the generic body
   }
+  // the declared backend of the app's webapp link (FinTerm: fin-api, private mesh): its own card with the lock badge, new tab
+  if (own?.backend && cards.some((c) => c.href)) cards.push({ title: own.backend.label, subtitle: 'The FinceptTerminal backend (fin-api): REST and WebSocket, reachable on the private mesh only', rows: [], caption: '', href: own.backend.href, mesh: own.backend.mesh, external: true });
   return cards;
 }
 

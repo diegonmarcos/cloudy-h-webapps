@@ -36,25 +36,33 @@ export function resolveLinks(mapping, servicesDoc, appIds = null) {
     const m = { ...m0, id: (appIds && ids.find((i) => appIds.includes(i))) || m0.id };
     if (seen.has(m.id)) throw new Error(`duplicate mapping entry ${m.id}`);
     seen.add(m.id);
-    const base = { id: m.id, kind: m.kind, reason: m.reason, ...(m.entries_open_app ? { entries_open_app: true } : {}) };
+    // A private (mesh) form of a container: DERIVED from its cloudy-u-containers declaration, never typed, never a public host.
+    const privateOf = (service, path) => {
+      const s = bySlug.get(service);
+      if (!s) throw new Error(`${m.id}: container "${service}" is not declared in cloudy-u-containers any more`);
+      const sub = path ? path.replace(/^\/?/, '') : '';
+      const mesh = typeof s.mesh === 'string' && s.mesh ? s.mesh : null;
+      const href = mesh ? `https://${mesh}/${sub}` : `https://${PVT}/${s.slug}/${sub}`;
+      const host = new URL(href).host;
+      if ((s.hosts ?? []).includes(host)) throw new Error(`${m.id}: private url ${href} is a public host`);
+      return { href, service: s.slug, dir: s.dir, mesh: true, via: mesh ? 'mesh' : 'c3-pvt' };
+    };
+    // `backend` (a webapp's own container, e.g. FinTerm's fin-api): a second, private link next to the web pages, lock badge on the web.
+    const base = { id: m.id, kind: m.kind, reason: m.reason, ...(m.entries_open_app ? { entries_open_app: true } : {}),
+      ...(m.backend ? { backend: { label: m.backend.label ?? 'Backend (mesh)', ...privateOf(m.backend.service, m.backend.path) } } : {}) };
     if (m.kind === 'phone-only') return { ...base, href: null, about: true };
     if (m.kind === 'external') {
       if (!/^https:\/\//.test(m.url)) throw new Error(`${m.id}: external url must be https`);
       return { ...base, href: m.url };
     }
     if (m.kind === 'webapp') {
-      if (!/^\/[a-z0-9-]+\//.test(m.path)) throw new Error(`${m.id}: webapp path must be root-absolute`);
-      return { ...base, href: m.path };
+      // `{id}` in a webapp path is the app's resolved id, so an Android-side rename needs no hand edit
+      const path = m.path.replace('{id}', m.id);
+      if (!/^\/[a-z0-9-]+\//.test(path)) throw new Error(`${m.id}: webapp path must be root-absolute`);
+      return { ...base, href: path };
     }
     if (m.kind !== 'container') throw new Error(`${m.id}: unknown kind ${m.kind}`);
-    const s = bySlug.get(m.service);
-    if (!s) throw new Error(`${m.id}: container "${m.service}" is not declared in cloudy-u-containers any more`);
-    const sub = m.path ? m.path.replace(/^\/?/, '') : '';
-    const mesh = typeof s.mesh === 'string' && s.mesh ? s.mesh : null;
-    const href = mesh ? `https://${mesh}/${sub}` : `https://${PVT}/${s.slug}/${sub}`;
-    const host = new URL(href).host;
-    if ((s.hosts ?? []).includes(host)) throw new Error(`${m.id}: private url ${href} is a public host`);
-    return { ...base, href, service: s.slug, dir: s.dir, mesh: true, via: mesh ? 'mesh' : 'c3-pvt' };
+    return { ...base, ...privateOf(m.service, m.path) };
   });
   return { _generated: HEADER, links };
 }

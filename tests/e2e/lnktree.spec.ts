@@ -6,13 +6,13 @@ import { BASE } from './helpers';
 // #1335: the Lnktree row (Omniverse, FinTerm, CAD, Sim2Real), their pages and the FinTerm terminal link. Every expected URL is READ from the generated
 // declarations (app-links.json, apps-ui.json), none is typed here.
 const J = (p: string) => JSON.parse(readFileSync(p, 'utf8'));
-const links = J('packages/cloudy-ui/nav/app-links.json').links as { id: string; kind: string; href: string; mesh?: boolean }[];
+const links = J('packages/cloudy-ui/nav/app-links.json').links as { id: string; kind: string; href: string; mesh?: boolean; backend?: { href: string } }[];
 const apps = J('packages/cloudy-ui/nav/nav.json').apps as { id: string; dir: string | null }[];
 const ui = J('packages/cloudy-ui/nav/apps-ui.json').apps as Record<string, { stacks: Record<string, { kind?: string; title?: string; url?: string; planned?: boolean }[]> }>;
 const finId = apps.find((a) => a.dir?.startsWith('ad_Capital-'))!.id;
 const terminal = links.find((l) => l.id === finId)!;
 
-test('the Lnktree row: three web app pages and the FinTerm terminal on the private mesh', async ({ page }, info) => {
+test('the Lnktree row: four web app pages (FinTerm is the web terminal, its backend is a separate mesh link)', async ({ page }, info) => {
   await page.goto(`${BASE}/cloud/`);
   const row = page.locator('[data-group="Lnktree"]');
   await expect(row.locator('[data-tile]')).toHaveCount(4);
@@ -23,11 +23,9 @@ test('the Lnktree row: three web app pages and the FinTerm terminal on the priva
   }
   const fin = row.locator('[data-tile="finterm"]');
   await expect(fin).toHaveAttribute('href', terminal.href);
-  await expect(fin).toHaveAttribute('target', '_blank');
-  await expect(fin.getByTestId('mesh-badge')).toBeVisible();
-  const host = new URL(terminal.href).host;
-  expect(host).toMatch(/\.mesh\.diegonmarcos\.com$|^c3-pvt\.diegonmarcos\.com$/);
-  expect(host).not.toMatch(/^(api|www)\.diegonmarcos\.com$/);
+  expect(terminal.kind).toBe('webapp');
+  await expect(fin).not.toHaveAttribute('target', '_blank');
+  await expect(fin.getByTestId('mesh-badge')).toHaveCount(0);
   await shot(page, info, 'lnktree-row');
 });
 
@@ -44,22 +42,4 @@ test('each Lnktree app page lists its entries: a declared target or a greyed pla
       }
     }
   }
-});
-
-test('FinTerm: every tab entry deep-links into the terminal (private URL, new tab, lock badge); my-pm stays on the phone', async ({ page }, info) => {
-  for (const tab of ['fi', 'eq', 'ex', 'nw', 'pm']) {
-    await page.goto(`${BASE}/${finId}/${tab}/`);
-    const opens = page.locator('[data-testid="stack-card"] a.open');
-    const n = ui[finId].stacks[tab].filter((e) => e.kind === 'dashboard').length;
-    await expect(opens, tab).toHaveCount(n);
-    for (let i = 0; i < n; i++) {
-      await expect(opens.nth(i), tab).toHaveAttribute('href', terminal.href);
-      await expect(opens.nth(i), tab).toHaveAttribute('target', '_blank');
-      await expect(opens.nth(i).getByTestId('mesh-badge'), tab).toBeVisible();
-    }
-    if (tab === 'fi') await shot(page, info, 'finterm-fi');
-  }
-  await page.goto(`${BASE}/${finId}/my-pm/`);
-  await expect(page.locator('[data-testid="stack-card"] a.open')).toHaveCount(0);
-  await expect(page.getByTestId('stack-card')).toHaveAttribute('data-planned', 'true');
 });

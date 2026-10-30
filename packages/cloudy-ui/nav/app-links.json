@@ -208,14 +208,18 @@
     },
     {
       "id": "capital-stack-finterminal",
-      "kind": "container",
-      "reason": "Capital-Stack-FinTerminal: the web version of the terminal = FinceptTerminal (upstream Fincept-Corporation/FinceptTerminal), the fin-api container on oci-apps (cloudy-u-containers user-fin_fin-api), reached over the private mesh only; the private URL is derived from its declaration, never a public host. Every FinTerm tab entry opens this link (the terminal's routes are API topics, no per-tab page, so the deep link is the terminal home = its info route). Not the public fin-terminal/ web app (unpublished, 404)",
+      "kind": "webapp",
+      "reason": "Capital-Stack-FinTerminal: the web version of the terminal = a dashboard page per FinTerm entry in this site (FI, EQ, EX, NW, PM), built from the Android app's declared sources and dashboards (scripts/gen-finterm.mjs); data from fin-api over the private mesh first, then the key-free public sources where a browser may read them. The tile and every tab entry open these pages; the FinceptTerminal backend (fin-api container on oci-apps, cloudy-u-containers user-fin_fin-api) is the separate Backend (mesh) link, its private URL derived from the container declaration, never a public host",
       "entries_open_app": true,
-      "href": "https://fin-api.mesh.diegonmarcos.com/api/v1/info",
-      "service": "fin-api",
-      "dir": "user-fin_fin-api",
-      "mesh": true,
-      "via": "mesh"
+      "backend": {
+        "label": "Backend (mesh)",
+        "href": "https://fin-api.mesh.diegonmarcos.com/api/v1/info",
+        "service": "fin-api",
+        "dir": "user-fin_fin-api",
+        "mesh": true,
+        "via": "mesh"
+      },
+      "href": "/cloud-webapps/capital-stack-finterminal/"
     },
     {
       "id": "hardtech-cad",

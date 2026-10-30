@@ -35,7 +35,7 @@ jobs:
         run: bash scripts/test.sh
       - name: Vendored service data == cloud-u-containers
         run: node scripts/sync-fallback-services.mjs --check
-      - name: Drift - tokens, nav data, icon sprites == cloudy-u-android main
+      - name: Drift - tokens, nav data, icon sprites, FinTerm sources and dashboards == cloudy-u-android main
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -43,6 +43,7 @@ jobs:
           node scripts/gen-navdata.mjs --check
           node scripts/gen-icons.mjs --check
           node scripts/gen-app-links.mjs --check
+          node scripts/gen-finterm.mjs --check
       - name: Portal probe (declared embeddable == what each vendor site allows)
         run: node scripts/probe-portals.mjs
       - name: Install (npm ci when the lockfile exists)
