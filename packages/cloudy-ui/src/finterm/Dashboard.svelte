@@ -78,7 +78,7 @@
             <tbody>{#each d.rows as r, i}<tr>{#each r as cell, j}<td>{#if j === 0 && d.links[i]}<a href={d.links[i]} target="_blank" rel="noopener noreferrer">{cell}</a>{:else}{cell}{/if}</td>{/each}</tr>{/each}</tbody></table></div>
         {/if}
         {#if d.note}<p class="note">{d.note}</p>{/if}
-        <p class="meta" data-testid="finterm-meta">{#if d.asOf}Last updated: <span data-testid="finterm-asof">{d.asOf}</span> · {/if}Source: {d.servedBy || at.name}{#if d.servedBy} (private mesh){/if}</p>
+        <p class="meta" data-testid="finterm-meta">{#if d.asOf}Last updated: <span data-testid="finterm-asof">{d.asOf}</span> · {/if}Source: {d.servedBy || at.name}</p>
       {/if}
       <p class="attr" data-testid="finterm-attr">{#if at.docs}<a href={at.docs} target="_blank" rel="noopener noreferrer">{at.name}</a>{:else}{at.name}{/if}</p>
     </section>

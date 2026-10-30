@@ -122,6 +122,6 @@ test('on the mesh fin-api serves first: the topic answer wins and the page says 
   await settle(page);
   const ust = page.locator('[data-panel="ust"]');
   await expect(ust).toHaveAttribute('data-state', 'data');
-  await expect(ust.getByTestId('finterm-meta')).toContainText(`Source: ${api.name} (private mesh)`);
+  await expect(ust.getByTestId('finterm-meta')).toContainText(`Source: ${api.name}`);
   expect(asked).not.toContain(new URL(src('fred').endpoint).host);
 });
