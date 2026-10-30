@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url'
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar'
         required: true
 permissions:
   contents: read
@@ -29,6 +29,7 @@ jobs:
             client-order)   sed -i 's/get(fetcher, MESH_BASE + path)/get(fetcher, PUBLIC_BASE + path)/' packages/c3-data/client.ts ;;
             c3-route)       sed -i "s/const page = PORTAL.find((p) => p.id === id);/const page = PORTAL.find((p) => p.id === id \&\& p.id !== 'gallery');/" sites/cloudy-c3/src/lib/server/c3.ts ;;
             old-url)        sed -i "/'cloud-media': /d" scripts/lib/old-paths.mjs ;;
+            baseline-bar)   sed -i 's/background: linear-gradient(180deg, var(--f-top), var(--f-bottom));/background: #d00;/' packages/cloudy-ui/src/fleet/FleetShell.svelte ;;
             island-width)   echo "MUTATION=island-width" >> "$GITHUB_ENV" ;;
             *) echo "unknown mutation"; exit 2 ;;
           esac
@@ -39,3 +40,9 @@ jobs:
         run: npm run build && node scripts/test-routes.mjs && node scripts/test-old-urls.mjs
       - name: E2E (visual)
         run: npx playwright install --with-deps chromium && npx playwright test -c tests/playwright.config.ts
+      - name: Web vs Android baseline (blocking)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASELINE_BLOCKING: '1'
+        run: node scripts/compare-baseline.mjs

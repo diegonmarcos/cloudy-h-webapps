@@ -20,7 +20,11 @@ const zi = args.indexOf('--zip');
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'android'), { recursive: true });
 const zip = zi >= 0 ? args[zi + 1] : join(OUT, 'Cloud-UI-Baseline.zip');
-if (zi < 0) execFileSync('gh', ['release', 'download', 'latest', '-R', 'diegonmarcos/cloudy-u-android', '-p', 'Cloud-UI-Baseline.zip', '-D', OUT, '--clobber'], { stdio: 'inherit' });
+// no published baseline (or no network) is a warning, not a failure: only a compared pair over the limit blocks
+if (zi < 0) {
+  try { execFileSync('gh', ['release', 'download', 'latest', '-R', 'diegonmarcos/cloudy-u-android', '-p', 'Cloud-UI-Baseline.zip', '-D', OUT, '--clobber'], { stdio: 'inherit' }); }
+  catch { console.log('::warning::Cloud-UI-Baseline.zip unavailable: baseline compare skipped'); process.exit(0); }
+}
 execFileSync('unzip', ['-qo', zip, '-d', join(OUT, 'android')]);
 
 const LIMIT = 0.05;
