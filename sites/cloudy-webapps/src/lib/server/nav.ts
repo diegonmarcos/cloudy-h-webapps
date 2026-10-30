@@ -221,12 +221,13 @@ export function appView(base: string, path: string): AppView | null {
   const order = app.bottom_nav.length ? app.bottom_nav : app.sections.map((s) => s.id);
   const secs = order.map((id) => app.sections.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s);
   // the first row: NavBarTopFirstRow's breadcrumb + dropdown, from the same declaration (titleHierarchy / titleNav)
-  let crumbs: AppView['crumbs'] = [{ label: app.label, href: joinBase(base, `${app.id}/`) }];
+  // the first crumb is the installed app's label (defaultAppName): build.json display_name
+  let crumbs: AppView['crumbs'] = [{ label: app.name, href: joinBase(base, `${app.id}/`) }];
   let related: AppView['related'] = [];
   if (section) {
     const paths = pagePaths(`${app.id}/${section.id}/`, section.pages);
     const entryHref = (e: Entry) => e.action ? href(base, e.action).href : e.depth === 0 ? joinBase(base, `${app.id}/${e.id}/`) : paths.has(e.id) ? joinBase(base, paths.get(e.id)!) : null;
-    const tn = titleNav(app.label, labelOf(section), titleHierarchy(section, (sub ?? page)?.id ?? null), secs);
+    const tn = titleNav(app.name, labelOf(section), titleHierarchy(section, (sub ?? page)?.id ?? null), secs);
     crumbs = tn.crumbs.map((c, i) => ({ label: c.label, href: i === 0 ? joinBase(base, `${app.id}/`) : c.target ? entryHref(c.target) : null }));
     related = tn.related.map((e) => ({ id: e.id, label: e.label, href: entryHref(e), indent: Math.max(0, e.depth - tn.currentDepth), selected: e.selected }));
   }

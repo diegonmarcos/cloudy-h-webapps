@@ -39,7 +39,7 @@ test('cloud-calc: the declared keypad computes (7 × 6 = 42; 500 / 3 = 166.66666
 
 test('cloud-calc: the breadcrumb, the second row and the bottom bar follow build.json', async ({ page }) => {
   await page.goto(`${BASE}/cloud-calc/calculator/graph/`);
-  await expect(page.getByTestId('fleet-title')).toHaveText(/Calc \/ Graph$/);
+  await expect(page.getByTestId('fleet-title')).toHaveText(/Cloud Calc \/ Calc \/ Graph$|Calc \/ Graph$/);
   await expect(page.getByTestId('ftab-graph')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('[data-testid="fleet-bottom"] a')).toHaveCount(5);
   await page.getByTestId('fleet-title').click();
