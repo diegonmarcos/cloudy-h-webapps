@@ -75,6 +75,8 @@ for (const e of ui.external_apps ?? []) {
     category: b.category ?? null,
     description: b.description ?? null,
     kind: sections.length ? 'app' : portals[e.id] ? 'portal' : 'card',
+    // a live Kotlin/Wasm page (build.json web.kind wasm, shipped as /cloud-web/apps/<portal_slug>/); retired ones are gone
+    wasm: b.web && (b.web.kind ?? 'wasm') === 'wasm' && b.web.portal_slug ? b.web.portal_slug : null,
     default_section: aui.default_section ?? aui.bottom_nav?.[0] ?? sections[0]?.id ?? null,
     bottom_nav: aui.bottom_nav ?? sections.map((s) => s.id),
     top_bar: strip(aui.top_bar ?? null),
@@ -114,7 +116,8 @@ for (const a of apps) {
     walk(`${a.id}/${s.id}/`, s.pages, { kind: 'app-page', app: a.id, section: s.id }, 1);
     for (const p of s.pages ?? []) if (p?.id) targets[`extapp:${a.id}#page:${s.id}/${p.id}`] = `${a.id}/${s.id}/${p.id}/`;
   }
-  if (a.kind === 'portal') route(`${a.id}/portal/`, { kind: 'portal', app: a.id });
+  // the app's embedded portal: a vendor UI (overlay portals) or its live Kotlin/Wasm page (kept until its mimic ships)
+  if (a.kind === 'portal' || a.wasm) route(`${a.id}/portal/`, { kind: 'portal', app: a.id });
 }
 
 // ── collision check: a service fallback page owns /cloud-webapps/<slug>/ (Pages serves it before the site) ──

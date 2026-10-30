@@ -42,6 +42,8 @@ jobs:
           node scripts/gen-tokens.mjs --check
           node scripts/gen-navdata.mjs --check
           node scripts/gen-icons.mjs --check
+      - name: Portal probe (declared embeddable == what each vendor site allows)
+        run: node scripts/probe-portals.mjs
       - name: Install (npm ci when the lockfile exists)
         run: |
           # npm ci when the lockfile matches package.json; a dependency change refreshes the lockfile (committed back on main)
@@ -83,6 +85,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # only the run of the newest source commit publishes: an older run whose dists would conflict steps aside
+          git fetch -q origin main
+          if [ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]; then echo "main moved past ${GITHUB_SHA::9}: the newer run commits the dists"; exit 0; fi
           git add sites/cloudy-webapps/dist sites/cloudy-c3/dist package-lock.json tests/visual/__screenshots__
           if git diff --cached --quiet; then echo "dists current"; exit 0; fi
           git diff --cached --stat | tail -3

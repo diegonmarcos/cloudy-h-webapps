@@ -18,3 +18,12 @@ if (missing.length || flat.length) {
 }
 const sa = routes.filter((r) => ['home', 'section', 'page'].includes(r.kind)).length;
 console.log(`ok: ${routes.length} routes prerendered (${sa} SuperApp, ${routes.length - sa} fleet app)`);
+
+// The old replica's per-app pages (scripts/old-app-paths.txt, /cloud-superapp/apps/<id>/...) each resolve to a prerendered
+// page of the new site: the same path under cloud-<id>/, else its nearest existing ancestor (the app root at worst).
+import { oldAppTarget } from './lib/old-paths.mjs';
+const have = new Set(routes.map((r) => r.path));
+const old = readFileSync(join(root, 'scripts/old-app-paths.txt'), 'utf8').split('\n').filter(Boolean);
+const lost = old.filter((p) => { const t = oldAppTarget(p, have); return t === null || !existsSync(join(dist, t, 'index.html')); });
+if (lost.length) { console.error(`FAIL ${lost.length} old app page(s) resolve to nothing: ${lost.slice(0, 8).join(', ')}`); process.exit(1); }
+console.log(`ok: ${old.length} old app pages resolve`);

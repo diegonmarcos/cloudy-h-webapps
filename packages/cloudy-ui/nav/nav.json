@@ -4867,6 +4867,7 @@
       "category": null,
       "description": null,
       "kind": "app",
+      "wasm": "cloud-dialer",
       "default_section": "home",
       "bottom_nav": [
         "home",
@@ -4950,6 +4951,7 @@
       "category": "android",
       "description": "Diego's Cloud Contacts — standalone Android multi-channel people hub. NOT a dialer-first address book: each person is a set of reachable CHANNELS (WhatsApp, Telegram, SMS, Cloud Mail, Cloud Dialer, Matrix, Cloud Chat, LinkedIn, Instagram) and the person screen is a channel switchboard — tapping a channel opens that conversation in its app; there is no default call action. Sources merged into one identity: device contacts (local phone + synced accounts such as Gmail) read from ContactsContract, plus LinkedIn Connections.csv and Instagram followers/following JSON imports parsed natively. WebView UI over HTML/Tailwind (cloud-news pattern). Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": null,
       "default_section": "people",
       "bottom_nav": [
         "people",
@@ -5007,6 +5009,7 @@
       "category": null,
       "description": null,
       "kind": "portal",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5023,6 +5026,7 @@
       "category": null,
       "description": null,
       "kind": "app",
+      "wasm": null,
       "default_section": "home",
       "bottom_nav": [
         "mail",
@@ -5139,6 +5143,7 @@
       "category": null,
       "description": null,
       "kind": "portal",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5155,6 +5160,7 @@
       "category": "android",
       "description": "cloud-myterminal — constellation of three minimally-forked upstream developer apps (Acode code editor / Amaze File Manager / Amaze File Utilities) plus a thin original hub APK. The hub switches between the forks and brokers their data (workspaces, recent files, git status, storage analysis, transfers) to Cloud-SuperApp over signature-gated AIDL + ContentProvider IPC. The shared resource is a hub-owned on-device workspace tree (not a server). Forks are declarative: pinned upstream tag + committed patch series, materialized into gitignored tracker clones at build time. Built via Nix devShell (gradle + AGP + Android SDK + node/cordova for the Acode fork).",
       "kind": "card",
+      "wasm": "cloud-myterminal",
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5171,6 +5177,7 @@
       "category": null,
       "description": null,
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5187,6 +5194,7 @@
       "category": null,
       "description": null,
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5203,6 +5211,7 @@
       "category": "android",
       "description": "Cloud Code — our own signed build of Acode (the Android code editor), vendored at ac_cloud-code/ as owned code (#562), with a 7-tab bottom nav over it: Backlog | Editor | Repos | Chat | Agents | Browser | MyTerminal. Acode is the UPSTREAM PROJECT, never the product name. The Editor tab is Acode untouched; the other six live in src/cloud/ behind one seam in src/main.js. See CLOUD-CODE.md.",
       "kind": "app",
+      "wasm": "cloud-code",
       "default_section": "ai",
       "bottom_nav": [
         "backlog",
@@ -5297,6 +5306,7 @@
       "category": "android",
       "description": "Diego's Cloud Nav — dedicated maps/navigation/tracker Android app. Single APK, gradle multi-module (app/ Google-Maps-style shell + libs/{core,maps}). MapLibre Native renderer, GPS tracker + Stop detection, multi-stop routing, driving navigation view, place-category browsing, and a timeline of visited places. Lifted out of Cloud SuperApp's libs:maps into its own focused app. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-nav",
       "default_section": "routes",
       "bottom_nav": [
         "routes",
@@ -5414,6 +5424,7 @@
       "category": "android",
       "description": "Diego's Cloud Tasks (formerly Cloud Agenda, before that Cloud Calendar) — standalone Android task, calendar and event app. The applicationId stays com.diegonmarcos.cloudagenda so installed phones update in place. Jetpack Compose chrome (CloudKitTheme light/dark/system, libs:bottomnav island + page tabs, a page-managed hamburger drawer, AI and Profile buttons in the top row, libs:ai chat with persistent history) over a local tasks database (projects > lists > tasks > subtasks, statuses, tags, links to Cloud Mail / Cloud Drive items) and a mail agent that proposes tasks for review. The Events, Calendar and Invites pages are still the legacy tasks.html WebView (public-ICS feed sync, CalDAV against a self-hosted Radicale). Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": null,
       "default_section": "tasks",
       "bottom_nav": [
         "tasks",
@@ -5505,6 +5516,7 @@
       "category": "android",
       "description": "Diego's Cloud News — standalone Android news app. WebView UI over GDELT-backed topic feeds (economy, technology, geopolitics, climate, finance, AI, energy, health): per-topic article lists, tone/sentiment timelines, and rolling topic summaries against a self-hosted GDELT proxy. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-news",
       "default_section": "feed",
       "bottom_nav": [
         "media",
@@ -5588,6 +5600,7 @@
       "category": "keyboard",
       "description": "Cloud Keyboard — IME with on-device translation, voice input, and bundled sticker packs. Standalone constellation APK.",
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -5604,6 +5617,7 @@
       "category": "android",
       "description": "Diego's Cloud Wallet — standalone cards/passes/tickets Android app. Lifted from Cloud SuperApp's libs:wallet into its own focused APK. Compose-based deck UI: vCards, boarding passes, loyalty cards, QR codes, .pkpass imports. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-wallet",
       "default_section": "pay",
       "bottom_nav": [
         "ids",
@@ -5685,6 +5699,7 @@
       "category": "android",
       "description": "Diego's Cloud Me — the personal-administration half of the constellation. Where Cloud SuperApp is the launcher for everything the cloud runs, Cloud Me is the launcher for everything the PERSON runs: paperwork and money (Buro), what is due (Agenda), the public profile (Me), travel and health (Projects) and study (Studying). It stores almost nothing of its own — cards live in Cloud Wallet, passwords in Cloud Vault, files in cloud-myterminal, health records in Health Connect — and is the one screen that indexes all of them.",
       "kind": "app",
+      "wasm": "cloud-me",
       "default_section": "lnktree",
       "bottom_nav": [
         "health",
@@ -6324,6 +6339,7 @@
       "category": "android",
       "description": "Diego's Cloud Browser — standalone WebView-based browser Android app. Lifted from Cloud SuperApp's libs:browser into its own focused APK. Multi-tab session persistence (BrowserTabPrefs), in-app URL bar, dark-chrome WebView host. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-browser",
       "default_section": "browser",
       "bottom_nav": [
         "favourites",
@@ -6443,6 +6459,7 @@
       "category": "android",
       "description": "Diego's Cloud Vault — standalone Vaultwarden client Android app. Hosts vault.diegonmarcos.com (self-hosted Vaultwarden) in a dedicated BrowserHostFragment APK with the constellation updater. Extracted from Cloud SuperApp's vault section (libs:vault was a KeePassDX stub) in favour of the full Vaultwarden web-app experience. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-vault",
       "default_section": "vault",
       "bottom_nav": [
         "vault",
@@ -6489,6 +6506,7 @@
       "category": "android",
       "description": "The c3-watchdog panel as an Android app: a WebView showing the REAL dashboard, drawn by c3-watchdog-tui inside nix-on-droid and transcribed to HTML.",
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6505,6 +6523,7 @@
       "category": "android",
       "description": "c3-morpheus on a phone: the cloud's workflow orchestrator. Four panels — the Dagu workflow list, the probe registry that declares what 'healthy' means, the fleet control panel, and the PM board (Paca). c3-watchdog keeps what is running alive; c3-morpheus decides what runs.",
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6521,6 +6540,7 @@
       "category": "android",
       "description": "c3-watchtower on a phone: ANALYTICS over the cloud's delivery pipeline. Watchdog watches what is running, Morpheus decides what runs, WatchTower counts what ran — per repo and per workflow, over a window: how many runs, what share of them succeeded, which workflow is failing, and how long ago the last green was.",
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6537,6 +6557,7 @@
       "category": "android",
       "description": "Diego's Cloud C3 - the fleet's command-and-control surface as its own APK, lifted out of the SuperApp's C3 section (#648). A five-tab shell drawn by the fleet's bottom-nav island (libs:bottomnav) - Infra, Containers, Home, Ops, Observ (opens on Home), under the fleet's AppTopBar with Configs behind its Settings button - declared in ui.* below and baked through BuildConfig. THE SHELL IS VIEWS AND HOSTS FRAGMENTS, not Compose: the pages this app exists to show are the SuperApp's C3 Fragments, and they are MOVED here rather than reauthored, so the rendering, wording and behaviour are the ones that already shipped. BottomNavIslandView is libs:bottomnav's own documented View-side contract for exactly this case (the SuperApp, cloud-me and cloud-wallet shells use it), so hosting fragments is a first-class path. Topology is the address estate: the SuperApp's c3_public and c3_private cards, one C3HealthFragment scoped two ways over the declared service tables. Observ is Health, the SuperApp's own page:c3/health. Home is the overview. Apps LAUNCHES the three C3 sibling APKs that already exist as their own fleet members through ui.external_apps, the same extapp: idiom the SuperApp used, so nothing is re-implemented; the printed name is DERIVED from each fleet id by dropping the family prefix, because an application has ONE name (#351). Configs holds About. A PAGE IS DECLARED WHEN ITS FRAGMENT EXISTS AND NOT BEFORE: there is no not-built body and no flag that could excuse one, which is what lets test/test-c3-shell.sh assert that every declared page renders real content - the guard whose absence let an empty five-tab APK ship green. The five feed cards, the ntfy centre and the three container dashboards ARRIVED (#648, owner-escalated): the ENTIRE SuperApp c3 section declaration is carried verbatim under ui.sections and its two stacks render as the Topology and Observability pages, with Dagu and the WG mesh as their own pages. The top offset is the MEASURED systemBars u displayCutout inset, read in a non-consuming listener (#407/#477), never a tuned margin. Dark is the default theme (#336, #337). English is the base language (#299). Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": null,
       "default_section": "home",
       "bottom_nav": [
         "infra",
@@ -6697,6 +6718,7 @@
       "category": "android",
       "description": "The phone's local web server, as an APK, in Rust and web only: a Tauri 2 app whose Rust library starts the shared fleet web server (ab_cloud-libs-shared/libs/fleet-webserver, the Linux my-webserver UI bundled verbatim) in-process on 8002, rooted at /storage/emulated/0 and nothing else, and opens its one webview on the app shell: five bottom tabs Pages, API, Home, Files and Configs, whose Files tab is that unchanged file view. A tapped link offers Open in browser or Open embedded (build.json::links). The SuperApp's About, Logcat and Diagnose are served on 8003, and a private DNS (udp 5354) answers termux.app, nix.app, emulated.app and cloud.app.",
       "kind": "card",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6713,6 +6735,7 @@
       "category": "android",
       "description": "The fleet's media hub, as an APK, in Rust and static web only: a Tauri 2 app whose one webview shows seven mobile-first pages — music, videos, gallery, books, feed, movies, documentaries — built from the media data of diegonmarcos.github.io pinned at one commit. Every link out goes to the phone's own apps through tauri-plugin-opener.",
       "kind": "portal",
+      "wasm": null,
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6729,6 +6752,7 @@
       "category": "android",
       "description": "Cloud Gallery — a photo/video gallery app forked from IacobIonut01/ReFra (ex-com.diegonmarcos.mediacenter). Single-app fork (NOT a hub+forks constellation like ea_cloud-comms/ac_cloud-ide): one APK, one materialized upstream tracker. Extends the upstream local MediaStore gallery with two additional non-local media sources behind the SAME Album/MediaItem model: an HTTP 'manifest' source (WG-gated JSON index + thumbs, also used to mirror Instagram via a server-side gallery-dl job) and a 'newpipe' source (NewPipeExtractor, YouTube only). See data/media-profiles.json for the profile registry — Kotlin iterates it, never a hardcoded source list.",
       "kind": "app",
+      "wasm": null,
       "default_section": "home",
       "bottom_nav": [
         "screenshots",
@@ -6823,6 +6847,7 @@
       "category": null,
       "description": null,
       "kind": "portal",
+      "wasm": "cloud-office",
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
@@ -6839,6 +6864,7 @@
       "category": "android",
       "description": "Diego's Cloud Camera — our own signed build of GrapheneOS Camera. Modern CameraX (photo, video, QR/barcode scan, timer, zoom/exposure bars, in-app gallery), pure Kotlin/Java, no NDK, no Play Services. Vendored upstream tree renamed onto cld.camera so it coexists with an officially-signed GrapheneOS Camera on the same device.",
       "kind": "app",
+      "wasm": "cloud-camera",
       "default_section": "photo",
       "bottom_nav": [
         "qr_scan",
@@ -6903,6 +6929,7 @@
       "category": "android",
       "description": "Cloud Notes — our own signed build (the local-first notes/whiteboard app), vendored at ac_cloud-notes/ as owned code. DE-CLOUDED (#469): no sync server, no Firebase/telemetry, no AI chat, no EE-licensed code. The one feature added over upstream is opening files from emulated storage (/storage/emulated/0/...) reached via the fleet rule about EAR discipline — see the ship workflow and testers.",
       "kind": "app",
+      "wasm": "cloud-notes",
       "default_section": "home",
       "bottom_nav": [
         "home",
@@ -7028,6 +7055,7 @@
       "category": "android",
       "description": "Cloud Writer - the application the owner asked for: one place that owns Text Enhance, Translate, Grammar Check and Summary (Resume), with its own model choice for each of them separately. Type or paste a text, pick a tool, get the result back in an editable box.",
       "kind": "app",
+      "wasm": "cloud-writer",
       "default_section": "documents",
       "bottom_nav": [
         "documents",
@@ -7101,6 +7129,7 @@
       "category": "android",
       "description": "Diego's Cloud Calc (#767) - an all-in-one calculator over libqalculate, the engine behind Qalculate!. Every number is computed by Cloud-Lib-Calc.apk (ab_cloud-libs-shared/libs/calc) - save Convert ▸ Network / Data, whose fixed bit and byte factors the app applies itself in exact decimals - which this app BINDS after a contract handshake and never compiles (#763: an app compiles only what it renders). #770 three top-level sections (ui.sections) - Calculator, Measure and Jev - each a set of bottom-nav tabs, each tab a strip of modes declared below in ui.modes. Calculator: Calc (Standard, Scientific, Programmer, CAS, Physics & Constants), Convert (Units, Currency, Network / Data), Graph, Tools (Date & Time, Finance, Acoustics) and History; Measure: Sound (#772: meter/oscilloscope/tuner, Wave detection, History with waterfall and CSV/WAV export, Generator, What is it?), Camera (#772: Measure by reference object or ARCore, Level, Identify, Colour, Text-to-numbers - every image read by the shared image engine Cloud-Lib-ML-L-Image, on-device ML Kit by default or an OpenRouter decision model when Configs ▸ Image route says so) and Clock (World clock, Alarms, Timers, Stopwatch, Interval, Bedtime; #768); Jev (#770): Ask - a natural-language request routed by a decision model on OpenRouter's Decisions API to one of the app's own tools, which then computes - and Configs (Token, Routing, Models, Test). Any result can also be scored by a decision model (Ask about this result: calibrated probabilities, kept in History). A mode is DATA: its kind picks one of its renderers (expression, catalog, converter, data_converter, form, plot, meter, history, and the six Clock kinds) and everything it shows - keys, options, forms, categories - is declared here. Offline by default: the network is used only by the engine's currency-rate download, on request, by the Jev section's and Sound ▸ What is it?'s calls to OpenRouter (build.json::jev; the shared libs:decisions client is the only code in this app that opens a URL), and - only when Configs ▸ Image route picks OpenRouter - by the image engine, which falls back to on-device ML Kit on any error; Calculator and Measure work without any of it, and the Clock section uses none (time zones are the device's tzdata, alarms are AlarmManager's). English is the base language (#299); dark is the default theme (#336).",
       "kind": "app",
+      "wasm": null,
       "default_section": "calculator",
       "bottom_nav": [
         "calculator",
@@ -7261,6 +7290,7 @@
       "category": "android",
       "description": "Diego's Cloud Search (#779; renamed Cloud Research in #1162, back to Cloud Search in #1197) - one app for searching, on the shared bottom nav (#1184): News (the fleet news service, YouTube channel feeds, Google News topic feeds and the German RSS feeds), Research (Reports of what agents published, the Model catalogue and Agents: #913 draft-only Buy-Side and Sell-Side agents that read your alert mails and pages and write drafts you send yourself), CGC (Cloud CGC and Me CGC, each with Semantic and Graph RAG over the public and the private code index), Search (the AI chat over OpenRouter and the major web and AI search engines, plus the fleet's Apps, Messages and Code), Media (Image, Video, Movies, Books), Shopping (Groceries, Electronics, Clothing and Compare, the price comparison) and Brokers (Job Placement, Real Estate, Business). House and Jobs keep their Listing, Analysis, Feed and Calculators subpages. REAL DATA ONLY: every in-app listing or feed comes from a public API or feed this app is allowed to read (build.json::search.sources, search.feeds), cached on the phone so the last results stay readable offline; a portal whose terms forbid automated access is never fetched - its own search page opens in cloud-browser - and a source that cannot be used says why. The German payslip runs the BMF's own Lohnsteuer PAP 2026 (core/pap, generated into Kotlin by core/tools/pap2kt.py) with the 2026 social-insurance rules, golden-tested against the BMF's calculator. English is the base language (#299); dark is the default theme (#336).",
       "kind": "app",
+      "wasm": "cloud-search",
       "default_section": "chat",
       "bottom_nav": [
         "news",
@@ -7609,6 +7639,7 @@
       "category": "android",
       "description": "Cloud SuperIntel (SI, #1162) - the fleet's Gemini-style AI chat as its own app, now with three sections (Notebook: source-grounded Q&A with citations and an explicit not-in-your-sources answer; SI: the router chat; CGCs: the experts, one persona chat each in six groups): a chat screen, a left side drawer listing the sessions (new chat, rename, delete), a model selector and an agent picker, answers streaming in, replies drawn as Markdown. The page, the sessions, the streaming and the Markdown are libs:ai's (shared with Cloud Drive's AI tab, Cloud Code's chat and the SuperApp assistant), so the look is the fleet's AI default; this app adds only the shell: the shared first row (Profile at the top right opens Cloud Account), the second row with icons, the bottom nav, the shared page gradient and the shared scroll collapse. Backends: the fleet agent gateway (my-ai-api on the mesh: Claude through claude-superset-api on oci-apps, Hermes, Goose, OpenClaw and the OpenRouter models), the address baked from the fleet catalogue; no token is held or read by this app (decisions-use guard D5) and none is in the repository. Dark is the default theme (#336); English is the base language (#299).",
       "kind": "app",
+      "wasm": null,
       "default_section": "si",
       "bottom_nav": [
         "notebook",
@@ -7835,6 +7866,7 @@
       "category": "android",
       "description": "Cloud KG Store (#1207) - the fleet's knowledge-graph store and browser, three sections on the bottom nav: Cloud (two rows of groups: Application = Binary, Web/Debug, MCP search tools, API Data and API Debug with GET and POST; Repo = Code, CGC, MCP search tools, API Semantic and GraphRAG; every page is backed by the fleet endpoints declared in ac_cloud-account/build.json::fleet_endpoints - c3-infra-api, cloud-me-api, c3-public-api, the two CGC MCP services and embeddings-api - and says plainly when an endpoint is missing or does not answer), Phone (the installed Android apps index through PackageManager: package, version, permissions and components) and Web (News, Media, Shopping, Real Estate, Jobs, Business, on the sources and parsers Cloud Search declares: its build.json::search is baked by reference and its plain-JVM search-core is linked by reference, nothing is copied). The assistant behind the top bar's AI icon is libs:ai's chat over the fleet agent gateway (mesh only); no token is held or read by this app for it (decisions-use guard D5), and the fleet bearer for the public fallback route is read from Cloud Account on use and never kept. Dark is the default theme (#336); English is the base language (#299).",
       "kind": "app",
+      "wasm": null,
       "default_section": "cloud",
       "bottom_nav": [
         "cloud",
@@ -8036,6 +8068,7 @@
       "category": "android",
       "description": "Cloud Tools Small LLMs - an AI chat that does simple, direct text jobs with small, cheap models only, calling OpenRouter directly with the user's own token. A router reads each request and names the task (Jev, TypeSafe's decision model on OpenRouter's Decisions API, while it is listed; else a small JSON chat model), and one small worker model per task answers it with a fixed prompt: translate, summarize, rewrite, fix grammar, extract, classify, reply drafts, explain simply, quick maths, JSON/CSV fix, regex/command, titles and hashtags, sentiment, keywords, Q&A on pasted text. Every answer shows its task, model and actual cost (from OpenRouter's usage, router included); Costs keeps the day and month totals. Sections: Apps (an icon grid of applications buildable from the models, each with its pipeline), Models (the owner's small, medium and retrieval model tables from app/src/main/assets/tools-models.json as a sortable table, an icon grid, descriptive cards or cards grouped by macro task), AI (the shared libs:ai chat over the fleet agent gateway, its model picker listing only the chat models, grouped by macro; every call recorded in Costs), Store and Costs. English is the base language (#299); dark is the default theme (#336).",
       "kind": "app",
+      "wasm": "cloud-tools-small-llms",
       "default_section": "models",
       "bottom_nav": [
         "apps",
@@ -8146,6 +8179,7 @@
       "category": "android",
       "description": "Diego's Cloud Store — the constellation app store as its own APK (#865). Hosts libs:appstore: the Cloud fleet list (install, update, download-all, auto-update on Wi-Fi), the phone's installed apps (stop, uninstall, sources) and the apps mesh. It also runs the background fleet pass that keeps every constellation app updated, Cloud SuperApp and itself included. Split out of cloud-superapp so the store ships and updates on its own.",
       "kind": "app",
+      "wasm": "cloud-store",
       "default_section": "search",
       "bottom_nav": [
         "cloud",
@@ -8291,6 +8325,7 @@
       "category": "android",
       "description": "Diego's Cloud Account — turns an empty phone into the owner's phone and keeps it that way: the account and its sign-in ways, the per-device profile backed up to and restored from the private vault repo, setup, and the fleet secrets (a0_docs/eng-specs/cloud-account-redesign.md). Hosts libs:account, the same code SuperApp links.",
       "kind": "app",
+      "wasm": "cloud-account",
       "default_section": "personal",
       "bottom_nav": [
         "personal",
@@ -8570,6 +8605,7 @@
       "category": "android",
       "description": "Diego's Cloud Drive — standalone Android storage app, lifted out of the SuperApp's Cloud▸Apps▸Drive pages so the phone's storage surface is its own icon. #609 REDESIGN over #603/#604's Compose chrome: a five-tab shell drawn by the fleet's bottom-nav island (libs:bottomnav) — Files, Volumes, Home, Sync, Configs — every tab, sub-page, place, section, filter and icon name declared in ui.* below and baked through BuildConfig. Files is a FULL X-plore-class manager over shared storage with TWO declared sections (ui.files.sections): Emulated (shared storage itself, /storage/emulated/0) and cloud-drive-storage (the ONE shared store of #575, storage.shared_root, exposed to every fleet app that holds all-files access — plain shared storage, so NO webserver is needed and libs:webserver stays deliberately unlinked); the store is seeded by DEFAULT with the public cloud repositories (storage.seed + data/drive-git-repos.json seed flags — a baked manifest with a first-run SHALLOW fetch, because an APK cannot carry a working clone). Volumes consolidates the FULL FLEET: the device's removable volumes plus every mesh mount (libs:mounts) and declared fleet connection, browse-through one tap away. Home is the drive's overview, REDESIGNED by #609 into two sections: Apps (the fleet's data-app grid, moved in from the old Apps tab) and Volumes (a snapshot of the two stores, the four volume classes, the seeded git repos' clean/dirty/ahead-behind state and the container mesh's status, each reading the SAME state the Volumes and Sync tabs render, never a second source). Sync holds three sub-pages from ONE declaration (ui.sections[sync].pages) — Git, Rclone and Mounts — moved back OUT of Configs by #609 (the mirror of #603's move the other way): the native git manager, the folder↔folder sync engine and the ftp/sftp/ssh/webdav connections. Configs keeps three sub-pages (ui.sections[configs].pages): Backups (the declared mirror/rsync jobs with cancellable progress), General (the app's settings, sign-in, storage access) and Others (removable storage, about). The four engine libraries (#567) and the ONE shared store (#575) are unchanged underneath. Dark is the default theme, set at the declaration (#336, #337). Design: a0_docs/eng-specs/cloud-drive-redesign.md. The PDF reader is the #577 native pdfium engine (build.json::pdf), the fleet's one in-process renderer, opened from the Files tab and from any app's Open-with. Build via Nix devShell, one APK out.",
       "kind": "app",
+      "wasm": "cloud-drive",
       "default_section": "git",
       "bottom_nav": [
         "explorer",

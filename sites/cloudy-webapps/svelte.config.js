@@ -29,6 +29,7 @@ export default {
       entries: ['*'],
       handleMissingId: 'fail',
       handleHttpError: ({ path, message }) => {
+        if (!path.startsWith('/cloud-webapps/')) return; // another Pages site (/cloud-web/apps/<slug>/ Wasm pages)
         const slug = path.replace(/^\/cloud-webapps\//, '').split('/')[0];
         if (SERVICES.has(slug)) return; // a link to a service page: published by the Pages ship step, not by this build
         throw new Error(message);

@@ -14,7 +14,7 @@ import shellSeed from '../../apps/superapp/data/shell.json';
 type Page = { id: string; label: string; icon?: string; hidden?: boolean; action?: string; is_action?: boolean; pages?: Page[]; mirror_section?: string; mode?: string; url?: string; separator_before?: boolean; group?: string; subgroup?: string };
 type Tile = { id?: string; label: string; icon?: string; target?: string; separator?: boolean; tint?: boolean };
 type Section = Record<string, unknown> & { id: string; label: string; icon?: string; pages?: Page[]; tile_groups?: { title: string; tiles: Tile[] }[] };
-type App = { id: string; name: string; label: string; icon: string | null; kind: string; package: string | null; default_section: string | null; bottom_nav: string[]; top_bar: Record<string, unknown> | null; sections: (Page & { background?: string })[] };
+type App = { id: string; name: string; label: string; icon: string | null; kind: string; wasm: string | null; package: string | null; default_section: string | null; bottom_nav: string[]; top_bar: Record<string, unknown> | null; sections: (Page & { background?: string })[] };
 
 export const SA = nav.superapp as unknown as { default_section: string; bottom_nav: string[]; sections: Section[]; top_orbs?: { right?: string }; dynamic_island_action?: string; external_apps: { id: string; install_package?: string; hub_package?: string }[]; [k: string]: unknown };
 export const APPS = nav.apps as unknown as App[];
@@ -120,6 +120,12 @@ function stackCards(base: string, declared: { kind?: string; title: string; subt
 export function pageBody(base: string, section: Section, page: Page | null): Body {
   if (!page) return { empty: { title: section.label, caption: 'Open this section on the phone.' } };
   if (section.id === 'cloud' && page.id === 'apps') return { groups: cloudGroups(base), quickmarks: true };
+  // Cloud > WebApps: in the APK this tab IS this site (?embed=1 = the apps grid); here it is that grid plus the fleet's live
+  // Kotlin/Wasm pages as portals (kept until each app's mimic ships, #1320 decision 4).
+  if (section.id === 'cloud' && page.id === 'webapps') {
+    const wasm = APPS.filter((a) => a.wasm).map((a) => ({ id: `wasm-${a.id}`, label: a.label, icon: a.icon, href: joinBase(base, `${a.id}/portal/`) }));
+    return { groups: [...cloudGroups(base), { title: 'Kotlin/Wasm pages', tiles: wasm }] };
+  }
   if (section.id === 'cloud' && page.id === 'lnktree') {
     const groups = (linktree as { groups: { label?: string; title?: string; tiles: { label: string; icon?: string; href?: string }[] }[] }).groups.map((g) => ({
       title: g.title ?? g.label ?? '', tiles: g.tiles.map((t) => ({ id: t.label, label: t.label, icon: t.icon ?? null, href: t.href ?? null, external: !!t.href })),
@@ -161,6 +167,9 @@ export type AppView = {
   crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
   aiHref: string | null; profileHref: string | null; configsHref: string | null;
   portalInfo: { url: string; service: string; embeddable: boolean; serviceHref: string } | null;
+  wasmHref: string | null; portalHref: string | null;
+  mode: string; groups: { id: string; label: string; pages: FleetTab[] }[];
+  sideItems: { id: string; label: string; icon: string; depth: number; heading: boolean; href: string | null }[];
   data?: unknown;
 };
 
@@ -232,6 +241,20 @@ export function appView(base: string, path: string): AppView | null {
     related = tn.related.map((e) => ({ id: e.id, label: e.label, href: entryHref(e), indent: Math.max(0, e.depth - tn.currentDepth), selected: e.selected }));
   }
   const has = (id: string) => app.sections.some((s) => s.id === id);
+  // NavDecl second-row modes: horizontal_two_rows = one row per group (rowGroups), vertical_side_menu = NavSideMenu items
+  const sec = section as (APage & { nav_mode?: string; groups?: { id: string; label?: string; pages?: string[] }[] }) | null;
+  const mode = sec?.nav_mode ?? 'horizontal_one_row';
+  const tabsAll = sec ? fleetTabs(base, `${app.id}/${sec.id}/`, sec.pages ?? []).map((t, i) => ({ ...t, separatorBefore: !!(sec.pages ?? []).filter((p) => !p.hidden)[i]?.separator_before })) : [];
+  const byId = new Map(tabsAll.map((t) => [t.id, t]));
+  const named = new Set((sec?.groups ?? []).flatMap((g) => g.pages ?? []));
+  const groups = sec ? [...(sec.groups ?? []).map((g) => ({ id: g.id, label: g.label ?? g.id, pages: (g.pages ?? []).map((id) => byId.get(id)).filter((t): t is FleetTab => !!t) })),
+    ...(tabsAll.some((t) => !named.has(t.id)) ? [{ id: sec.id, label: labelOf(sec), pages: tabsAll.filter((t) => !named.has(t.id)) }] : [])] : [];
+  const sideItems: AppView['sideItems'] = [];
+  if (sec && mode === 'vertical_side_menu') {
+    const walk = (prefix: string, pages: APage[] | undefined, depth: number) => { for (const p of pages ?? []) { sideItems.push({ id: p.id, label: labelOf(p), icon: p.icon ?? 'tab', depth, heading: false, href: p.action ? href(base, p.action).href : joinBase(base, `${prefix}${p.id}/`) }); walk(`${prefix}${p.id}/`, p.pages, depth + 1); } };
+    if (sec.groups?.length) for (const g of groups) { sideItems.push({ id: `group:${g.id}`, label: g.label, icon: '', depth: 0, heading: true, href: null }); for (const t of g.pages) sideItems.push({ id: t.id, label: t.label, icon: t.icon, depth: 1, heading: false, href: t.href }); }
+    else walk(`${app.id}/${sec.id}/`, sec.pages, 0);
+  }
   const p = portals[app.id];
   return {
     kind: 'app',
@@ -248,6 +271,10 @@ export function appView(base: string, path: string): AppView | null {
     profileHref: app.id === 'cloud-account' ? null : joinBase(base, 'cloud-account/'),
     configsHref: has('configs') ? joinBase(base, `${app.id}/configs/`) : has('settings') ? joinBase(base, `${app.id}/settings/`) : null,
     portalInfo: p ? { ...p, serviceHref: joinBase(base, `${p.service}/`) } : null,
+    mode, groups, sideItems,
+    // the live Kotlin/Wasm page (published by the Pages repo at /cloud-web/apps/<slug>/) while the app has no mimic body
+    wasmHref: app.wasm ? `/cloud-web/apps/${app.wasm}/` : null,
+    portalHref: app.wasm || p ? joinBase(base, `${app.id}/portal/`) : null,
   };
 }
 

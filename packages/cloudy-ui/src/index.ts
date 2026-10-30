@@ -53,3 +53,4 @@ export { default as FleetFirstRow } from './fleet/FleetFirstRow.svelte';
 export { default as FleetSecondRow } from './fleet/FleetSecondRow.svelte';
 export { default as FleetBottomBar } from './fleet/FleetBottomBar.svelte';
 export { titleHierarchy, titleNav, fitCrumbs, railLabel, cellWidth } from './fleet/fleetNav';
+export { default as Portal } from './components/Portal.svelte';

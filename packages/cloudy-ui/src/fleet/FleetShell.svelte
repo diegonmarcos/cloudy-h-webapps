@@ -7,24 +7,32 @@
   import FleetFirstRow from './FleetFirstRow.svelte';
   import FleetSecondRow from './FleetSecondRow.svelte';
   import FleetBottomBar from './FleetBottomBar.svelte';
+  import FleetSecondRows from './FleetSecondRows.svelte';
+  import FleetSideMenu from './FleetSideMenu.svelte';
   type Tab = { id: string; label: string; icon: string; href: string | null };
-  let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, children }: {
+  let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], children }: {
     app: string; background?: string; crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
     sections: { id: string; label: string; icon: string; href: string }[]; section: string | null; tabs?: Tab[]; tab?: string | null; subtabs?: Tab[]; subtab?: string | null;
     aiHref?: string | null; profileHref?: string | null; configsHref?: string | null; children: Snippet;
+    mode?: string; groups?: { id: string; label: string; pages: Tab[] }[]; sideItems?: { id: string; label: string; icon: string; depth: number; heading: boolean; href: string | null }[];
   } = $props();
   let collapsed = $state(false);
+  let width = $state(0);
   let last = 0;
   const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y; if (d > 0 && y > 0) collapsed = true; else if (d < 0) collapsed = false; };
 </script>
 
 <div class="fleet" class:light={background === 'light'} class:theme={background === 'theme'} class:collapsed data-app={app} data-testid="fleet-shell">
   <div class="top" class:away={collapsed}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} /></div>
+  <div class="body" bind:clientWidth={width}>
+  {#if mode === 'vertical_side_menu' && sideItems.length}<FleetSideMenu items={sideItems} selected={subtab ?? tab} narrow={width > 0 && width < 600} />{/if}
   <main class="content" onscroll={onScroll} data-testid="fleet-content">
-    {#if tabs.length > 1}<FleetSecondRow tabs={tabs} selected={tab} compact={collapsed} />{/if}
+    {#if mode === 'horizontal_two_rows' && groups.length}<FleetSecondRows {groups} selected={tab} compact={collapsed} />
+    {:else if mode !== 'vertical_side_menu' && tabs.length > 1}<FleetSecondRow tabs={tabs} selected={tab} compact={collapsed} />{/if}
     {#if subtabs.length > 1}<FleetSecondRow tabs={subtabs} selected={subtab} compact={collapsed} testid="fleet-third-row" />{/if}
     {@render children()}
   </main>
+  </div>
   {#if sections.length > 1}<FleetBottomBar items={sections} selected={section} {collapsed} />{/if}
 </div>
 
@@ -51,7 +59,8 @@
     --f-bar-fill: var(--fleet-searchhtml-fill-light); --f-bar-border: var(--fleet-searchhtml-border-light); --f-bar-accent: var(--fleet-searchhtml-accent-light); --f-bar-idle: var(--fleet-searchhtml-idle-light); } }
   .top { flex: none; overflow: hidden; height: var(--fleet-top1-height); transition: height 200ms; }
   .top.away { height: 0; }
-  .content { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: calc(var(--fleet-bottom-height) + var(--fleet-bottom-bottom-margin)); position: relative; container: pane / inline-size; }
+  .body { flex: 1; min-height: 0; display: flex; position: relative; }
+  .content { flex: 1; min-width: 0; overflow-y: auto; padding-bottom: calc(var(--fleet-bottom-height) + var(--fleet-bottom-bottom-margin)); position: relative; container: pane / inline-size; }
   @media (prefers-reduced-motion: reduce) { .top { transition: none; } }
   :global(html.embed) .fleet { position: static; overflow: visible; background: none; }
   :global(html.embed) .top, :global(html.embed) .fleet :global(.second-row) { display: none; }
