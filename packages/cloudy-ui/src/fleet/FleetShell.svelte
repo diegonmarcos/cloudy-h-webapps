@@ -44,6 +44,8 @@
     --f-accent: var(--fleet-theme-dark-accent); --f-accent-on-island: var(--fleet-theme-dark-accent-on-island); --f-tab-selected: var(--fleet-theme-dark-tab-selected);
     --f-on-tab-selected: var(--fleet-theme-dark-on-tab-selected); --f-tab-strip: var(--fleet-theme-dark-tab-strip);
     --f-bar-fill: var(--fleet-searchhtml-fill-dark); --f-bar-border: var(--fleet-searchhtml-border-dark); --f-bar-accent: var(--fleet-searchhtml-accent-dark); --f-bar-idle: var(--fleet-searchhtml-idle-dark); }
+  /* Kit text inside a fleet app follows the page's ink (light pages drew white-on-light rows before) */
+  .fleet :global(> *) { --role-text-primary: var(--f-ink); --role-text-secondary: var(--f-ink-dim); }
   .fleet.light {
     --f-top: var(--fleet-theme-light-top); --f-bottom: var(--fleet-theme-light-bottom); --f-ink: var(--fleet-theme-light-ink); --f-ink-dim: var(--fleet-theme-light-ink-dim);
     --f-island: var(--fleet-theme-light-island); --f-on-island: var(--fleet-theme-light-on-island); --f-island-border: var(--fleet-theme-light-island-border);

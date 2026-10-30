@@ -4,7 +4,8 @@ import { BASE } from './helpers';
 
 // The web halves of the M4 baseline pairs (scripts/compare-baseline.mjs): the same screens BaselineShots renders on
 // Android, captured full viewport at the same size and density, reduced motion (still frames), clock frozen.
-test.use({ reducedMotion: 'reduce' });
+// BaselineShots draws the fleet chrome with dark = true (PageBackground.THEME on a dark device): same scheme here.
+test.use({ reducedMotion: 'reduce', colorScheme: 'dark' });
 const out = (p: string) => { mkdirSync(`tests/results/baseline-web/${p}`, { recursive: true }); return `tests/results/baseline-web/${p}`; };
 
 const SHOTS: [string, string][] = [

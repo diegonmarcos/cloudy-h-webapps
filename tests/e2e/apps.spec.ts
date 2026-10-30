@@ -70,3 +70,13 @@ for (const p of ['cloud-calc/calculator/calc/', 'cloud-tasks/tasks/', 'cloud-c3/
     expect(critical.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
 }
+
+test.describe('light pages', () => {
+  test.use({ colorScheme: 'light' });
+  test('cloud-tasks on a light device: kit rows take the page ink, not the dark theme\'s white', async ({ page }) => {
+    await page.goto(`${BASE}/cloud-tasks/calendar/events/`);
+    const rgb = await page.getByTestId('list-row').first().locator('.l').evaluate((el) => getComputedStyle(el).color);
+    const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
+    expect((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255).toBeLessThan(0.5);
+  });
+});
