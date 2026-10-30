@@ -6985,6 +6985,11 @@
               "icon": "folder"
             },
             {
+              "id": "vault",
+              "label": "Vault",
+              "icon": "folder"
+            },
+            {
               "id": "new",
               "label": "New page",
               "action": "launch",
