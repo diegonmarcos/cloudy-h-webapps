@@ -235,6 +235,14 @@ for (const [rel, name, key, min] of [
   }
 }
 
+// ── per-app palettes: each mimicked fleet app's own res/values/colors.xml (Cloud Calc's pad_*, calc_*, ...) ──
+for (const id of ['cloud-calc', 'cloud-c3', 'cloud-tasks']) {
+  const rel = `ac_${id}/app/src/main/res/values/colors.xml`;
+  if (readRaw(rel) == null) continue;
+  const cols = xmlValues(rel, 'color');
+  for (const [n, v] of cols) if (/^#/.test(v)) put(`app.${id}.${n}`, 'color', cssColor(v), `${rel}#${n}`);
+}
+
 // ── density: KitDensity (KitComponents.kt) ─────────────────────────────────────────────────────────
 {
   const rel = `${KIT}/KitComponents.kt`;

@@ -20,7 +20,7 @@ for (const site of ['cloudy-webapps', 'cloudy-c3']) {
   if (!existsSync(join(dist, 'index.html'))) { console.error(`FAIL ${site}: no dist/index.html (build first)`); bad++; continue; }
   const html = readFileSync(join(dist, 'index.html'), 'utf8');
   const base = /href="([^"]*?)\/_app\//.exec(html)?.[1] ?? '';
-  const initial = new Set([...html.matchAll(/(?:href|import\()\s*"([^"]+\.js)"/g)].map((m) => m[1].replace(base + '/', '')));
+  const initial = new Set([...html.matchAll(/(?:href=|import\()\s*"([^"]+\.js)"/g)].map((m) => m[1].replace(base + '/', '')));
   const files = walk(dist);
   let shell = 0;
   for (const rel of initial) { const f = join(dist, rel); if (existsSync(f)) shell += gz(f); }

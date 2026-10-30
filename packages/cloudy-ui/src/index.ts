@@ -48,3 +48,8 @@ export { default as SearchBar } from './components/SearchBar.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
 export { default as SelectableTile } from './components/SelectableTile.svelte';
 export { default as StackCard } from './components/StackCard.svelte';
+export { default as FleetShell } from './fleet/FleetShell.svelte';
+export { default as FleetFirstRow } from './fleet/FleetFirstRow.svelte';
+export { default as FleetSecondRow } from './fleet/FleetSecondRow.svelte';
+export { default as FleetBottomBar } from './fleet/FleetBottomBar.svelte';
+export { titleHierarchy, titleNav, fitCrumbs, railLabel, cellWidth } from './fleet/fleetNav';

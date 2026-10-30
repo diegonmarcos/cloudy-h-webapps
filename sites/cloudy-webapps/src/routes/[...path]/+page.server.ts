@@ -6,9 +6,16 @@ import { ENTRY_PATHS, superappView, appView, shellData } from '$lib/server/nav';
 // Every SuperApp section/page and every fleet app/section/page from the GENERATED routes.json (B.6): one prerendered URL each.
 export const entries: EntryGenerator = () => ENTRY_PATHS.map((p) => ({ path: p.replace(/\/$/, '') }));
 
+// Per-app build-time data (src/apps/<id>/server.ts load(view)): only the slice the page renders reaches the client.
+const SERVERS = import.meta.glob('../../apps/*/server.ts', { eager: true }) as Record<string, { load?: (v: unknown) => unknown }>;
+
 export const load = ({ params }) => {
   const path = params.path ? `${params.path}/` : '';
-  const view = superappView(base, path) ?? appView(base, path);
+  const sa = superappView(base, path);
+  if (sa) return { view: sa, shell: shellData(base) };
+  const view = appView(base, path);
   if (!view) error(404, `No page ${path}`);
-  return { view, shell: shellData(base) };
+  const srv = SERVERS[`../../apps/${view.app.id}/server.ts`];
+  if (srv?.load) view.data = srv.load(view);
+  return { view, shell: null };
 };

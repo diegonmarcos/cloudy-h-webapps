@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "description": "cloudy-webapps (SuperApp mobile/tablet mimic, base /cloud-webapps) + cloudy-c3 (control centre, base /cloudy-c3) on one @cloudy/ui package (#1320).",
-  "workspaces": ["packages/*", "sites/*"],
+  "workspaces": [
+    "packages/*",
+    "sites/*"
+  ],
   "scripts": {
     "build": "npm run build -w sites/cloudy-webapps && npm run build -w sites/cloudy-c3",
     "test:unit": "vitest run",
@@ -18,7 +21,10 @@
     "svelte": "^5.41.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.10",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@axe-core/playwright": "^4.10.0"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

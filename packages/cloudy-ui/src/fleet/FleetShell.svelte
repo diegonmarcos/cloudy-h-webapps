@@ -8,8 +8,8 @@
   import FleetSecondRow from './FleetSecondRow.svelte';
   import FleetBottomBar from './FleetBottomBar.svelte';
   type Tab = { id: string; label: string; icon: string; href: string | null };
-  let { app, dark = true, crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, children }: {
-    app: string; dark?: boolean; crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
+  let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, children }: {
+    app: string; background?: string; crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
     sections: { id: string; label: string; icon: string; href: string }[]; section: string | null; tabs?: Tab[]; tab?: string | null; subtabs?: Tab[]; subtab?: string | null;
     aiHref?: string | null; profileHref?: string | null; configsHref?: string | null; children: Snippet;
   } = $props();
@@ -18,7 +18,7 @@
   const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y; if (d > 0 && y > 0) collapsed = true; else if (d < 0) collapsed = false; };
 </script>
 
-<div class="fleet" class:light={!dark} class:collapsed data-app={app} data-testid="fleet-shell">
+<div class="fleet" class:light={background === 'light'} class:theme={background === 'theme'} class:collapsed data-app={app} data-testid="fleet-shell">
   <div class="top" class:away={collapsed}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} /></div>
   <main class="content" onscroll={onScroll} data-testid="fleet-content">
     {#if tabs.length > 1}<FleetSecondRow tabs={tabs} selected={tab} compact={collapsed} />{/if}
@@ -42,6 +42,13 @@
     --f-accent: var(--fleet-theme-light-accent); --f-accent-on-island: var(--fleet-theme-light-accent-on-island); --f-tab-selected: var(--fleet-theme-light-tab-selected);
     --f-on-tab-selected: var(--fleet-theme-light-on-tab-selected); --f-tab-strip: var(--fleet-theme-light-tab-strip);
     --f-bar-fill: var(--fleet-searchhtml-fill-light); --f-bar-border: var(--fleet-searchhtml-border-light); --f-bar-accent: var(--fleet-searchhtml-accent-light); --f-bar-idle: var(--fleet-searchhtml-idle-light); }
+  /* PageBackground.THEME: the system's light/dark (Android follows the device; the web follows prefers-color-scheme) */
+  @media (prefers-color-scheme: light) { .fleet.theme {
+    --f-top: var(--fleet-theme-light-top); --f-bottom: var(--fleet-theme-light-bottom); --f-ink: var(--fleet-theme-light-ink); --f-ink-dim: var(--fleet-theme-light-ink-dim);
+    --f-island: var(--fleet-theme-light-island); --f-on-island: var(--fleet-theme-light-on-island); --f-island-border: var(--fleet-theme-light-island-border);
+    --f-accent: var(--fleet-theme-light-accent); --f-accent-on-island: var(--fleet-theme-light-accent-on-island); --f-tab-selected: var(--fleet-theme-light-tab-selected);
+    --f-on-tab-selected: var(--fleet-theme-light-on-tab-selected); --f-tab-strip: var(--fleet-theme-light-tab-strip);
+    --f-bar-fill: var(--fleet-searchhtml-fill-light); --f-bar-border: var(--fleet-searchhtml-border-light); --f-bar-accent: var(--fleet-searchhtml-accent-light); --f-bar-idle: var(--fleet-searchhtml-idle-light); } }
   .top { flex: none; overflow: hidden; height: var(--fleet-top1-height); transition: height 200ms; }
   .top.away { height: 0; }
   .content { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: calc(var(--fleet-bottom-height) + var(--fleet-bottom-bottom-margin)); position: relative; container: pane / inline-size; }

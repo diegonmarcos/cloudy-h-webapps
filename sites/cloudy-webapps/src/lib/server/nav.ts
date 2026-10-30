@@ -4,6 +4,7 @@ import nav from '@cloudy/ui/nav/nav.json';
 import targetsJson from '@cloudy/ui/nav/targets.json';
 import routesJson from '@cloudy/ui/nav/routes.json';
 import overlay from '@cloudy/ui/nav/nav-overlay.json';
+import { titleHierarchy, titleNav, type Entry } from '@cloudy/ui/src/fleet/fleetNav.ts';
 import { drawerRows, resolveTarget, joinBase, type ShellData, type Tab, type TileGroup, type TileItem } from '@cloudy/ui';
 import content from '../../apps/superapp/data/sections-content.json';
 import core from '../../apps/superapp/data/sections-core.json';
@@ -150,11 +151,17 @@ export type SuperAppView = {
   tabs: Tab[]; tabSelected: string | null; subtabs: Tab[]; subSelected: string | null; tabHrefs: string[];
   title: string; body: Body; detail: Body | null; path: string;
 };
+export type FleetTab = { id: string; label: string; icon: string; href: string | null };
 export type AppView = {
-  kind: 'app'; app: { id: string; name: string; label: string; icon: string | null; topBar: Record<string, unknown> | null };
+  kind: 'app'; app: { id: string; name: string; label: string; icon: string | null; kind: string };
   sections: { id: string; label: string; icon: string; href: string }[]; section: string | null; sectionLabel: string;
-  tabs: Tab[]; tabSelected: string | null; subtabs: Tab[]; subSelected: string | null; title: string; path: string; portal: boolean;
+  page: string | null; sub: string | null;
+  tabs: FleetTab[]; tabSelected: string | null; subtabs: FleetTab[]; subSelected: string | null; title: string; path: string; portal: boolean;
   listDetail: boolean; background: string;
+  crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
+  aiHref: string | null; profileHref: string | null; configsHref: string | null;
+  portalInfo: { url: string; service: string; embeddable: boolean; serviceHref: string } | null;
+  data?: unknown;
 };
 
 function back(base: string, parts: string[], section: Section): string | null {
@@ -189,29 +196,57 @@ export function superappView(base: string, path: string): SuperAppView | null {
 }
 
 const lists = overlay.list_detail as Record<string, string[]>;
+const portals = overlay.portals as Record<string, { url: string; service: string; embeddable: boolean }>;
+type APage = Page & { background?: string };
+function fleetTabs(base: string, prefix: string, pages: APage[]): FleetTab[] {
+  return (pages ?? []).filter((p) => !p.hidden).map((p) => ({ id: p.id, label: labelOf(p), icon: p.icon ?? 'tab', href: p.action ? href(base, p.action).href : joinBase(base, `${prefix}${p.id}/`) }));
+}
+/** id -> site path of every page of [section] (depth-first), for the title dropdown's entries. */
+function pagePaths(prefix: string, pages: APage[] | undefined, out = new Map<string, string>()) {
+  for (const p of pages ?? []) { out.set(p.id, `${prefix}${p.id}/`); pagePaths(`${prefix}${p.id}/`, p.pages, out); }
+  return out;
+}
 export function appView(base: string, path: string): AppView | null {
   const parts = path.split('/').filter(Boolean);
   const app = APPS.find((a) => a.id === parts[0]);
   if (!app) return null;
   const portal = parts[1] === 'portal';
   const secId = portal ? null : parts[1] ?? app.default_section;
-  const section = secId ? app.sections.find((s) => s.id === secId) ?? null : null;
+  const section = (secId ? app.sections.find((s) => s.id === secId) ?? null : null) as (APage | null);
   if (parts[1] && !portal && !section) return null;
   const page = section?.pages?.length ? (parts[2] ? section.pages.find((p) => p.id === parts[2]) ?? null : visible(section.pages)[0] ?? null) : null;
   if (parts[2] && !page) return null;
   const sub = page?.pages?.length ? (parts[3] ? page.pages.find((p) => p.id === parts[3]) ?? null : visible(page.pages)[0] ?? null) : null;
   if (parts[3] && !sub) return null;
   const order = app.bottom_nav.length ? app.bottom_nav : app.sections.map((s) => s.id);
+  const secs = order.map((id) => app.sections.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s);
+  // the first row: NavBarTopFirstRow's breadcrumb + dropdown, from the same declaration (titleHierarchy / titleNav)
+  let crumbs: AppView['crumbs'] = [{ label: app.label, href: joinBase(base, `${app.id}/`) }];
+  let related: AppView['related'] = [];
+  if (section) {
+    const paths = pagePaths(`${app.id}/${section.id}/`, section.pages);
+    const entryHref = (e: Entry) => e.action ? href(base, e.action).href : e.depth === 0 ? joinBase(base, `${app.id}/${e.id}/`) : paths.has(e.id) ? joinBase(base, paths.get(e.id)!) : null;
+    const tn = titleNav(app.label, labelOf(section), titleHierarchy(section, (sub ?? page)?.id ?? null), secs);
+    crumbs = tn.crumbs.map((c, i) => ({ label: c.label, href: i === 0 ? joinBase(base, `${app.id}/`) : c.target ? entryHref(c.target) : null }));
+    related = tn.related.map((e) => ({ id: e.id, label: e.label, href: entryHref(e), indent: Math.max(0, e.depth - tn.currentDepth), selected: e.selected }));
+  }
+  const has = (id: string) => app.sections.some((s) => s.id === id);
+  const p = portals[app.id];
   return {
     kind: 'app',
-    app: { id: app.id, name: app.name, label: app.label, icon: app.icon, topBar: app.top_bar },
-    sections: order.map((id) => app.sections.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s)
-      .map((s) => ({ id: s.id, label: labelOf(s), icon: s.icon ?? 'tab', href: joinBase(base, `${app.id}/${s.id}/`) })),
-    section: section?.id ?? null, sectionLabel: section?.label ?? '',
-    tabs: section ? tabsOf(base, `${app.id}/${section.id}/`, section.pages ?? []) : [], tabSelected: page?.id ?? null,
-    subtabs: page?.pages?.length ? tabsOf(base, `${app.id}/${section!.id}/${page.id}/`, page.pages) : [], subSelected: sub?.id ?? null,
+    app: { id: app.id, name: app.name, label: app.label, icon: app.icon, kind: app.kind },
+    sections: secs.map((s) => ({ id: s.id, label: labelOf(s), icon: s.icon ?? 'tab', href: joinBase(base, `${app.id}/${s.id}/`) })),
+    section: section?.id ?? null, sectionLabel: section ? labelOf(section) : '', page: page?.id ?? null, sub: sub?.id ?? null,
+    tabs: section ? fleetTabs(base, `${app.id}/${section.id}/`, section.pages ?? []) : [], tabSelected: page?.id ?? null,
+    subtabs: page?.pages?.length ? fleetTabs(base, `${app.id}/${section!.id}/${page.id}/`, page.pages) : [], subSelected: sub?.id ?? null,
     title: [sub && labelOf(sub), page && labelOf(page), section && labelOf(section), app.label].filter(Boolean).join(' · '), path, portal,
-    listDetail: !!section && (lists[app.id] ?? []).includes(section.id), background: section?.background ?? 'dark',
+    listDetail: !!section && (lists[app.id] ?? []).includes(section.id),
+    background: section?.background ?? 'dark',
+    crumbs, related,
+    aiHref: has('ai') ? joinBase(base, `${app.id}/ai/`) : null,
+    profileHref: app.id === 'cloud-account' ? null : joinBase(base, 'cloud-account/'),
+    configsHref: has('configs') ? joinBase(base, `${app.id}/configs/`) : has('settings') ? joinBase(base, `${app.id}/settings/`) : null,
+    portalInfo: p ? { ...p, serviceHref: joinBase(base, `${p.service}/`) } : null,
   };
 }
 
