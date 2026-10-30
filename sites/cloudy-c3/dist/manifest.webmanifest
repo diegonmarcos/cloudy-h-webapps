@@ -1,0 +1,11 @@
+{
+  "name": "Cloud C3",
+  "short_name": "C3",
+  "description": "The fleet control centre on the web: the Cloud C3 app mimicked, over the c3-infra-api (#1320).",
+  "start_url": "/cloudy-c3/",
+  "scope": "/cloudy-c3/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [{ "src": "/cloudy-c3/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
