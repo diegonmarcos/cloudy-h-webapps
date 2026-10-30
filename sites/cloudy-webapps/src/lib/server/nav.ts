@@ -43,7 +43,8 @@ export function linkOf(t: Tile): AppLink | undefined {
 }
 /** Phone-only apps open their own About page. */
 export const aboutPath = (appId: string) => `${appId}/about/`;
-export const ABOUT_IDS = [...LINKS.values()].filter((l) => l.kind === 'phone-only').map((l) => l.id);
+// An app that declares its own `about` section (ad_ apps, #1335) renders it as a fleet page at the same URL: no generic About card.
+export const ABOUT_IDS = [...LINKS.values()].filter((l) => l.kind === 'phone-only' && !APPS.find((a) => a.id === l.id)?.sections.some((s) => s.id === 'about')).map((l) => l.id);
 
 /** TileStrip input: a separator rides on the previous tile (separatorAfter). */
 export function tileItems(base: string, tiles: Tile[]): TileItem[] {
