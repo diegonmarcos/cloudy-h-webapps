@@ -9,6 +9,7 @@
 //   routes.json  : every URL path both shells prerender (relative to the site base), with what it renders
 //   targets.json : Android target string -> canonical web path (section:, page:, extapp:, extapp:#page:) for /t/<target>
 //   app-ids.json : the [app=appId] param matcher list
+//   status-bar.json : the home status bar, the Tasks popup and the One-Hand index declarations (#1332), top-level build.json keys
 //   apps-ui.json : each fleet app's other ui declarations (calc modes/keys, c3_ops, ...), read at build time only
 // Hand-written companion: packages/cloudy-ui/nav/nav-overlay.json (what Android cannot say: list-detail flags, portals).
 // The legacy shared nav (scripts/gen-nav.mjs -> /cloud-webapps/nav.js, used by the service pages) is a separate script.
@@ -151,7 +152,12 @@ const clash = [...new Set([...services, ...extraSvc])].filter((s) => firstSeg.ha
 if (clash.length) fail(`service slug(s) collide with a site route: ${clash.join(', ')} (rename the service page or the route)`);
 
 const json = (o) => JSON.stringify(o, null, 2) + '\n';
+// The home status bar, the Tasks popup (the clock's popup) and the One-Hand page index, as the SuperApp declares them in
+// aa_cloud-superapp/build.json (home_status_bar / tasks_popup / onehand_page, #1332). The strip below renders from the first.
+const chrome = {};
+for (const k of ['home_status_bar', 'tasks_popup', 'onehand_page']) chrome[k] = strip(saBuild[k] ?? fail(`aa_cloud-superapp/build.json has no ${k}`));
 emit(root, {
+  [`${OUT}/status-bar.json`]: json({ _generated: HEADER, statusBar: chrome.home_status_bar, tasksPopup: chrome.tasks_popup, onehandPage: chrome.onehand_page }),
   [`${OUT}/nav.json`]: json({ _generated: HEADER, superapp, apps }),
   [`${OUT}/routes.json`]: json({ _generated: HEADER, count: routes.length, routes }),
   [`${OUT}/targets.json`]: json({ _generated: HEADER, count: Object.keys(targets).length, targets }),
