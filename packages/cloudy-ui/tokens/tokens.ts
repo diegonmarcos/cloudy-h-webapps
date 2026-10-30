@@ -211,8 +211,11 @@ export const tokens = {
       "radius": 12
     },
     "drawer_glass": {
+      "edge": "#b794f455",
+      "edge_inset_left": 278,
       "fill": "#b794f455",
-      "gradient": "linear-gradient(180deg, #2d1b69, #000000, #2d1b69)"
+      "gradient": "linear-gradient(180deg, #2d1b69, #000000, #2d1b69)",
+      "layers": "linear-gradient(315deg, #b794f433, #ffffff0d, #7c3aed1a), linear-gradient(180deg, #2d1b69, #000000, #2d1b69)"
     },
     "dynamic_island": {
       "fill": "#000000",
@@ -225,11 +228,13 @@ export const tokens = {
     },
     "icon_glass": {
       "gradient": "linear-gradient(315deg, #ffffff1a, #ffffff0d, #7c3aed1a)",
+      "layers": "linear-gradient(315deg, #ffffff1a, #ffffff0d, #7c3aed1a)",
       "stroke": "#ffffff33",
       "stroke_width": 1
     },
     "liquid_glass": {
       "gradient": "linear-gradient(315deg, #ffffff40, #ffffff0d, #b794f41a)",
+      "layers": "linear-gradient(315deg, #ffffff40, #ffffff0d, #b794f41a)",
       "radius": 24,
       "stroke": "#ffffff33",
       "stroke_width": 1
@@ -248,6 +253,7 @@ export const tokens = {
     },
     "tile_glass": {
       "gradient": "linear-gradient(315deg, #ffffff33, #ffffff0a, #b794f414)",
+      "layers": "linear-gradient(315deg, #ffffff33, #ffffff0a, #b794f414)",
       "radius": 20,
       "stroke": "#ffffff22",
       "stroke_width": 1
@@ -315,7 +321,7 @@ export const tokens = {
       "weight": 400
     },
     "family": {
-      "mono": "\"Roboto Mono\", ui-monospace, \"DejaVu Sans Mono\", monospace",
+      "mono": "\"Noto Sans Mono\", \"Droid Sans Mono\", ui-monospace, monospace",
       "sans": "Roboto, system-ui, -apple-system, \"Segoe UI\", sans-serif"
     },
     "headlineLarge": {
@@ -360,4 +366,4 @@ export type Tokens = typeof tokens;
 export const THEME_IDS = ["cloud","cloud_minimalist_black"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const PALETTE_ROLES = ["window","surface","surface_selected","text_primary","text_secondary","accent","hairline","tile_ink"] as const;
-export const TOKEN_COUNT = 238;
+export const TOKEN_COUNT = 244;

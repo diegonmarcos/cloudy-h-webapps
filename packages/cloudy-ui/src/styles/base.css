@@ -1,0 +1,10 @@
+/* @cloudy/ui base: the dense Kit defaults (LocalTextStyle = bodySmall 12sp, no fixed line height) on the theme roles. */
+html { background: #000; color: var(--role-text-primary); font: 400 var(--type-body-small-size) / normal var(--type-family-sans);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-text-size-adjust: 100%; color-scheme: dark; }
+body { margin: 0; min-height: 100dvh; }
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--role-accent); outline-offset: 1px; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--motion-fade-in); }
+@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }

@@ -1,0 +1,11 @@
+{
+  "name": "Cloud SuperApp",
+  "short_name": "Cloud",
+  "description": "The Cloud SuperApp on the web: the Android launcher and its fleet apps, mimicked (#1320).",
+  "start_url": "/cloud-webapps/",
+  "scope": "/cloud-webapps/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#140B26",
+  "icons": [{ "src": "/cloud-webapps/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

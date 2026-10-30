@@ -1,0 +1,37 @@
+# Mutation runs (#1320): each applies ONE deliberate break to a fresh checkout and runs the test that must catch it.
+# A RED run is the expected result (the guard works); a green run means the guard is blind. Manual only.
+name: mutation
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad'
+        required: true
+permissions:
+  contents: read
+jobs:
+  mutate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - name: Apply mutation ${{ inputs.name }}
+        run: |
+          case "${{ inputs.name }}" in
+            trailing-slash) sed -i "/export const trailingSlash/d" sites/cloudy-webapps/src/routes/+layout.ts ;;
+            plan-island)    sed -i 's/const roomy = Math.max(classic, maxWidth - t.fitSideMargin \* 2);/const roomy = classic;/' packages/cloudy-ui/src/shell/planIsland.ts ;;
+            page-route)     node -e 'const f="packages/cloudy-ui/nav/routes.json",fs=require("fs"),j=JSON.parse(fs.readFileSync(f));j.routes=j.routes.filter(r=>r.path!=="cloud-calc/calculator/graph/");fs.writeFileSync(f,JSON.stringify(j,null,2)+"\n")' ;;
+            calc-keypad)    sed -i 's/case .\*.: return a \* b;/case "*": return a + b;/' sites/cloudy-webapps/src/apps/cloud-calc/engine.ts ;;
+            island-width)   echo "MUTATION=island-width" >> "$GITHUB_ENV" ;;
+            *) echo "unknown mutation"; exit 2 ;;
+          esac
+          git diff --stat
+      - name: Unit
+        run: npx vitest run
+      - name: Build + route check
+        run: npm run build && node scripts/test-routes.mjs
+      - name: E2E (visual)
+        run: npx playwright install --with-deps chromium && npx playwright test -c tests/playwright.config.ts

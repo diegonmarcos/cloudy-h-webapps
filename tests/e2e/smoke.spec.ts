@@ -6,7 +6,7 @@ import { shot } from './shot';
 test('cloudy-webapps home loads under /cloud-webapps/', async ({ page }, info) => {
   const r = await page.goto('/cloud-webapps/');
   expect(r?.status()).toBe(200);
-  await expect(page.locator('[data-site="cloudy-webapps"]')).toBeVisible();
+  await expect(page.getByTestId('home-cube')).toBeVisible();
   await shot(page, info, 'webapps-home');
 });
 

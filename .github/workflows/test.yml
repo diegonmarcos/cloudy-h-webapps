@@ -44,11 +44,14 @@ jobs:
           node scripts/gen-icons.mjs --check
       - name: Install (npm ci when the lockfile exists)
         run: |
-          if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+          # npm ci when the lockfile matches package.json; a dependency change refreshes the lockfile (committed back on main)
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
       - name: Unit (Vitest)
         run: npx vitest run
       - name: Build both sites
         run: npm run build
+      - name: Every routes.json path prerendered (trailing slash)
+        run: node scripts/test-routes.mjs
       - name: Budgets
         run: node scripts/budget.mjs
       - name: Playwright + Chromium
@@ -70,7 +73,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add sites/cloudy-webapps/dist sites/cloudy-c3/dist package-lock.json
+          git add sites/cloudy-webapps/dist sites/cloudy-c3/dist package-lock.json tests/visual/__screenshots__
           if git diff --cached --quiet; then echo "dists current"; exit 0; fi
           git diff --cached --stat | tail -3
           git config user.name "github-actions[bot]"

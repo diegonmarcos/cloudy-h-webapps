@@ -64,6 +64,22 @@ function drawable(name) {
   if (solid) out.solid = col(solid);
   const sw = a('stroke', 'width');
   if (sw) out.stroke = { width: parseFloat(sw), color: col(a('stroke', 'color')) };
+  // layer-list: every full-bleed <item> paints a layer (CSS lists the TOP layer first); an inset item is an edge band.
+  if (/<layer-list\b/.test(xml)) {
+    const layers = [];
+    for (const m of xml.matchAll(/<item\b([^>]*)>([\s\S]*?)<\/item>/g)) {
+      const [, itemAttrs, body] = m;
+      const b = (tag, at) => (new RegExp(`<${tag}\\b[^>]*android:${at}="([^"]*)"`).exec(body) ?? [])[1];
+      const inset = /android:(left|right|top|bottom)="([\d.]+)dp"/.exec(itemAttrs);
+      let paint = null;
+      if (/<gradient\b/.test(body)) paint = `linear-gradient(${cssAngle(b('gradient', 'angle') ?? 0)}deg, ${['startColor', 'centerColor', 'endColor'].map((k) => col(b('gradient', k))).filter(Boolean).join(', ')})`;
+      else if (b('solid', 'color')) paint = col(b('solid', 'color'));
+      if (!paint) continue;
+      if (inset) out.edge = { side: inset[1], inset: parseFloat(inset[2]), color: paint };
+      else layers.push(paint.startsWith('linear') ? paint : `linear-gradient(${paint}, ${paint})`);
+    }
+    if (layers.length) out.layers = layers.reverse().join(', ');
+  }
   return out;
 }
 
@@ -201,6 +217,8 @@ for (const n of ['bg_tile_glass', 'bg_liquid_glass', 'bg_liquid_glass_pill', 'bg
   if (d.gradient) put(`${k}.gradient`, 'gradient', d.gradient, d.rel);
   if (d.solid) put(`${k}.fill`, 'color', d.solid, d.rel);
   if (d.stroke) { put(`${k}.stroke_width`, 'dimension', d.stroke.width, d.rel); put(`${k}.stroke`, 'color', d.stroke.color, d.rel); }
+  if (d.layers) put(`${k}.layers`, 'gradient', d.layers, d.rel);
+  if (d.edge) { put(`${k}.edge`, 'color', d.edge.color, d.rel); put(`${k}.edge_inset_${d.edge.side}`, 'dimension', d.edge.inset, d.rel); }
 }
 
 // ── type: kitTypography() = Material 3 Typography() roles with lineHeight / letterSpacing unset ───────
@@ -217,7 +235,7 @@ for (const n of ['bg_tile_glass', 'bg_liquid_glass', 'bg_liquid_glass_pill', 'bg
     put(`type.${role}.weight`, 'number', weight, `${rel}#kitTypography().${role} (M3 TypeScaleTokens)`);
   }
   put('type.family.sans', 'string', 'Roboto, system-ui, -apple-system, "Segoe UI", sans-serif', `${rel}#kitTypography (FontFamily.Default = Roboto on Android)`);
-  put('type.family.mono', 'string', '"Roboto Mono", ui-monospace, "DejaVu Sans Mono", monospace', `${RES}/values/themes.xml#Theme.Superapp.Terminal (monospace)`);
+  put('type.family.mono', 'string', '"Noto Sans Mono", "Droid Sans Mono", ui-monospace, monospace', `${RES}/values/themes.xml#Theme.Superapp.Terminal (monospace)`);
 }
 
 // ── motion ──────────────────────────────────────────────────────────────────────────────────────

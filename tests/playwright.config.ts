@@ -8,7 +8,11 @@ export default defineConfig({
   timeout: 30_000,
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { outputFolder: './results/report', open: 'never' }]],
-  use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'retain-on-failure' },
+  // Visual baselines (tests/visual/__screenshots__/<project>/): CI writes a missing one and commits it back (test.yml).
+  snapshotPathTemplate: '{testDir}/../visual/__screenshots__/{projectName}/{arg}{ext}',
+  updateSnapshots: process.env.CI ? 'missing' : 'none',
+  expect: { toHaveScreenshot: { animations: 'disabled', caret: 'hide' } },
+  use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'retain-on-failure', reducedMotion: 'reduce', timezoneId: 'UTC', locale: 'en-US' },
   webServer: { command: `node tests/serve.mjs`, cwd: '..', port: PORT, reuseExistingServer: false, env: { PORT: String(PORT) } },
   projects: [
     { name: 'phone', use: { ...devices['Pixel 7'], viewport: { width: 412, height: 915 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true } },
