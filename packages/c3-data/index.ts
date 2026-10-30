@@ -1,12 +1,9 @@
-// Build-time access to the C3 snapshot (packages/c3-data/data/*.json). Server code only: a page gets the slice it renders.
-import { readFileSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const DIR = join(dirname(fileURLToPath(import.meta.url)), 'data');
-const cache = new Map<string, unknown>();
+// Build-time access to the C3 snapshot (packages/c3-data/data/*.json), bundled by Vite (import.meta.glob), so it works in
+// the prerender's server bundle. Server code only: a page gets the slice it renders, never the files.
+const FILES = import.meta.glob('./data/*.json', { eager: true, import: 'default' }) as Record<string, unknown>;
 export function dataset<T = unknown>(name: string): T {
-  if (!cache.has(name)) cache.set(name, JSON.parse(readFileSync(join(DIR, `${name}.json`), 'utf8')));
-  return cache.get(name) as T;
+  const v = FILES[`./data/${name}.json`];
+  if (v === undefined) throw new Error(`no C3 dataset ${name}`);
+  return v as T;
 }
-export const DATASETS = readdirSync(DIR).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).sort();
+export const DATASETS = Object.keys(FILES).map((f) => f.slice(7, -5)).sort();
