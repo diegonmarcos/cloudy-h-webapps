@@ -5793,56 +5793,56 @@
       "section": "about"
     },
     {
-      "path": "capital-finterm/",
+      "path": "capital-stack-finterminal/",
       "kind": "app",
-      "app": "capital-finterm"
+      "app": "capital-stack-finterminal"
     },
     {
-      "path": "capital-finterm/fi/",
+      "path": "capital-stack-finterminal/fi/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "fi"
     },
     {
-      "path": "capital-finterm/eq/",
+      "path": "capital-stack-finterminal/eq/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "eq"
     },
     {
-      "path": "capital-finterm/ex/",
+      "path": "capital-stack-finterminal/ex/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "ex"
     },
     {
-      "path": "capital-finterm/nw/",
+      "path": "capital-stack-finterminal/nw/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "nw"
     },
     {
-      "path": "capital-finterm/pm/",
+      "path": "capital-stack-finterminal/pm/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "pm"
     },
     {
-      "path": "capital-finterm/my-pm/",
+      "path": "capital-stack-finterminal/my-pm/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "my-pm"
     },
     {
-      "path": "capital-finterm/about/",
+      "path": "capital-stack-finterminal/about/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "about"
     },
     {
-      "path": "capital-finterm/config/",
+      "path": "capital-stack-finterminal/config/",
       "kind": "app-section",
-      "app": "capital-finterm",
+      "app": "capital-stack-finterminal",
       "section": "config"
     },
     {

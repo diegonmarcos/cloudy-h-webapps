@@ -73,7 +73,7 @@ describe('Lnktree apps on the web', () => {
   });
 
   it('no hand-typed URL for the container, and none for the apps in the mapping (webapp paths are root-absolute)', () => {
-    for (const m of mapping.filter((x) => ['capital-finterm', 'cg-omniverse', 'hardtech-cad', 'hardtech-sim2real'].includes(x.id as string))) {
+    for (const m of mapping.filter((x) => ['capital-stack-finterminal', 'cg-omniverse', 'hardtech-cad', 'hardtech-sim2real'].includes(x.id as string))) {
       expect(m.url, m.id as string).toBeUndefined();
       expect(m.href, m.id as string).toBeUndefined();
       expect(JSON.stringify(m.path ?? ''), m.id as string).not.toMatch(/https?:/);

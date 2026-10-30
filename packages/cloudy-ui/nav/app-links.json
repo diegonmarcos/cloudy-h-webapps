@@ -207,9 +207,9 @@
       "href": "/cloud-webapps/cg-omniverse/"
     },
     {
-      "id": "capital-finterm",
+      "id": "capital-stack-finterminal",
       "kind": "container",
-      "reason": "Capital-FinTerm: the web version of the terminal = FinceptTerminal (upstream Fincept-Corporation/FinceptTerminal), the fin-api container on oci-apps (cloudy-u-containers user-fin_fin-api), reached over the private mesh only; the private URL is derived from its declaration, never a public host. Every FinTerm tab entry opens this link (the terminal's routes are API topics, no per-tab page, so the deep link is the terminal home = its info route). Not the public fin-terminal/ web app (unpublished, 404)",
+      "reason": "Capital-Stack-FinTerminal: the web version of the terminal = FinceptTerminal (upstream Fincept-Corporation/FinceptTerminal), the fin-api container on oci-apps (cloudy-u-containers user-fin_fin-api), reached over the private mesh only; the private URL is derived from its declaration, never a public host. Every FinTerm tab entry opens this link (the terminal's routes are API topics, no per-tab page, so the deep link is the terminal home = its info route). Not the public fin-terminal/ web app (unpublished, 404)",
       "entries_open_app": true,
       "href": "https://fin-api.mesh.diegonmarcos.com/api/v1/info",
       "service": "fin-api",
