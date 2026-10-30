@@ -201,6 +201,34 @@
       "about": true
     },
     {
+      "id": "cg-omniverse",
+      "kind": "phone-only",
+      "reason": "CG-Omniverse: a phone app (Galaxy opens the CG Galaxy web app); no web service of its own",
+      "href": null,
+      "about": true
+    },
+    {
+      "id": "capital-finterm",
+      "kind": "phone-only",
+      "reason": "Capital-FinTerm: a phone app whose entries open the Fin Terminal, CentralBank, MarketWatch and GDELT News web apps; no web service of its own",
+      "href": null,
+      "about": true
+    },
+    {
+      "id": "hardtech-cad",
+      "kind": "phone-only",
+      "reason": "Hardtech-CAD: a phone app (MCAD and BIM open their repo folders); no web service of its own",
+      "href": null,
+      "about": true
+    },
+    {
+      "id": "hardtech-sim2real",
+      "kind": "phone-only",
+      "reason": "Hardtech-Sim2Real: a phone app, all planned; no web service of its own",
+      "href": null,
+      "about": true
+    },
+    {
       "id": "cloud-superintel",
       "kind": "phone-only",
       "reason": "SI: AI chat over OpenRouter on the phone; no web UI container",

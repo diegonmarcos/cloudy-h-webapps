@@ -5026,14 +5026,22 @@
         },
         {
           "id": "latex_editor",
-          "label": "Editor",
+          "label": "Edit",
           "icon": "edit",
-          "short": "Editor",
+          "short": "Edit",
           "tab": "latex",
           "kind": "latex_editor",
           "options": {
             "approx": 2
           }
+        },
+        {
+          "id": "latex_graph",
+          "label": "Graph",
+          "icon": "chart",
+          "short": "Graph",
+          "tab": "latex",
+          "kind": "latex_graph"
         },
         {
           "id": "unit_length",
@@ -6065,20 +6073,75 @@
           "options": {
             "approx": 1
           },
+          "spec": {
+            "holidays": "datetime/holidays.json"
+          },
           "forms": [
             {
               "id": "between",
               "label": "Days between",
+              "bind": {
+                "from": "from",
+                "to": "to",
+                "end": "inclusive",
+                "weekend": "weekend",
+                "region": "region"
+              },
               "fields": [
                 {
                   "id": "from",
                   "label": "From",
-                  "default": "2026-01-01"
+                  "type": "date",
+                  "default": "2026-01-01",
+                  "range_end": "to",
+                  "calendar_open": true
                 },
                 {
                   "id": "to",
                   "label": "To",
+                  "type": "date",
                   "default": "2026-12-25"
+                },
+                {
+                  "id": "inclusive",
+                  "label": "Count the end date too",
+                  "type": "toggle",
+                  "default": "false"
+                },
+                {
+                  "id": "weekend",
+                  "label": "Weekend",
+                  "type": "choice",
+                  "default": "SAT,SUN",
+                  "options": [
+                    {
+                      "value": "SAT,SUN",
+                      "label": "Sat + Sun"
+                    },
+                    {
+                      "value": "FRI,SAT",
+                      "label": "Fri + Sat"
+                    },
+                    {
+                      "value": "SUN",
+                      "label": "Sun only"
+                    },
+                    {
+                      "value": "SAT",
+                      "label": "Sat only"
+                    },
+                    {
+                      "value": "NONE",
+                      "label": "No weekend"
+                    }
+                  ]
+                },
+                {
+                  "id": "region",
+                  "label": "Holidays (region)",
+                  "type": "choice",
+                  "options_from": "holiday_regions",
+                  "default_from": "locale_country"
                 }
               ],
               "outputs": [
@@ -6089,6 +6152,27 @@
                 {
                   "label": "Weeks",
                   "expr": "days(\"{from}\", \"{to}\") / 7"
+                },
+                {
+                  "label": "Working days",
+                  "calc": "span",
+                  "metric": "working",
+                  "label_off": "Working days (end excluded)",
+                  "label_on": "Working days (end included)"
+                },
+                {
+                  "label": "Weekend days",
+                  "calc": "span",
+                  "metric": "weekend",
+                  "label_off": "Weekend days (end excluded)",
+                  "label_on": "Weekend days (end included)"
+                },
+                {
+                  "label": "Holidays",
+                  "calc": "span",
+                  "metric": "holidays",
+                  "label_off": "Holidays on working weekdays (end excluded)",
+                  "label_on": "Holidays on working weekdays (end included)"
                 }
               ]
             },
@@ -6099,6 +6183,7 @@
                 {
                   "id": "date",
                   "label": "Date",
+                  "type": "date",
                   "default": "2026-10-02"
                 },
                 {
@@ -6111,6 +6196,70 @@
                 {
                   "label": "Date",
                   "expr": "addDays(\"{date}\"; {days})"
+                }
+              ]
+            },
+            {
+              "id": "add_working",
+              "label": "Add working days",
+              "bind": {
+                "date": "date",
+                "count": "days",
+                "weekend": "weekend",
+                "region": "region"
+              },
+              "fields": [
+                {
+                  "id": "date",
+                  "label": "Date",
+                  "type": "date",
+                  "default": "2026-10-02"
+                },
+                {
+                  "id": "days",
+                  "label": "Working days (negative = back)",
+                  "default": "10"
+                },
+                {
+                  "id": "weekend",
+                  "label": "Weekend",
+                  "type": "choice",
+                  "default": "SAT,SUN",
+                  "options": [
+                    {
+                      "value": "SAT,SUN",
+                      "label": "Sat + Sun"
+                    },
+                    {
+                      "value": "FRI,SAT",
+                      "label": "Fri + Sat"
+                    },
+                    {
+                      "value": "SUN",
+                      "label": "Sun only"
+                    },
+                    {
+                      "value": "SAT",
+                      "label": "Sat only"
+                    },
+                    {
+                      "value": "NONE",
+                      "label": "No weekend"
+                    }
+                  ]
+                },
+                {
+                  "id": "region",
+                  "label": "Holidays (region)",
+                  "type": "choice",
+                  "options_from": "holiday_regions",
+                  "default_from": "locale_country"
+                }
+              ],
+              "outputs": [
+                {
+                  "label": "Date",
+                  "calc": "add_working"
                 }
               ]
             },
@@ -7068,6 +7217,260 @@
         "fleet": "c3-webserver",
         "activity": ".MainActivity",
         "fallback_url": "http://localhost:8002"
+      },
+      "general": {
+        "anchors": [
+          {
+            "id": "explorer",
+            "label": "Explorer",
+            "icon": "folder"
+          },
+          {
+            "id": "manage",
+            "label": "Manage",
+            "icon": "storage"
+          },
+          {
+            "id": "agents",
+            "label": "Agents",
+            "icon": "smart_toy"
+          },
+          {
+            "id": "perms",
+            "label": "Perms",
+            "icon": "lock"
+          },
+          {
+            "id": "device",
+            "label": "Device",
+            "icon": "smartphone"
+          }
+        ],
+        "perms": [
+          {
+            "id": "battery_opt",
+            "label": "Battery optimisation exemption",
+            "why": "Background sync: Git auto-sync and Fsync (WorkManager) and the mount keeper foreground service are throttled or killed by Doze and OEM battery managers unless the app is exempt.",
+            "permissions": [
+              "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+            ],
+            "check": "battery_opt",
+            "grant": "settings",
+            "intents": [
+              {
+                "action": "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+                "package_uri": true
+              },
+              {
+                "action": "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS"
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "oem_samsung",
+            "label": "Samsung: Never sleeping apps",
+            "why": "Samsung's own battery manager kills background apps even when Android's exemption is granted (#1256 mounts). Add Cloud Drive to Never sleeping apps, then App info > Battery > Unrestricted. The OS cannot say whether it is done.",
+            "permissions": [],
+            "check": "oem",
+            "oem": "samsung",
+            "grant": "settings",
+            "intents": [
+              {
+                "component": "com.samsung.android.lool/com.samsung.android.sm.ui.battery.BatteryActivity"
+              },
+              {
+                "component": "com.samsung.android.lool/com.samsung.android.sm.battery.ui.BatteryActivity"
+              },
+              {
+                "action": "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS"
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "notifications",
+            "label": "Notifications",
+            "why": "Sync, mount keeper and transfer status (the foreground service notification; Git and rclone results).",
+            "permissions": [
+              "android.permission.POST_NOTIFICATIONS"
+            ],
+            "min_sdk": 33,
+            "check": "permission",
+            "grant": "runtime",
+            "intents": [
+              {
+                "action": "android.settings.APP_NOTIFICATION_SETTINGS",
+                "extra_package": true
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "all_files",
+            "label": "All files access",
+            "why": "Files tab (a real file manager over shared storage), the shared store, Fsync folders and the rclone mounts read and write anywhere. Below Android 11 the legacy storage pair is asked instead.",
+            "permissions": [
+              "android.permission.MANAGE_EXTERNAL_STORAGE",
+              "android.permission.READ_EXTERNAL_STORAGE",
+              "android.permission.WRITE_EXTERNAL_STORAGE"
+            ],
+            "check": "all_files",
+            "grant": "settings",
+            "intents": [
+              {
+                "action": "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION",
+                "package_uri": true
+              },
+              {
+                "action": "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION"
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "termux_run_command",
+            "label": "Run commands in cld.termux",
+            "why": "Git sync store route: git runs inside the terminal app through its RunCommandService when the shared uid is not in effect (Sync > Git).",
+            "permissions": [
+              "{terminalPackage}.permission.RUN_COMMAND"
+            ],
+            "requires_package": "{terminalPackage}",
+            "check": "permission",
+            "grant": "runtime",
+            "intents": [
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "fleet_auth",
+            "label": "Fleet sign-in (browser mission)",
+            "why": "Sign in rides the fleet browser; the signature permission is granted automatically to apps signed with the constellation key.",
+            "permissions": [
+              "{authMissionPermission}"
+            ],
+            "check": "permission",
+            "grant": "none",
+            "intents": []
+          },
+          {
+            "id": "install_unknown",
+            "label": "Install unknown apps",
+            "why": "Updating and installing fleet APKs (Apps tab and Store route) goes through the system installer; Android asks per app.",
+            "permissions": [
+              "android.permission.REQUEST_INSTALL_PACKAGES",
+              "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"
+            ],
+            "check": "install_unknown",
+            "grant": "settings",
+            "intents": [
+              {
+                "action": "android.settings.MANAGE_UNKNOWN_APP_SOURCES",
+                "package_uri": true
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "usage_access",
+            "label": "Usage access",
+            "why": "Manage > Apps ranks every installed app by size and running state (StorageStatsManager).",
+            "permissions": [
+              "android.permission.PACKAGE_USAGE_STATS"
+            ],
+            "check": "appop",
+            "appop": "android:get_usage_stats",
+            "grant": "settings",
+            "intents": [
+              {
+                "action": "android.settings.USAGE_ACCESS_SETTINGS",
+                "package_uri": true
+              },
+              {
+                "action": "android.settings.USAGE_ACCESS_SETTINGS"
+              },
+              {
+                "action": "android.settings.APPLICATION_DETAILS_SETTINGS",
+                "package_uri": true
+              }
+            ]
+          },
+          {
+            "id": "query_all",
+            "label": "See all installed apps",
+            "why": "Manage > Apps and the Home app grid list every installed app. Granted at install.",
+            "permissions": [
+              "android.permission.QUERY_ALL_PACKAGES"
+            ],
+            "check": "permission",
+            "grant": "none",
+            "intents": []
+          },
+          {
+            "id": "fgs",
+            "label": "Foreground service (specialUse)",
+            "why": "The mount keeper keeps rclone and sshfs mounts alive past the UI as a foreground service of type specialUse. Info: declared in the manifest, nothing to grant.",
+            "permissions": [
+              "android.permission.FOREGROUND_SERVICE",
+              "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+            ],
+            "check": "declared",
+            "grant": "none",
+            "intents": []
+          },
+          {
+            "id": "boot",
+            "label": "Start after reboot",
+            "why": "Mounts are restored after a reboot and after an update. Granted at install.",
+            "permissions": [
+              "android.permission.RECEIVE_BOOT_COMPLETED"
+            ],
+            "check": "permission",
+            "grant": "none",
+            "intents": []
+          },
+          {
+            "id": "wake_lock",
+            "label": "Keep the CPU awake during transfers",
+            "why": "A partial wake lock is held only while a transfer or sync runs. Granted at install.",
+            "permissions": [
+              "android.permission.WAKE_LOCK"
+            ],
+            "check": "permission",
+            "grant": "none",
+            "intents": []
+          },
+          {
+            "id": "network",
+            "label": "Network and network state",
+            "why": "Git, rclone, sign-in and the unmetered-only sync condition (WorkManager) need the network and to read its state. Granted at install.",
+            "permissions": [
+              "android.permission.INTERNET",
+              "android.permission.ACCESS_NETWORK_STATE"
+            ],
+            "check": "permission",
+            "grant": "none",
+            "intents": []
+          }
+        ]
       },
       "files": {
         "sections": [
@@ -8751,6 +9154,233 @@
             }
           ]
         }
+      }
+    },
+    "cg-omniverse": {
+      "stacks": {
+        "galaxy": [
+          {
+            "title": "Galaxy",
+            "subtitle": "CG Galaxy: the 3D galaxy worlds web app",
+            "registry": "2.1.1"
+          }
+        ],
+        "game-store": [
+          {
+            "title": "Game Store",
+            "subtitle": "Games in one place",
+            "planned": true,
+            "note": "Planned: no game store yet"
+          }
+        ],
+        "vr-store": [
+          {
+            "title": "VR Store",
+            "subtitle": "VR experiences in one place",
+            "planned": true,
+            "note": "Planned: no VR store yet"
+          }
+        ],
+        "about": [
+          {
+            "kind": "about"
+          }
+        ]
+      }
+    },
+    "capital-finterm": {
+      "stacks": {
+        "fi": [
+          {
+            "title": "Yield Curves",
+            "subtitle": "Spot, forward and zero curves, US and major sovereigns",
+            "site": "Fin Terminal"
+          },
+          {
+            "title": "Forward Rates",
+            "subtitle": "Forward rate curves and the paths they imply",
+            "site": "Fin Terminal"
+          },
+          {
+            "title": "World Interest Rate Probabilities",
+            "subtitle": "Market-implied central bank rate paths",
+            "site": "CentralBank"
+          },
+          {
+            "title": "World Bonds",
+            "subtitle": "Sovereign bond yields and spreads by country",
+            "site": "Fin Terminal"
+          }
+        ],
+        "eq": [
+          {
+            "title": "World Equity Indices",
+            "subtitle": "Major equity index levels and moves worldwide",
+            "site": "MarketWatch"
+          }
+        ],
+        "ex": [
+          {
+            "title": "FX",
+            "subtitle": "Comprehensive real-time currency pricing, matrix crosses, spot rates, and forwards",
+            "site": "Fin Terminal"
+          },
+          {
+            "title": "Onshore USD Rates",
+            "subtitle": "Onshore USD rate benchmarks and curves",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "nw": [
+          {
+            "title": "News",
+            "subtitle": "Global news from the GDELT feed",
+            "site": "GDELT News"
+          }
+        ],
+        "pm": [
+          {
+            "title": "Portfolio & Risk Analytics",
+            "subtitle": "Comprehensive portfolio tracking, attribution analysis, factor exposures and scenario stress testing for well-known portfolios",
+            "planned": true,
+            "note": "Planned: analytics coming"
+          },
+          {
+            "kind": "section_title",
+            "title": "Model portfolios: bonds / equity"
+          },
+          {
+            "title": "40/60",
+            "subtitle": "40% bonds, 60% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "70/30",
+            "subtitle": "70% bonds, 30% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "60/40",
+            "subtitle": "60% bonds, 40% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "30/70",
+            "subtitle": "30% bonds, 70% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "section_title",
+            "title": "Model portfolios: DM / EM"
+          },
+          {
+            "title": "70/30 DM/EM",
+            "subtitle": "70% Developed Markets, 30% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "60/40 DM/EM",
+            "subtitle": "60% Developed Markets, 40% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "40/60 DM/EM",
+            "subtitle": "40% Developed Markets, 60% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "title": "30/70 DM/EM",
+            "subtitle": "30% Developed Markets, 70% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "my-pm": [
+          {
+            "kind": "holdings",
+            "title": "Personal portfolio",
+            "subtitle": "Your holdings: ticker, quantity, cost, kept on this phone"
+          }
+        ],
+        "about": [
+          {
+            "kind": "about"
+          }
+        ]
+      }
+    },
+    "hardtech-cad": {
+      "stacks": {
+        "mcad": [
+          {
+            "title": "MCAD",
+            "subtitle": "Mechanical CAD: FreeCAD and AutoCAD agents (MCP)",
+            "repo": "HardTech-Stack-CAD-Simulators",
+            "path": "Structural-Designer/OpenCAD"
+          }
+        ],
+        "bim": [
+          {
+            "title": "BIM",
+            "subtitle": "Building information models: IFC and Bonsai agents (MCP)",
+            "repo": "HardTech-Stack-CAD-Simulators",
+            "path": "Structural-Designer/OpenBIM"
+          }
+        ],
+        "solidworks": [
+          {
+            "title": "SolidWorks",
+            "subtitle": "SolidWorks parametric CAD",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "about": [
+          {
+            "kind": "about"
+          }
+        ]
+      }
+    },
+    "hardtech-sim2real": {
+      "stacks": {
+        "sap2000": [
+          {
+            "title": "SAP2000",
+            "subtitle": "Structural analysis",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "matlab": [
+          {
+            "title": "MATLAB",
+            "subtitle": "Numerical computing and simulation",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "ansys": [
+          {
+            "title": "Ansys",
+            "subtitle": "Finite element simulation",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "about": [
+          {
+            "kind": "about"
+          }
+        ]
       }
     }
   }

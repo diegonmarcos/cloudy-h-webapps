@@ -1212,27 +1212,6 @@
             "icon": "ic_solutions",
             "hidden": true,
             "placeholder": true
-          },
-          {
-            "id": "omniverse",
-            "label": "Omniverse",
-            "icon": "ic_world",
-            "facet": true,
-            "hidden": true
-          },
-          {
-            "id": "cad",
-            "label": "CAD",
-            "icon": "ic_p_c3_stack",
-            "facet": true,
-            "hidden": true
-          },
-          {
-            "id": "sim2real",
-            "label": "Sim2Real",
-            "icon": "ic_robot",
-            "facet": true,
-            "hidden": true
           }
         ],
         "tiles_labs": [
@@ -1591,7 +1570,7 @@
                 "id": "omniverse",
                 "label": "Omniverse",
                 "icon": "ic_p_sol_other",
-                "target": "page:cloud/omniverse"
+                "target": "extapp:cg-omniverse"
               },
               {
                 "id": "lnktree-sep-1",
@@ -1602,7 +1581,7 @@
                 "id": "finterm",
                 "label": "FinTerm",
                 "icon": "ic_p_markets_terminal",
-                "target": "section:finterm"
+                "target": "extapp:capital-finterm"
               },
               {
                 "id": "lnktree-sep-2",
@@ -1613,13 +1592,13 @@
                 "id": "cad",
                 "label": "CAD",
                 "icon": "ic_p_sol_pro",
-                "target": "page:cloud/cad"
+                "target": "extapp:hardtech-cad"
               },
               {
                 "id": "sim2real",
                 "label": "Sim2Real",
                 "icon": "ic_p_sol_tools",
-                "target": "page:cloud/sim2real"
+                "target": "extapp:hardtech-sim2real"
               }
             ]
           },
@@ -1715,72 +1694,6 @@
             "kind": "link_grid",
             "title": "Circus",
             "subtitle": "Misc experiments and side quests"
-          }
-        ],
-        "stack_omniverse": [
-          {
-            "kind": "entry",
-            "title": "Galaxy",
-            "subtitle": "CG Galaxy: the 3D galaxy worlds web app",
-            "url": "https://diegonmarcos.github.io/galaxy/"
-          },
-          {
-            "kind": "entry",
-            "title": "Game Store",
-            "subtitle": "Games in one place",
-            "planned": true,
-            "note": "Planned: no game store yet"
-          },
-          {
-            "kind": "entry",
-            "title": "VR Store",
-            "subtitle": "VR experiences in one place",
-            "planned": true,
-            "note": "Planned: no VR store yet"
-          }
-        ],
-        "stack_cad": [
-          {
-            "kind": "entry",
-            "title": "MCAD",
-            "subtitle": "Mechanical CAD: FreeCAD and AutoCAD agents (MCP)",
-            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenCAD"
-          },
-          {
-            "kind": "entry",
-            "title": "BIM",
-            "subtitle": "Building information models: IFC and Bonsai agents (MCP)",
-            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenBIM"
-          },
-          {
-            "kind": "entry",
-            "title": "SolWrk",
-            "subtitle": "SolidWorks",
-            "planned": true,
-            "note": "Planned: coming"
-          }
-        ],
-        "stack_sim2real": [
-          {
-            "kind": "entry",
-            "title": "SAP2000",
-            "subtitle": "Structural analysis",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "MATLAB",
-            "subtitle": "Numerical computing and simulation",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "Ansys",
-            "subtitle": "Finite-element and multiphysics simulation",
-            "planned": true,
-            "note": "Planned: coming"
           }
         ]
       },
@@ -3103,192 +3016,6 @@
                 "target": "page:c3/vms"
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "finterm",
-        "label": "FinTerm",
-        "parent": "cloud",
-        "icon": "ic_fin",
-        "module": null,
-        "supports_accounts": false,
-        "tabs": true,
-        "pages": [
-          {
-            "id": "fi",
-            "label": "FI",
-            "icon": "ic_p_accounts",
-            "facet": true
-          },
-          {
-            "id": "eq",
-            "label": "EQ",
-            "icon": "ic_p_c3_workflows",
-            "facet": true
-          },
-          {
-            "id": "ex",
-            "label": "EX",
-            "icon": "ic_wg",
-            "facet": true
-          },
-          {
-            "id": "nw",
-            "label": "NW",
-            "icon": "ic_rss",
-            "facet": true
-          },
-          {
-            "id": "pm",
-            "label": "PM",
-            "icon": "ic_p_folder",
-            "facet": true
-          },
-          {
-            "id": "my-portfolio",
-            "label": "MY-PM",
-            "icon": "ic_wallet",
-            "facet": true
-          }
-        ],
-        "stack_fi": [
-          {
-            "kind": "entry",
-            "title": "Yield Curves",
-            "subtitle": "Spot, forward and zero curves, US and major sovereigns",
-            "url": "https://diegonmarcos.github.io/fin-terminal"
-          },
-          {
-            "kind": "entry",
-            "title": "Forward Rates",
-            "subtitle": "Forward rate curves and the paths they imply",
-            "url": "https://diegonmarcos.github.io/fin-terminal"
-          },
-          {
-            "kind": "entry",
-            "title": "World Interest Rate Probabilities",
-            "subtitle": "Market-implied central bank rate paths",
-            "url": "https://diegonmarcos.github.io/central_bank"
-          },
-          {
-            "kind": "entry",
-            "title": "World Bonds",
-            "subtitle": "Sovereign bond yields and spreads by country",
-            "url": "https://diegonmarcos.github.io/fin-terminal"
-          }
-        ],
-        "stack_eq": [
-          {
-            "kind": "entry",
-            "title": "World Equity Indices",
-            "subtitle": "Major equity index levels and moves worldwide",
-            "url": "https://diegonmarcos.github.io/market_watch"
-          }
-        ],
-        "stack_ex": [
-          {
-            "kind": "entry",
-            "title": "FX",
-            "subtitle": "Comprehensive real-time currency pricing, matrix crosses, spot rates, and forwards",
-            "url": "https://diegonmarcos.github.io/fin-terminal"
-          },
-          {
-            "kind": "entry",
-            "title": "Onshore USD Rates",
-            "subtitle": "Onshore USD rate benchmarks and curves",
-            "planned": true,
-            "note": "Planned: coming"
-          }
-        ],
-        "stack_nw": [
-          {
-            "kind": "entry",
-            "title": "News",
-            "subtitle": "Global news from the GDELT feed",
-            "url": "https://news.diegonmarcos.com"
-          }
-        ],
-        "stack_pm": [
-          {
-            "kind": "entry",
-            "title": "Portfolio & Risk Analytics",
-            "subtitle": "Portfolio tracking, attribution analysis, factor exposures and scenario stress testing for well-known portfolios",
-            "planned": true,
-            "note": "Planned: analytics coming"
-          },
-          {
-            "kind": "section_title",
-            "title": "Model portfolios: bonds / equity"
-          },
-          {
-            "kind": "entry",
-            "title": "40/60",
-            "subtitle": "40% bonds, 60% equity",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "70/30",
-            "subtitle": "70% bonds, 30% equity",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "60/40",
-            "subtitle": "60% bonds, 40% equity",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "30/70",
-            "subtitle": "30% bonds, 70% equity",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "section_title",
-            "title": "Model portfolios: DM / EM"
-          },
-          {
-            "kind": "entry",
-            "title": "70/30 DM/EM",
-            "subtitle": "70% Developed Markets, 30% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "60/40 DM/EM",
-            "subtitle": "60% Developed Markets, 40% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "40/60 DM/EM",
-            "subtitle": "40% Developed Markets, 60% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
-          },
-          {
-            "kind": "entry",
-            "title": "30/70 DM/EM",
-            "subtitle": "30% Developed Markets, 70% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
-          }
-        ],
-        "stack_my-portfolio": [
-          {
-            "kind": "entry",
-            "title": "Personal portfolio",
-            "subtitle": "Your holdings: ticker, quantity, cost, kept on this phone",
-            "planned": true,
-            "note": "Planned: needs an editable list, coming"
           }
         ]
       },
@@ -5107,6 +4834,30 @@
         "folder": "prod_storage",
         "hub_package": "com.diegonmarcos.clouddrive",
         "install_package": "com.diegonmarcos.clouddrive"
+      },
+      {
+        "id": "cg-omniverse",
+        "folder": "prod_utils",
+        "hub_package": "com.diegonmarcos.cgomniverse",
+        "install_package": "com.diegonmarcos.cgomniverse"
+      },
+      {
+        "id": "capital-finterm",
+        "folder": "prod_utils",
+        "hub_package": "com.diegonmarcos.capitalfinterm",
+        "install_package": "com.diegonmarcos.capitalfinterm"
+      },
+      {
+        "id": "hardtech-cad",
+        "folder": "prod_utils",
+        "hub_package": "com.diegonmarcos.hardtechcad",
+        "install_package": "com.diegonmarcos.hardtechcad"
+      },
+      {
+        "id": "hardtech-sim2real",
+        "folder": "prod_utils",
+        "hub_package": "com.diegonmarcos.hardtechsim2real",
+        "install_package": "com.diegonmarcos.hardtechsim2real"
       }
     ]
   },
@@ -9026,6 +8777,211 @@
               "icon": "dns"
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "cg-omniverse",
+      "dir": "ad_CG-Omniverse",
+      "package": "com.diegonmarcos.cgomniverse",
+      "name": "CG-Omniverse",
+      "label": "Omniverse",
+      "icon": "ic_p_sol_other",
+      "group": "Lnktree",
+      "category": "android",
+      "description": "CG-Omniverse: the CG area's Android app behind the SuperApp's Cloud > Lnktree row. Three pages on the shared bottom nav: Galaxy (opens the CG Galaxy web app, read from the registry), Game Store and VR Store (planned, greyed). The pages are declared in build.json::ui and drawn by declared kinds; the address of Galaxy is read at build time from the SuperApp's own declarations, none is typed here.",
+      "kind": "app",
+      "wasm": null,
+      "default_section": "galaxy",
+      "bottom_nav": [
+        "galaxy",
+        "game-store",
+        "vr-store"
+      ],
+      "top_bar": null,
+      "sections": [
+        {
+          "id": "galaxy",
+          "label": "Galaxy",
+          "icon": "public",
+          "pages": []
+        },
+        {
+          "id": "game-store",
+          "label": "Game Store",
+          "icon": "play_circle",
+          "pages": []
+        },
+        {
+          "id": "vr-store",
+          "label": "VR Store",
+          "icon": "devices",
+          "pages": []
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "icon": "info",
+          "pages": []
+        }
+      ]
+    },
+    {
+      "id": "capital-finterm",
+      "dir": "ad_Capital-FinTerm",
+      "package": "com.diegonmarcos.capitalfinterm",
+      "name": "Capital-FinTerm",
+      "label": "FinTerm",
+      "icon": "ic_p_markets_terminal",
+      "group": "Lnktree",
+      "category": "android",
+      "description": "Capital-FinTerm: the Capital area's capital-markets terminal as an Android app behind the SuperApp's Cloud > Lnktree row. Six tabs on the shared bottom nav, FI | EQ | EX | NW | PM | MY-PM: fixed income, equity, FX, news, portfolio and risk, and a personal portfolio (a simple local holdings list, nothing fetched or priced). Entries open the Capital-Stack-Fin-Terminal web apps and the GDELT news page through addresses read at build time from the SuperApp's declarations, or are planned and greyed; no price, rate or chart is drawn that is not real.",
+      "kind": "app",
+      "wasm": null,
+      "default_section": "fi",
+      "bottom_nav": [
+        "fi",
+        "eq",
+        "ex",
+        "nw",
+        "pm",
+        "my-pm"
+      ],
+      "top_bar": null,
+      "sections": [
+        {
+          "id": "fi",
+          "label": "FI",
+          "icon": "account_balance",
+          "pages": []
+        },
+        {
+          "id": "eq",
+          "label": "EQ",
+          "icon": "trending_up",
+          "pages": []
+        },
+        {
+          "id": "ex",
+          "label": "EX",
+          "icon": "payments",
+          "pages": []
+        },
+        {
+          "id": "nw",
+          "label": "NW",
+          "icon": "rss_feed",
+          "pages": []
+        },
+        {
+          "id": "pm",
+          "label": "PM",
+          "icon": "pie_chart",
+          "pages": []
+        },
+        {
+          "id": "my-pm",
+          "label": "MY-PM",
+          "icon": "wallet",
+          "pages": []
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "icon": "info",
+          "pages": []
+        }
+      ]
+    },
+    {
+      "id": "hardtech-cad",
+      "dir": "ad_Hardtech-CAD",
+      "package": "com.diegonmarcos.hardtechcad",
+      "name": "Hardtech-CAD",
+      "label": "CAD",
+      "icon": "ic_p_sol_pro",
+      "group": "Lnktree",
+      "category": "android",
+      "description": "Hardtech-CAD: the HardTech area's CAD app behind the SuperApp's Cloud > Lnktree row. Three pages on the shared bottom nav: MCAD and BIM (their folders of the HardTech-Stack-CAD-Simulators repo, the address read at build time from the SuperApp's declarations) and SolidWorks (planned, greyed).",
+      "kind": "app",
+      "wasm": null,
+      "default_section": "mcad",
+      "bottom_nav": [
+        "mcad",
+        "bim",
+        "solidworks"
+      ],
+      "top_bar": null,
+      "sections": [
+        {
+          "id": "mcad",
+          "label": "MCAD",
+          "icon": "build",
+          "pages": []
+        },
+        {
+          "id": "bim",
+          "label": "BIM",
+          "icon": "layers",
+          "pages": []
+        },
+        {
+          "id": "solidworks",
+          "label": "SolidWorks",
+          "icon": "inventory_2",
+          "pages": []
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "icon": "info",
+          "pages": []
+        }
+      ]
+    },
+    {
+      "id": "hardtech-sim2real",
+      "dir": "ad_Hardtech-Sim2Real",
+      "package": "com.diegonmarcos.hardtechsim2real",
+      "name": "Hardtech-Sim2Real",
+      "label": "Sim2Real",
+      "icon": "ic_p_sol_tools",
+      "group": "Lnktree",
+      "category": "android",
+      "description": "Hardtech-Sim2Real: the HardTech area's simulation app behind the SuperApp's Cloud > Lnktree row. Three pages on the shared bottom nav, SAP2000, MATLAB and Ansys, all planned and greyed: HardTech-Stack-CAD-Simulators holds no tool for them yet.",
+      "kind": "app",
+      "wasm": null,
+      "default_section": "sap2000",
+      "bottom_nav": [
+        "sap2000",
+        "matlab",
+        "ansys"
+      ],
+      "top_bar": null,
+      "sections": [
+        {
+          "id": "sap2000",
+          "label": "SAP2000",
+          "icon": "assessment",
+          "pages": []
+        },
+        {
+          "id": "matlab",
+          "label": "MATLAB",
+          "icon": "table_chart",
+          "pages": []
+        },
+        {
+          "id": "ansys",
+          "label": "Ansys",
+          "icon": "speed",
+          "pages": []
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "icon": "info",
+          "pages": []
         }
       ]
     }

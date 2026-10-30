@@ -3,7 +3,7 @@
 //
 //   node scripts/gen-navdata.mjs [--android <dir>] [--check]
 //
-// Reads (read-only): aa_cloud-superapp/build.json (ui) + every fleet app ac_<id>/build.json named by ui.external_apps.
+// Reads (read-only): aa_cloud-superapp/build.json (ui) + every fleet app ac_<id>/build.json (or the Lnktree family's ad_* folder, #1335) named by ui.external_apps.
 // Writes packages/cloudy-ui/nav/:
 //   nav.json     : the SuperApp shell declaration (sections, pages, tiles, stacks, menus) + every fleet app (sections/pages)
 //   routes.json  : every URL path both shells prerender (relative to the site base), with what it renders
@@ -16,7 +16,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { need, readRaw, emit, CHECK } from './lib/android-src.mjs';
+import { need, readRaw, emit, listDir, CHECK } from './lib/android-src.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = 'packages/cloudy-ui/nav';
@@ -76,10 +76,15 @@ for (const t of cloudSec?.tiles_labs ?? []) {
   if (m && !tileOf.has(m[1])) tileOf.set(m[1], { label: t.label, icon: t.icon, group: 'Labs' });
 }
 const portals = overlay.portals ?? {};
+// An app's folder: ac_<id> (the Cloud family) or, for the Lnktree family (#1335, 1_cicd/src/data/app-families.json), the ad_* folder whose
+// build.json::name is the id (CG-Omniverse is ad_CG-Omniverse, id cg-omniverse).
+const adDirs = listDir('').filter((d) => d.startsWith('ad_'));
+const dirOf = (id) => readRaw(`ac_${id}/build.json`) ? `ac_${id}`
+  : adDirs.find((d) => { const r = readRaw(`${d}/build.json`); return r && JSON.parse(r).name === id; }) ?? `ac_${id}`;
 const apps = [];
 const appsUi = {};
 for (const e of ui.external_apps ?? []) {
-  const dir = `ac_${e.id}`;
+  const dir = dirOf(e.id);
   const raw = readRaw(`${dir}/build.json`);
   const b = raw ? JSON.parse(raw) : {};
   const aui = b.ui ?? {};

@@ -70,6 +70,9 @@ export const tokens = {
     "data": {
       "tile_group": "Data Apps"
     },
+    "lnktree": {
+      "tile_group": "Lnktree"
+    },
     "tools": {
       "tile_group": "Tools Primary"
     }
@@ -91,6 +94,10 @@ export const tokens = {
       "data": {
         "end": "#4338ca",
         "start": "#0e7490"
+      },
+      "lnktree": {
+        "end": "#1e1b4b",
+        "start": "#0f766e"
       },
       "tools": {
         "end": "#312e81",
@@ -542,4 +549,4 @@ export type Tokens = typeof tokens;
 export const THEME_IDS = ["cloud","cloud_minimalist_black"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const PALETTE_ROLES = ["window","surface","surface_selected","text_primary","text_secondary","accent","hairline","tile_ink"] as const;
-export const TOKEN_COUNT = 388;
+export const TOKEN_COUNT = 391;

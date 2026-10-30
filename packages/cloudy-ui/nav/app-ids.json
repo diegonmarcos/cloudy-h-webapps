@@ -2,6 +2,8 @@
   "c3-morpheus",
   "c3-watchdog",
   "c3-watchtower",
+  "capital-finterm",
+  "cg-omniverse",
   "cloud-account",
   "cloud-browser",
   "cloud-c3",
@@ -34,5 +36,7 @@
   "cloud-tools-small-llms",
   "cloud-vault",
   "cloud-wallet",
-  "cloud-writer"
+  "cloud-writer",
+  "hardtech-cad",
+  "hardtech-sim2real"
 ]

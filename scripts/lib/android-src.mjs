@@ -39,7 +39,7 @@ export function need(rel) {
 /** Directory listing (names) of <rel> in cloudy-u-android. */
 export function listDir(rel) {
   if (LOCAL) return execFileSync('ls', [join(LOCAL, rel)]).toString().split('\n').filter(Boolean);
-  const j = JSON.parse(execFileSync('gh', ['api', '--paginate', `repos/${REPO}/contents/${rel}?ref=main`, '--jq', '[.[].name]'],
+  const j = JSON.parse(execFileSync('gh', ['api', '--paginate', `repos/${REPO}/contents${rel ? `/${rel}` : ''}?ref=main`, '--jq', '[.[].name]'],
     { maxBuffer: 64 * 1024 * 1024 }).toString().replace(/\]\s*\[/g, ','));
   return j;
 }
