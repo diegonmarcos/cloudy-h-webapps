@@ -1212,6 +1212,27 @@
             "icon": "ic_solutions",
             "hidden": true,
             "placeholder": true
+          },
+          {
+            "id": "omniverse",
+            "label": "Omniverse",
+            "icon": "ic_world",
+            "facet": true,
+            "hidden": true
+          },
+          {
+            "id": "cad",
+            "label": "CAD",
+            "icon": "ic_p_c3_stack",
+            "facet": true,
+            "hidden": true
+          },
+          {
+            "id": "sim2real",
+            "label": "Sim2Real",
+            "icon": "ic_robot",
+            "facet": true,
+            "hidden": true
           }
         ],
         "tiles_labs": [
@@ -1564,59 +1585,41 @@
             ]
           },
           {
-            "title": "Projects W",
+            "title": "Lnktree",
             "tiles": [
               {
-                "id": "lf-dp-cloud-apk",
-                "label": "Lf.y-D&P-Cloud-apk",
-                "icon": "ic_p_sol_other",
-                "target": "https://github.com/diegonmarcos/cloudy-u-android"
+                "id": "omniverse",
+                "label": "Omniverse",
+                "icon": "ic_world",
+                "target": "page:cloud/omniverse"
               },
               {
-                "id": "lf-dp-cloud-c3",
-                "label": "Lf.y-D&P-Cloud-C3",
-                "icon": "ic_p_c3_reports",
-                "target": "https://paca.diegonmarcos.com/projects/9d336534-d0d6-4b9d-aebb-cbd59fde4d0d"
-              },
-              {
-                "id": "lf-cg-galaxy",
-                "label": "Lf.y-CG-Galaxy",
-                "icon": "ic_pm_boards",
-                "target": "https://github.com/diegonmarcos/CG-galaxy"
-              },
-              {
-                "id": "lf-cg-zirkus",
-                "label": "Lf.y-CG-Zirkus",
-                "icon": "ic_p_sol_pro",
-                "target": "https://github.com/diegonmarcos/CG-circus"
-              },
-              {
-                "id": "projects-w-sep-1",
+                "id": "lnktree-sep-1",
                 "label": "|",
                 "separator": true
               },
               {
-                "id": "nx-cm-mqpm",
-                "label": "Nx.z-CM-MQPM",
-                "icon": "ic_p_markets_prices",
-                "target": "https://github.com/diegonmarcos/Capital-Macro-Central-Bank"
+                "id": "finterm",
+                "label": "FinTerm",
+                "icon": "ic_fin",
+                "target": "section:finterm"
               },
               {
-                "id": "nx-cm-blmbrg",
-                "label": "Nx.z-CM-Blmbrg",
-                "icon": "ic_p_markets_terminal",
-                "target": "https://github.com/diegonmarcos/Capital-Stack-Fin-Terminal"
-              },
-              {
-                "id": "projects-w-sep-2",
+                "id": "lnktree-sep-2",
                 "label": "|",
                 "separator": true
               },
               {
-                "id": "st-deepsc-x",
-                "label": "St.x-DeepSc-X",
-                "icon": "ic_p_sol_tools",
-                "target": "https://github.com/diegonmarcos/HardTech-DeepXTech"
+                "id": "cad",
+                "label": "CAD",
+                "icon": "ic_p_c3_stack",
+                "target": "page:cloud/cad"
+              },
+              {
+                "id": "sim2real",
+                "label": "Sim2Real",
+                "icon": "ic_robot",
+                "target": "page:cloud/sim2real"
               }
             ]
           },
@@ -1712,6 +1715,72 @@
             "kind": "link_grid",
             "title": "Circus",
             "subtitle": "Misc experiments and side quests"
+          }
+        ],
+        "stack_omniverse": [
+          {
+            "kind": "entry",
+            "title": "Galaxy",
+            "subtitle": "CG Galaxy: the 3D galaxy worlds web app",
+            "url": "https://diegonmarcos.github.io/galaxy/"
+          },
+          {
+            "kind": "entry",
+            "title": "Game Store",
+            "subtitle": "Games in one place",
+            "planned": true,
+            "note": "Planned: no game store yet"
+          },
+          {
+            "kind": "entry",
+            "title": "VR Store",
+            "subtitle": "VR experiences in one place",
+            "planned": true,
+            "note": "Planned: no VR store yet"
+          }
+        ],
+        "stack_cad": [
+          {
+            "kind": "entry",
+            "title": "MCAD",
+            "subtitle": "Mechanical CAD: FreeCAD and AutoCAD agents (MCP)",
+            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenCAD"
+          },
+          {
+            "kind": "entry",
+            "title": "BIM",
+            "subtitle": "Building information models: IFC and Bonsai agents (MCP)",
+            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenBIM"
+          },
+          {
+            "kind": "entry",
+            "title": "SolWrk",
+            "subtitle": "SolidWorks",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "stack_sim2real": [
+          {
+            "kind": "entry",
+            "title": "SAP2000",
+            "subtitle": "Structural analysis",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "MATLAB",
+            "subtitle": "Numerical computing and simulation",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "Ansys",
+            "subtitle": "Finite-element and multiphysics simulation",
+            "planned": true,
+            "note": "Planned: coming"
           }
         ]
       },
@@ -3034,6 +3103,192 @@
                 "target": "page:c3/vms"
               }
             ]
+          }
+        ]
+      },
+      {
+        "id": "finterm",
+        "label": "FinTerm",
+        "parent": "cloud",
+        "icon": "ic_fin",
+        "module": null,
+        "supports_accounts": false,
+        "tabs": true,
+        "pages": [
+          {
+            "id": "fi",
+            "label": "FI",
+            "icon": "ic_p_accounts",
+            "facet": true
+          },
+          {
+            "id": "eq",
+            "label": "EQ",
+            "icon": "ic_p_c3_workflows",
+            "facet": true
+          },
+          {
+            "id": "ex",
+            "label": "EX",
+            "icon": "ic_wg",
+            "facet": true
+          },
+          {
+            "id": "nw",
+            "label": "NW",
+            "icon": "ic_rss",
+            "facet": true
+          },
+          {
+            "id": "pm",
+            "label": "PM",
+            "icon": "ic_p_folder",
+            "facet": true
+          },
+          {
+            "id": "my-portfolio",
+            "label": "MY-PM",
+            "icon": "ic_wallet",
+            "facet": true
+          }
+        ],
+        "stack_fi": [
+          {
+            "kind": "entry",
+            "title": "Yield Curves",
+            "subtitle": "Spot, forward and zero curves, US and major sovereigns",
+            "url": "https://diegonmarcos.github.io/fin-terminal"
+          },
+          {
+            "kind": "entry",
+            "title": "Forward Rates",
+            "subtitle": "Forward rate curves and the paths they imply",
+            "url": "https://diegonmarcos.github.io/fin-terminal"
+          },
+          {
+            "kind": "entry",
+            "title": "World Interest Rate Probabilities",
+            "subtitle": "Market-implied central bank rate paths",
+            "url": "https://diegonmarcos.github.io/central_bank"
+          },
+          {
+            "kind": "entry",
+            "title": "World Bonds",
+            "subtitle": "Sovereign bond yields and spreads by country",
+            "url": "https://diegonmarcos.github.io/fin-terminal"
+          }
+        ],
+        "stack_eq": [
+          {
+            "kind": "entry",
+            "title": "World Equity Indices",
+            "subtitle": "Major equity index levels and moves worldwide",
+            "url": "https://diegonmarcos.github.io/market_watch"
+          }
+        ],
+        "stack_ex": [
+          {
+            "kind": "entry",
+            "title": "FX",
+            "subtitle": "Comprehensive real-time currency pricing, matrix crosses, spot rates, and forwards",
+            "url": "https://diegonmarcos.github.io/fin-terminal"
+          },
+          {
+            "kind": "entry",
+            "title": "Onshore USD Rates",
+            "subtitle": "Onshore USD rate benchmarks and curves",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "stack_nw": [
+          {
+            "kind": "entry",
+            "title": "News",
+            "subtitle": "Global news from the GDELT feed",
+            "url": "https://news.diegonmarcos.com"
+          }
+        ],
+        "stack_pm": [
+          {
+            "kind": "entry",
+            "title": "Portfolio & Risk Analytics",
+            "subtitle": "Portfolio tracking, attribution analysis, factor exposures and scenario stress testing for well-known portfolios",
+            "planned": true,
+            "note": "Planned: analytics coming"
+          },
+          {
+            "kind": "section_title",
+            "title": "Model portfolios: bonds / equity"
+          },
+          {
+            "kind": "entry",
+            "title": "40/60",
+            "subtitle": "40% bonds, 60% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "70/30",
+            "subtitle": "70% bonds, 30% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "60/40",
+            "subtitle": "60% bonds, 40% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "30/70",
+            "subtitle": "30% bonds, 70% equity",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "section_title",
+            "title": "Model portfolios: DM / EM"
+          },
+          {
+            "kind": "entry",
+            "title": "70/30 DM/EM",
+            "subtitle": "70% Developed Markets, 30% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "60/40 DM/EM",
+            "subtitle": "60% Developed Markets, 40% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "40/60 DM/EM",
+            "subtitle": "40% Developed Markets, 60% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          },
+          {
+            "kind": "entry",
+            "title": "30/70 DM/EM",
+            "subtitle": "30% Developed Markets, 70% Emerging Markets",
+            "planned": true,
+            "note": "Planned: coming"
+          }
+        ],
+        "stack_my-portfolio": [
+          {
+            "kind": "entry",
+            "title": "Personal portfolio",
+            "subtitle": "Your holdings: ticker, quantity, cost, kept on this phone",
+            "planned": true,
+            "note": "Planned: needs an editable list, coming"
           }
         ]
       },
@@ -7149,6 +7404,11 @@
               "id": "calc",
               "label": "Calc",
               "icon": "calculate"
+            },
+            {
+              "id": "latex",
+              "label": "LaTeX",
+              "icon": "edit"
             },
             {
               "id": "convert",

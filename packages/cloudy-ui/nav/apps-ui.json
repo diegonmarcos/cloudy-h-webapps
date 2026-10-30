@@ -5017,6 +5017,25 @@
           ]
         },
         {
+          "id": "latex_library",
+          "label": "Library",
+          "icon": "functions",
+          "short": "Library",
+          "tab": "latex",
+          "kind": "latex_library"
+        },
+        {
+          "id": "latex_editor",
+          "label": "Editor",
+          "icon": "edit",
+          "short": "Editor",
+          "tab": "latex",
+          "kind": "latex_editor",
+          "options": {
+            "approx": 2
+          }
+        },
+        {
           "id": "unit_length",
           "label": "Length",
           "icon": "straighten",

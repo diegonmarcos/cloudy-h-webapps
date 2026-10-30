@@ -2,9 +2,9 @@
   // AggregatorStackFragment's collapsible card (stack_<page> entries: kind, title, subtitle): a KitCard with a chevron header;
   // the body is live device or fleet state on Android, so the web draws the declared rows/caption or says where it lives.
   import type { Snippet } from 'svelte';
-  let { title, subtitle = '', open = $bindable(true), href = null, children }: { title: string; subtitle?: string; open?: boolean; href?: string | null; children?: Snippet } = $props();
+  let { title, subtitle = '', open = $bindable(true), href = null, planned = false, children }: { title: string; subtitle?: string; open?: boolean; href?: string | null; planned?: boolean; children?: Snippet } = $props();
 </script>
-<section class="stack-card" data-testid="stack-card">
+<section class="stack-card" class:planned data-testid="stack-card" data-planned={planned || undefined}>
   <button class="head" aria-expanded={open} onclick={() => (open = !open)}>
     <span class="txt"><span class="t">{title}</span>{#if subtitle}<span class="s">{subtitle}</span>{/if}</span>
     <span class="chev" class:open aria-hidden="true">⌄</span>
@@ -13,6 +13,7 @@
 </section>
 <style>
   .stack-card { border-radius: var(--shape-card-radius); background: var(--role-surface); margin: 0 12px 10px; }
+  .stack-card.planned { opacity: 0.45; }
   .head { display: flex; align-items: center; width: 100%; background: none; border: 0; padding: var(--shape-card-padding); color: inherit; text-align: left; cursor: pointer; }
   .txt { flex: 1; display: flex; flex-direction: column; }
   .t { font: 500 var(--type-title-small-size) / normal var(--type-family-sans); color: var(--role-text-primary); }

@@ -105,7 +105,7 @@ function tabsOf(base: string, prefix: string, pages: Page[]): Tab[] {
   }));
 }
 
-export type StackCardData = { title: string; subtitle: string; rows: [string, string][]; caption: string; href: string | null };
+export type StackCardData = { title: string; subtitle: string; rows: [string, string][]; caption: string; href: string | null; planned?: boolean };
 export type ItemRow = { title: string; subtitle: string; meta: string; href: string | null; lead: string };
 export type Body = {
   cube?: boolean;
@@ -127,9 +127,16 @@ function contentPage(sectionId: string, pageId: string): ContentPage | undefined
   return sec?.pages.find((p) => p.id === pageId) ?? corePage?.pages.find((p) => p.id === pageId);
 }
 
-function stackCards(base: string, declared: { kind?: string; title: string; subtitle?: string }[] | undefined, seed: Record<string, unknown>[] | undefined): StackCardData[] {
+function stackCards(base: string, declared: { kind?: string; title: string; subtitle?: string; url?: string; planned?: boolean; note?: string }[] | undefined, seed: Record<string, unknown>[] | undefined): StackCardData[] {
   const out: StackCardData[] = [];
-  for (const c of declared ?? []) {
+  for (const c of (declared ?? []) as { kind?: string; title: string; subtitle?: string; url?: string; planned?: boolean; note?: string }[]) {
+    // kind=entry (Cloud > Lnktree pages, #1331): title, one-line description and the url gen-navdata resolved from the declared
+    // source; an entry with no url is planned: greyed, with its short note, nothing to open.
+    if (c.kind === 'entry') {
+      out.push({ title: c.title, subtitle: c.subtitle ?? '', rows: [], caption: c.url ? '' : (c.note ?? 'Planned'), href: c.url ?? null, planned: !c.url });
+      continue;
+    }
+    if (c.kind === 'section_title') { out.push({ title: c.title, subtitle: '', rows: [], caption: '', href: null }); continue; }
     const s = (seed ?? []).find((x) => x.title === c.title || (c.kind && x.kind === c.kind));
     out.push({ title: c.title, subtitle: c.subtitle ?? (s?.subtitle as string) ?? '', rows: ((s?.rows as unknown[]) ?? []).filter((r): r is [string, string] => Array.isArray(r) && typeof r[0] === 'string').map((r) => [r[0], String(r[1] ?? '')]),
       caption: (s?.caption as string) ?? 'Live on the device: this card reads phone or fleet state a browser cannot reach.', href: href(base, s?.target as string).href });

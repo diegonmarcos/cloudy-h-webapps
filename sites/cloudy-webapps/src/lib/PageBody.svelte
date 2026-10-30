@@ -12,9 +12,9 @@
   {#if body.stack?.length}
     {#if body.tiles || body.groups}<hr class="div" />{/if}
     {#each body.stack as c, ci (ci)}
-      <StackCard title={c.title} subtitle={c.subtitle} href={c.href}>
+      <StackCard title={c.title} subtitle={c.subtitle} href={c.href} planned={c.planned}>
         {#each c.rows as [k, val]}<ListRow label={k}>{#snippet trailing()}<span class="val">{val}</span>{/snippet}</ListRow>{/each}
-        <p class="cap">{c.caption}</p>
+        {#if c.caption}<p class="cap">{c.caption}</p>{/if}
       </StackCard>
     {/each}
   {/if}
