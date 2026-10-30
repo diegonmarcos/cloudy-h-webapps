@@ -12,11 +12,12 @@ describe('Lnktree row', () => {
   const row = sec('cloud').tile_groups.find((g: { title: string }) => g.title === 'Lnktree');
   it('is called Lnktree and holds exactly Omniverse, FinTerm, CAD, Sim2Real', () => {
     expect(sec('cloud').tile_groups.map((g: { title: string }) => g.title)).not.toContain('Projects W');
-    expect(row.tiles.filter((t: { separator?: boolean }) => !t.separator).map((t: { label: string }) => t.label)).toEqual(['Omniverse', 'FinTerm', 'CAD', 'Sim2Real']);
+    // the SuperApp's own tile leads the row (1719aee0d5) and launches the SuperApp itself; the other four are the family
+    expect(row.tiles.filter((t: { separator?: boolean; label: string }) => !t.separator && t.label !== 'SuperApp').map((t: { label: string }) => t.label)).toEqual(['Omniverse', 'FinTerm', 'CAD', 'Sim2Real']);
   });
   it('every tile target is a route the web has (targets.json)', () => {
     const targets = JSON.parse(readFileSync(join(root, 'packages/cloudy-ui/nav/targets.json'), 'utf8')).targets as Record<string, string>;
-    for (const t of row.tiles.filter((x: { separator?: boolean }) => !x.separator)) expect(targets[t.target], t.target).toBeTruthy();
+    for (const t of row.tiles.filter((x: { separator?: boolean; label: string }) => !x.separator && x.label !== 'SuperApp')) expect(targets[t.target], t.target).toBeTruthy();
   });
 });
 
@@ -27,7 +28,7 @@ describe('Lnktree apps (#1335)', () => {
     // the FinTerm app id follows the Android folder (ad_Capital-FinTerm -> ad_Capital-Stack-FinTerminal): matched by its ad_Capital- folder, not by a typed id
     const finterm = apps.find((a) => a.dir?.startsWith('ad_Capital-'))!;
     const want: Record<string, string> = { Omniverse: 'extapp:cg-omniverse', FinTerm: `extapp:${finterm.id}`, CAD: 'extapp:hardtech-cad', Sim2Real: 'extapp:hardtech-sim2real' };
-    for (const t of row.tiles.filter((x: { separator?: boolean }) => !x.separator)) expect(t.target, t.label).toBe(want[t.label]);
+    for (const t of row.tiles.filter((x: { separator?: boolean; label: string }) => !x.separator && x.label !== 'SuperApp')) expect(t.target, t.label).toBe(want[t.label]);
     expect(nav.superapp.sections.map((s) => s.id)).not.toContain('finterm');
     for (const k of ['stack_omniverse', 'stack_cad', 'stack_sim2real']) expect(sec('cloud')[k], k).toBeUndefined();
   });
