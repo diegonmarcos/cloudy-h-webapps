@@ -48,7 +48,7 @@
   });
 </script>
 
-<div class="calc" data-testid="calc-tab-{data.tab}">
+<div class="calc" data-testid="app-body" data-tab={data.tab}>
   {#if data.modes.length > 1}
     <div class="modes" role="tablist" data-testid="calc-modes">
       {#each data.modes as m (m.id)}

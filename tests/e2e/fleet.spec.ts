@@ -26,7 +26,7 @@ for (const a of nav.apps) {
 }
 
 test('cloud-mail: vertical_side_menu = the rail on a phone, the docked menu on a tablet', async ({ page }, info) => {
-  await page.goto(`${BASE}/cloud-mail/`);
+  await page.goto(`${BASE}/cloud-mail/mail/`);
   const menu = page.getByTestId('fleet-side-menu');
   if (nav.apps.find((x) => x.id === 'cloud-mail')!.sections.length) {
     await expect(menu).toBeVisible();
