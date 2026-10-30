@@ -15,7 +15,8 @@ const terminal = links.find((l) => l.id === finId)!;
 test('the Lnktree row: four web app pages (FinTerm is the web terminal, its backend is a separate mesh link)', async ({ page }, info) => {
   await page.goto(`${BASE}/cloud/`);
   const row = page.locator('[data-group="Lnktree"]');
-  await expect(row.locator('[data-tile]')).toHaveCount(4);
+  // the SuperApp's own tile leads the row (Android 1719aee0d5), then the four apps
+  await expect(row.locator('[data-tile]')).toHaveCount(5);
   for (const [tile, id] of [['omniverse', 'cg-omniverse'], ['cad', 'hardtech-cad'], ['sim2real', 'hardtech-sim2real']] as const) {
     const a = row.locator(`[data-tile="${tile}"]`);
     await expect(a).toHaveAttribute('href', links.find((l) => l.id === id)!.href);
