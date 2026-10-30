@@ -213,9 +213,9 @@
       "entries_open_app": true,
       "backend": {
         "label": "Backend (mesh)",
-        "href": "https://fin-api.mesh.diegonmarcos.com/api/v1/info",
-        "service": "fin-api",
-        "dir": "user-fin_fin-api",
+        "href": "https://capital-stack-finterminal-api.mesh.diegonmarcos.com/api/v1/info",
+        "service": "capital-stack-finterminal-api",
+        "dir": "user-fin_capital-stack-finterminal-api",
         "mesh": true,
         "via": "mesh"
       },
