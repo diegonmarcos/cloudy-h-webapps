@@ -70,12 +70,14 @@ export function shellData(base: string): ShellData {
   };
 }
 
+/** NavDecl: a page's label defaults to its id (o.text("label", id)). */
+const labelOf = (p: { id: string; label?: string }) => p.label ?? p.id;
 const visible = (pages: Page[] | undefined) => (pages ?? []).filter((p) => !p.hidden);
 
 function tabsOf(base: string, prefix: string, pages: Page[]): Tab[] {
   return visible(pages).map((p) => ({
     id: p.id,
-    label: p.label,
+    label: labelOf(p),
     href: p.action ? href(base, p.action).href : joinBase(base, `${prefix}${p.id}/`),
     action: !!(p.action || p.is_action),
     separatorBefore: !!p.separator_before,
@@ -204,11 +206,11 @@ export function appView(base: string, path: string): AppView | null {
     kind: 'app',
     app: { id: app.id, name: app.name, label: app.label, icon: app.icon, topBar: app.top_bar },
     sections: order.map((id) => app.sections.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s)
-      .map((s) => ({ id: s.id, label: s.label, icon: s.icon ?? 'tab', href: joinBase(base, `${app.id}/${s.id}/`) })),
+      .map((s) => ({ id: s.id, label: labelOf(s), icon: s.icon ?? 'tab', href: joinBase(base, `${app.id}/${s.id}/`) })),
     section: section?.id ?? null, sectionLabel: section?.label ?? '',
     tabs: section ? tabsOf(base, `${app.id}/${section.id}/`, section.pages ?? []) : [], tabSelected: page?.id ?? null,
     subtabs: page?.pages?.length ? tabsOf(base, `${app.id}/${section!.id}/${page.id}/`, page.pages) : [], subSelected: sub?.id ?? null,
-    title: [sub?.label, page?.label, section?.label, app.label].filter(Boolean).join(' · '), path, portal,
+    title: [sub && labelOf(sub), page && labelOf(page), section && labelOf(section), app.label].filter(Boolean).join(' · '), path, portal,
     listDetail: !!section && (lists[app.id] ?? []).includes(section.id), background: section?.background ?? 'dark',
   };
 }

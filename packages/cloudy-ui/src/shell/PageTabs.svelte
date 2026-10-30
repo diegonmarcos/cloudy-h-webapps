@@ -15,7 +15,7 @@
     const fam = getComputedStyle(document.documentElement).getPropertyValue('--type-family-mono') || 'monospace';
     charW = (px: number) => { if (!c) return px * 0.68; c.font = `700 ${px}px ${fam}`; return c.measureText('M').width + px * (T.tabsLetterSpacingMilli / 1000); };
   });
-  const labels = $derived(tabs.map((t) => t.label.toUpperCase()));
+  const labels = $derived(tabs.map((t) => (t.label ?? t.id).toUpperCase()));
   const firstLaunch = $derived(tabs.findIndex((t) => t.action));
   const dividers = $derived(new Set(tabs.map((t, i) => (i > 0 && (i === firstLaunch || t.separatorBefore) ? i : -1)).filter((i) => i > 0)));
   const plan: PillPlan | null = $derived.by(() => {
