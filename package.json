@@ -1,0 +1,24 @@
+{
+  "name": "cloudy-h-webapps",
+  "private": true,
+  "type": "module",
+  "description": "cloudy-webapps (SuperApp mobile/tablet mimic, base /cloud-webapps) + cloudy-c3 (control centre, base /cloudy-c3) on one @cloudy/ui package (#1320).",
+  "workspaces": ["packages/*", "sites/*"],
+  "scripts": {
+    "build": "npm run build -w sites/cloudy-webapps && npm run build -w sites/cloudy-c3",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test -c tests/playwright.config.ts",
+    "budget": "node scripts/budget.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.47.1",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "svelte": "^5.41.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vitest": "^3.2.4"
+  },
+  "engines": { "node": ">=22" }
+}

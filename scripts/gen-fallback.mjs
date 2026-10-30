@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Generates one fallback site per container/service: <service>/src/index.html (+ identical dist/index.html),
-// next to the per-APK folders, from scripts/fallback-services.json (vendored copy of
+// Generates one fallback site per container/service: services/<service>/src/index.html (+ identical dist/index.html),
+// published at /cloud-webapps/<service>/ (the Pages ship step maps services/<slug>/dist), from scripts/fallback-services.json (vendored copy of
 // cloud-u-containers _shared/fallback-services.json, kept in sync by scripts/sync-fallback-services.mjs; itself generated from every <service>/build.json).
 // Caddy's shared 401/403 handler redirects browsers here: https://diegonmarcos.github.io/cloud-webapps/<service>/.
 // Same nav + design as the app sites. Public facts only: no secrets, no addresses. `--check` fails when stale.
@@ -69,7 +69,7 @@ for (const s of data.services) {
   if (apkDirs.has(s.slug)) { console.error('service slug collides with an app folder:', s.slug); process.exit(1); }
   const html = page(s);
   for (const sub of ['src', 'dist']) {
-    const f = join(root, s.slug, sub, 'index.html');
+    const f = join(root, 'services', s.slug, sub, 'index.html');
     if (check) { if (!existsSync(f) || readFileSync(f, 'utf8') !== html) { console.error('stale or missing', f); bad++; } }
     else { mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); }
   }

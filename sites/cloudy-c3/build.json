@@ -1,0 +1,10 @@
+{
+  "name": "Cloudy C3",
+  "framework": "sveltekit",
+  "src": "src",
+  "dist": "dist",
+  "build": [
+    { "_doc": "SvelteKit adapter-static, base /cloudy-c3. dist/ is committed (built in cloudy-h-webapps CI); the Pages deploy maps it, it does not rebuild.", "mod": "sveltekit" }
+  ],
+  "deploy": {}
+}

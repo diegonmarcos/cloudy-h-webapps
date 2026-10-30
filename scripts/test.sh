@@ -18,12 +18,12 @@ node scripts/gen-fallback.mjs --check
 n=$(node -e 'console.log(require("./scripts/fallback-services.json").services.length)')
 [ "$n" -gt 0 ] || { echo "FAIL no services in fallback-services.json"; exit 1; }
 for slug in $(node -e 'for(const s of require("./scripts/fallback-services.json").services)console.log(s.slug)'); do
-  [ -f "$slug/dist/index.html" ] && cmp -s "$slug/src/index.html" "$slug/dist/index.html" || { echo "FAIL service page $slug"; exit 1; }
-  grep -q 'cwa-nav\|/cloud-webapps/nav.js' "$slug/dist/index.html" || { echo "FAIL $slug lacks the shared nav"; exit 1; }
+  [ -f "services/$slug/dist/index.html" ] && cmp -s "services/$slug/src/index.html" "services/$slug/dist/index.html" || { echo "FAIL service page $slug"; exit 1; }
+  grep -q 'cwa-nav\|/cloud-webapps/nav.js' "services/$slug/dist/index.html" || { echo "FAIL $slug lacks the shared nav"; exit 1; }
   # no secrets or internal addresses
-  if grep -Eq '([0-9]{1,3}\.){3}[0-9]{1,3}|fd0c:|ghp_|github_pat_|sk-[A-Za-z0-9]{10}|BEGIN [A-Z ]*PRIVATE|eyJ[A-Za-z0-9_-]{20}|AKIA[0-9A-Z]{12}' "$slug/dist/index.html"; then echo "FAIL $slug page carries a secret-like or address string"; exit 1; fi
+  if grep -Eq '([0-9]{1,3}\.){3}[0-9]{1,3}|fd0c:|ghp_|github_pat_|sk-[A-Za-z0-9]{10}|BEGIN [A-Z ]*PRIVATE|eyJ[A-Za-z0-9_-]{20}|AKIA[0-9A-Z]{12}' "services/$slug/dist/index.html"; then echo "FAIL $slug page carries a secret-like or address string"; exit 1; fi
   # the return URL is validated against the declared hosts (no open redirect)
-  if grep -q 'data-rd' "$slug/dist/index.html"; then grep -q "H.indexOf(u.hostname)>=0" "$slug/dist/index.html" || { echo "FAIL $slug rd not validated"; exit 1; }; fi
+  if grep -q 'data-rd' "services/$slug/dist/index.html"; then grep -q "H.indexOf(u.hostname)>=0" "services/$slug/dist/index.html" || { echo "FAIL $slug rd not validated"; exit 1; }; fi
 done
 echo "ok: $n service fallback pages"
 # the index lists every service page

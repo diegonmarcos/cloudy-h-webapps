@@ -1,12 +1,74 @@
+# cloudy-h-webapps CI (#1320). Builds run here only (owner rule: no local npm/Gradle).
+#  legacy : scripts/test.sh (service fallback pages, shared nav, redirects) + vendored-data drift
+#  unit   : Vitest (packages/*, scripts/*)
+#  build  : both SvelteKit sites (adapter-static) -> sites/<site>/dist, budgets
+#  e2e    : Playwright phone 412x915 + tablet 1280x800 / 800x1280 against the dists laid out as Pages serves them
+#  dist   : dist is committed code (rule 12). On a push to main the fresh dists (and the lockfile) are committed
+#           back when they differ, then the Pages mirror is bumped.
+# Also runs daily and on repository_dispatch superapp-updated, so an Android-side change fails here even when
+# this repo does not move (the token/nav drift checks land with M1).
 name: test
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '29 5 * * *'
+  repository_dispatch:
+    types: [superapp-updated]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.56.1 (same pin as the Pages repo) does not support 26.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: bash scripts/test.sh
-      # drift guard: the vendored service data must equal cloud-u-containers (the sync workflow repairs drift)
-      - run: node scripts/sync-fallback-services.mjs --check
+        with: { node-version: 22 }
+      - name: Legacy guards (service pages, shared nav, redirects)
+        run: bash scripts/test.sh
+      - name: Vendored service data == cloud-u-containers
+        run: node scripts/sync-fallback-services.mjs --check
+      - name: Install (npm ci when the lockfile exists)
+        run: |
+          if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+      - name: Unit (Vitest)
+        run: npx vitest run
+      - name: Build both sites
+        run: npm run build
+      - name: Budgets
+        run: node scripts/budget.mjs
+      - name: Playwright + Chromium
+        run: npx playwright install --with-deps chromium
+      - name: E2E phone + tablet
+        run: npx playwright test -c tests/playwright.config.ts
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: |
+            tests/results/shots
+            tests/results/report
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Commit fresh dists back (push to main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add sites/cloudy-webapps/dist sites/cloudy-c3/dist package-lock.json
+          if git diff --cached --quiet; then echo "dists current"; exit 0; fi
+          git diff --cached --stat | tail -3
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "auto: rebuild dists from ${GITHUB_SHA::9} [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          gh workflow run bump-pages.yml
