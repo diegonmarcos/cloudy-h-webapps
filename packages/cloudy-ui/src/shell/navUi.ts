@@ -17,15 +17,7 @@ export const DEFAULT_NAV_UI: NavUiSettings = { mode: U.defaultMode as NavUiMode,
 export const CONFIGS_UI_LABEL = 'Configs ▸ UI';
 
 /** CSS colour (#rrggbbaa / #rgba / transparent) has no opacity at all. */
-export function isTransparent(css: string): boolean {
-  const c = css.trim().toLowerCase();
-  if (c === 'transparent') return true;
-  const h = /^#([0-9a-f]+)$/.exec(c)?.[1];
-  if (!h) return false;
-  if (h.length === 8) return h.slice(6) === '00';
-  if (h.length === 4) return h[3] === '0';
-  return false;
-}
+export const isTransparent = (css: string): boolean => /^(transparent|#[0-9a-f]{6}00|#[0-9a-f]{3}0)$/i.test(css.trim());
 
 export type NavChromePlan = {
   mode: NavUiMode; topRowTransparent: boolean; hamburger: boolean; secondRow: boolean;
@@ -70,24 +62,5 @@ export function declaredNavUi(decl: { mode?: string; scroll_hide?: boolean } | n
   return {
     mode: NAV_UI_MODES.includes(decl?.mode as NavUiMode) ? (decl!.mode as NavUiMode) : DEFAULT_NAV_UI.mode,
     scrollHide: typeof decl?.scroll_hide === 'boolean' ? decl.scroll_hide : DEFAULT_NAV_UI.scrollHide,
-  };
-}
-
-// ── the Clean drawer's content (cleanDrawerModel) ──
-export type DrawerEntry = { id: string; label: string; href: string | null; selected: boolean; depth: number };
-export type CleanDrawerModel = {
-  rows: DrawerRowKind[]; pageName: string; pages: DrawerEntry[]; actions: NavQuickAction[]; subPages: DrawerEntry[]; subPageName: string;
-};
-type PageLike = { id: string; label: string; href: string | null };
-
-/** Row 1: the bottom pages (the open one named); row 2: the icons; row 3: the open page's child pages, absent when it has none. */
-export function cleanDrawerModel(bottom: PageLike[], section: string | null, children: PageLike[], selectedChild: string | null): CleanDrawerModel {
-  const pages = bottom.map((b) => ({ ...b, selected: b.id === section, depth: 0 }));
-  const subPages = children.map((c) => ({ ...c, selected: c.id === selectedChild, depth: 0 }));
-  const face = subPages.find((s) => s.selected) ?? subPages[0];
-  return {
-    rows: CLEAN_DRAWER_ROWS.filter((r) => r !== 'sub_page_dropdown' || subPages.length > 0),
-    pageName: pages.find((p) => p.selected)?.label ?? '',
-    pages, actions: [...CLEAN_DRAWER_ACTIONS], subPages, subPageName: face?.label ?? '',
   };
 }

@@ -3,7 +3,8 @@
   // AI / Profile / Settings icons, row 3 a dropdown of the child pages; then the Configs > UI entry. Rows come from the declaration
   // (cleanDrawerModel), never from a literal here.
   import Icon from '../shell/Icon.svelte';
-  import { CONFIGS_UI_LABEL, cleanDrawerModel } from '../shell/navUi';
+  import { CONFIGS_UI_LABEL } from '../shell/navUi';
+  import { cleanDrawerModel } from '../shell/navUiDrawer';
   type Page = { id: string; label: string; href: string | null };
   let { open = $bindable(false), bottom, section, childPages, selectedChild, aiHref = null, profileHref = null, configsHref = null, onConfigsUi }: {
     open?: boolean; bottom: Page[]; section: string | null; childPages: Page[]; selectedChild: string | null;

@@ -11,7 +11,7 @@ export { swipeDirection, isEdgeOpen, swipe } from './shell/gestures';
 export { isEmbed, bootScript, EMBED_UA } from './shell/embed';
 export { drawerRows } from './shell/drawerRows';
 export * from './shell/navUi';
-export { navUi, loadNavUi, saveNavUi } from './shell/navUiStore';
+export { navUi, loadNavUi } from './shell/navUiStore';
 export type { DrawerRow } from './shell/drawerRows';
 export { resolveTarget, targetFromLocation } from './lib/targets';
 export type { Href } from './lib/targets';

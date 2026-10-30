@@ -5,10 +5,10 @@
   // hamburger | Back, 56dp touch boxes, 24dp glyphs in text_primary. The Dynamic Island (120x22) sits in the centre.
   import Icon from './Icon.svelte';
   import { fxCanvas, drawIslandWave, drawPrism, drawWaveLine, WAVE_PERIOD_MS, PRISM_PERIOD_MS, WAVELINE_PERIOD_MS } from './fx';
-  let { atHome, backHref = null, historyBack = false, orbHref = null, islandHref = null, onMenu, clean = false, hidden = false }: {
+  let { atHome, backHref = null, historyBack = false, orbHref = null, islandHref = null, onMenu, hidden = false }: {
     atHome: boolean; historyBack?: boolean; backHref?: string | null; orbHref?: string | null; islandHref?: string | null; onMenu: () => void;
-    /** Clean mode: the row is ONLY the top-left hamburger. hidden: scroll-hide has taken the row away. */
-    clean?: boolean; hidden?: boolean;
+    /** scroll-hide has taken the row away. */
+    hidden?: boolean;
   } = $props();
   // About pages (#1326): the arrow is history-back when the visitor came from inside this site, else the plain link (the grid).
   const goBack = (e: MouseEvent) => {
@@ -19,18 +19,16 @@
   };
 </script>
 
-<div class="app-top-bar top-row" class:away={hidden} class:clean data-testid="top-row">
-  {#if clean}
-    <button class="tool left" aria-label="Open the main menu" data-testid="toolbar-menu" onclick={onMenu}><Icon name="ic_hamburger_asymmetric" /></button>
-  {:else if atHome}
+<div class="app-top-bar top-row" class:away={hidden} data-testid="top-row">
+  {#if atHome}
     <button class="orb left" aria-label="Open the main menu" onclick={onMenu}><Icon name="ic_hamburger_asymmetric" /></button>
     {#if orbHref}<a class="orb right" href={orbHref} aria-label="Configs"><Icon name="ic_wallet" /></a>{/if}
   {:else}
     <button class="tool left" aria-label="Open the main menu" data-testid="toolbar-menu" onclick={onMenu}><Icon name="ic_hamburger_asymmetric" /></button>
     {#if backHref !== null}<a class="tool right" href={backHref} aria-label="Back" data-testid="toolbar-back" onclick={goBack}><Icon name="ic_back" /></a>{/if}
   {/if}
-  {#if !clean}<div class="music"><canvas use:fxCanvas={{ draw: drawWaveLine, periodMs: WAVELINE_PERIOD_MS }}></canvas></div>{/if}
-  {#if islandHref && !clean}
+  <div class="music"><canvas use:fxCanvas={{ draw: drawWaveLine, periodMs: WAVELINE_PERIOD_MS }}></canvas></div>
+  {#if islandHref}
     <a class="island" href={islandHref} aria-label="Dynamic Island" data-testid="dynamic-island">
       <canvas use:fxCanvas={{ draw: drawIslandWave, periodMs: WAVE_PERIOD_MS }}></canvas>
       <canvas use:fxCanvas={{ draw: drawPrism, periodMs: PRISM_PERIOD_MS }}></canvas>

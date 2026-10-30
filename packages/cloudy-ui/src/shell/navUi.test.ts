@@ -3,10 +3,12 @@ import { get } from 'svelte/store';
 import nav from '../../nav/nav.json';
 import { tokens } from '../../tokens/tokens';
 import {
-  CLEAN_DRAWER_ACTIONS, CLEAN_DRAWER_ROWS, DEFAULT_NAV_UI, NAV_UI_MODES, cleanDrawerModel, declaredNavUi, isTransparent, navChromePlan, parseNavUi, scrollHideStep,
+  CLEAN_DRAWER_ACTIONS, CLEAN_DRAWER_ROWS, DEFAULT_NAV_UI, NAV_UI_MODES, declaredNavUi, isTransparent, navChromePlan, parseNavUi, scrollHideStep,
   type NavUiMode,
 } from './navUi';
-import { loadNavUi, navUi, saveNavUi } from './navUiStore';
+import { cleanDrawerModel } from './navUiDrawer';
+import { loadNavUi, navUi } from './navUiStore';
+import { saveNavUi } from './navUiSave';
 
 // The nav UI (libs:bottomnav NavUi.kt): everything below reads the GENERATED tokens, so an Android change that is not regenerated fails here.
 const mem = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k), m }; };

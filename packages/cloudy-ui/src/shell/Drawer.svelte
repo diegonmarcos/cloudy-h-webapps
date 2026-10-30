@@ -6,11 +6,8 @@
   import PageTabs from './PageTabs.svelte';
   import type { Tab } from './types';
   import type { DrawerRow } from './drawerRows';
-  import { CONFIGS_UI_LABEL } from './navUi';
-  let { open = $bindable(false), rows, tabs, selectedTab, app, onConfigsUi = null }: {
+  let { open = $bindable(false), rows, tabs, selectedTab, app }: {
     open?: boolean; rows: DrawerRow[]; tabs: Tab[]; selectedTab: string | null;
-    /** Non-null: the drawer ends with the Configs > UI entry (nav mode, scroll-hide). */
-    onConfigsUi?: (() => void) | null;
     app: { name: string; build: string; stamp: string; user: { name: string; email: string; initials: string; mode: string } };
   } = $props();
   const close = () => (open = false);
@@ -41,7 +38,6 @@
         </svelte:element>
       {/if}
     {/each}
-    {#if onConfigsUi}<button class="row item cfgui" onclick={() => { close(); onConfigsUi(); }} data-testid="drawer-configs-ui"><span class="sp"></span><span class="lab">{CONFIGS_UI_LABEL}</span></button>{/if}
   </div>
 </aside>
 
@@ -70,7 +66,6 @@
   .title { color: var(--role-accent); opacity: 0.8; padding: 8px 0 2px 8px; }
   .heading { color: var(--role-text-secondary); opacity: 0.7; padding: 2px 0 2px 10px; }
   .item { color: var(--role-text-primary); padding: 3px 10px; text-decoration: none; }
-  .cfgui { width: 100%; background: none; border: 0; cursor: pointer; font: inherit; }
   .lab { padding-left: 8px; overflow: hidden; text-overflow: ellipsis; }
   .sp { width: 18px; flex: none; }
 </style>
