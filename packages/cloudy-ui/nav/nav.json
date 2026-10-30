@@ -1568,6 +1568,17 @@
             "title": "Lnktree",
             "tiles": [
               {
+                "id": "cloud-superapp",
+                "label": "SuperApp",
+                "icon": "ic_superapp_d",
+                "target": "app://com.diegonmarcos.superapp"
+              },
+              {
+                "id": "lnktree-sep-0",
+                "label": "|",
+                "separator": true
+              },
+              {
                 "id": "omniverse",
                 "label": "Omniverse",
                 "icon": "ic_p_sol_other",
@@ -1606,17 +1617,6 @@
           {
             "title": "Configs",
             "tiles": [
-              {
-                "id": "cloud-superapp",
-                "label": "SuperApp",
-                "icon": "ic_superapp_d",
-                "target": "app://com.diegonmarcos.superapp"
-              },
-              {
-                "id": "configs-sep-1",
-                "label": "|",
-                "separator": true
-              },
               {
                 "id": "configs-account",
                 "label": "Account",
