@@ -22,7 +22,9 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.10",
     "vitest": "^3.2.4",
-    "@axe-core/playwright": "^4.10.0"
+    "@axe-core/playwright": "^4.10.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0"
   },
   "engines": {
     "node": ">=22"

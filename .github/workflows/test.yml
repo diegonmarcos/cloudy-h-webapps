@@ -60,6 +60,12 @@ jobs:
         run: npx playwright test -c tests/playwright.config.ts tests/e2e/visual.spec.ts --update-snapshots=missing || true
       - name: E2E phone + tablet
         run: npx playwright test -c tests/playwright.config.ts
+      - name: Web vs Android baseline (Cloud-UI-Baseline.zip, pixelmatch, advisory until BASELINE_BLOCKING=1)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASELINE_BLOCKING: '0'
+        run: node scripts/compare-baseline.mjs || echo "::warning::baseline compare unavailable or over the limit (see the summary)"
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -68,6 +74,8 @@ jobs:
           path: |
             tests/results/shots
             tests/results/report
+            tests/results/baseline
+            tests/results/baseline-web
           if-no-files-found: ignore
           retention-days: 14
       - name: Commit fresh dists back (push to main only)
