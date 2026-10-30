@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar | finterm-drift | finterm-order | finterm-csv | finterm-url | finterm-tab | finterm-placeholder | finterm-fred'
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar | finterm-drift | finterm-order | finterm-csv | finterm-url | finterm-tab | finterm-placeholder | finterm-fred | finterm-model-merge | finterm-v1-first | finterm-window | finterm-cors-model | finterm-alert-side | finterm-declared'
         required: true
 permissions:
   contents: read
@@ -37,6 +37,12 @@ jobs:
             finterm-tab)    sed -i 's#href: `${own.href}${dash.tab}/${dash.slug}/`#href: own.href#' sites/cloudy-webapps/src/lib/server/nav.ts ;;
             finterm-placeholder) sed -i 's#<p class="note" data-testid="finterm-note">{st.ph.note}</p>#<p class="note" data-testid="finterm-note"></p>#' packages/cloudy-ui/src/finterm/Dashboard.svelte ;;
             finterm-fred)   sed -i "s/\[\['id', id\], \['cosd'/[['series', id], ['cosd'/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-model-merge) sed -i "s/      if (!f.merge) break;/      break;/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-v1-first)    sed -i "s/  if (api \&\& f.primary?.api) {/  if (false \&\& api \&\& f.primary?.api) {/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-window)      sed -i "s/e.ts.slice(0, 10) >= from \&\& e.ts.slice(0, 10) <= to \&\& //" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-cors-model)  sed -i "s/    if (browserReadable(source)) routes.push(\[source, f as Fetch \& Route\]);/    routes.push([source, f as Fetch \& Route]);/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-alert-side)  sed -i "s/(r.kind === 'above' ? p.value > r.level : p.value < r.level)/(r.kind === 'above' ? p.value < r.level : p.value > r.level)/" packages/cloudy-ui/src/finterm/engine.ts ;;
+            finterm-declared)    sed -i "s/      const doc = FINTERM.declared?.\[url.slice(6)\];/      const doc = undefined;/" packages/cloudy-ui/src/finterm/Dashboard.svelte ;;
             island-width)   echo "MUTATION=island-width" >> "$GITHUB_ENV" ;;
             *) echo "unknown mutation"; exit 2 ;;
           esac

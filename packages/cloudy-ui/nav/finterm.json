@@ -15,6 +15,12 @@
     "fi": [
       {
         "kind": "dashboard",
+        "title": "Market Monitor",
+        "subtitle": "Cross-asset tiles (rates, funding, indices, FX, crypto) and the next 48 hours of high-importance events",
+        "dashboard": "market_monitor"
+      },
+      {
+        "kind": "dashboard",
         "title": "Yield Curves",
         "subtitle": "Spot, forward and zero curves, US and major sovereigns",
         "dashboard": "yield_curves"
@@ -36,6 +42,18 @@
         "title": "World Bonds",
         "subtitle": "Sovereign bond yields and spreads by country",
         "dashboard": "world_bonds"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Credit",
+        "subtitle": "Corporate spreads (ICE BofA OAS), corporate yields and curve slopes",
+        "dashboard": "credit"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Macro",
+        "subtitle": "Latest official prints: US (BLS), euro area (Eurostat), G7 inflation (OECD)",
+        "dashboard": "macro"
       }
     ],
     "eq": [
@@ -44,6 +62,30 @@
         "title": "World Equity Indices",
         "subtitle": "Major equity index levels and moves worldwide",
         "dashboard": "world_equity_indices"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Quotes & Charts",
+        "subtitle": "Delayed quotes and daily charts for stocks, ETFs and indices",
+        "dashboard": "equity_quote"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Fundamentals",
+        "subtitle": "SEC EDGAR company profile, reported financials and filings",
+        "dashboard": "equity_fundamentals"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Earnings Calendar",
+        "subtitle": "Earnings this week with EPS consensus and last year's EPS",
+        "dashboard": "earnings_calendar"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Watchlist & Alerts",
+        "subtitle": "Your symbols, price alerts and event alerts, kept on this device",
+        "dashboard": "watchlist"
       }
     ],
     "ex": [
@@ -58,14 +100,38 @@
         "title": "Onshore USD Rates",
         "subtitle": "Onshore USD rate benchmarks and curves",
         "dashboard": "onshore_usd_rates"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Crypto",
+        "subtitle": "Crypto spot, 24h change and daily candles",
+        "dashboard": "crypto"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Commodities",
+        "subtitle": "Energy spot prices; EIA with your key",
+        "dashboard": "commodities"
       }
     ],
     "nw": [
       {
         "kind": "dashboard",
+        "title": "Economic Calendar",
+        "subtitle": "Economic events by day: time, country, importance, consensus, actual, previous",
+        "dashboard": "economic_calendar"
+      },
+      {
+        "kind": "dashboard",
         "title": "News",
         "subtitle": "Global news from the GDELT feed",
         "dashboard": "news"
+      },
+      {
+        "kind": "dashboard",
+        "title": "Central Bank Calendar",
+        "subtitle": "Next policy decisions, current policy rates and market-implied odds",
+        "dashboard": "central_bank_calendar"
       }
     ],
     "pm": [
@@ -140,7 +206,7 @@
       "category": "Equity-Exchange",
       "primary": true,
       "priority": 0,
-      "coverage": "The FinceptTerminal backend (fin-api) running on oci-apps: 35 data connectors (FRED, DBnomics, IMF, World Bank, Polygon, Yahoo, Kraken, ...), 7 analytics modules, 17 brokers, 6 investor personas, MCP tools, behind one DataHub. PRIMARY source of every FinTerm entry while the phone is on the mesh.",
+      "coverage": "The FinceptTerminal backend (fin-api) running on oci-apps: 35 data connectors (FRED, DBnomics, IMF, World Bank, Polygon, Yahoo, Kraken, ...), 7 analytics modules, 17 brokers, 6 investor personas, MCP tools, behind one DataHub. PRIMARY source of every FinTerm entry while the phone is on the mesh. The /v1 surface (design 3.2: series, curves, quotes, calendars, fundamentals, normalised) is the declared first source of every panel that names it as fetch.primary.api.",
       "endpoint": "",
       "fleet_endpoint": "fin-api",
       "docs": "https://github.com/Fincept-Corporation/FinceptTerminal",
@@ -151,7 +217,8 @@
         "peek": "/api/v1/topics/{topic}/peek",
         "personas": "/api/v1/personas",
         "mcp_tools": "/api/v1/mcp/tools",
-        "ws": "/api/v1/ws"
+        "ws": "/api/v1/ws",
+        "v1": "/v1"
       },
       "connector": "fincept_topic",
       "feeds": [
@@ -221,6 +288,18 @@
             "FX",
             "Onshore USD Rates"
           ]
+        },
+        {
+          "tab": "fi",
+          "entries": [
+            "Credit"
+          ]
+        },
+        {
+          "tab": "ex",
+          "entries": [
+            "Commodities"
+          ]
         }
       ],
       "auth": {
@@ -257,6 +336,12 @@
           "entries": [
             "FX",
             "Onshore USD Rates"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Central Bank Calendar"
           ]
         }
       ],
@@ -363,6 +448,12 @@
           "tab": "ex",
           "entries": [
             "Onshore USD Rates"
+          ]
+        },
+        {
+          "tab": "fi",
+          "entries": [
+            "Credit"
           ]
         }
       ],
@@ -601,9 +692,774 @@
         "type": "free_key",
         "signup": "https://aisstream.io"
       }
+    },
+    {
+      "id": "nyfed",
+      "name": "NY Fed Markets API",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "Reference rates published by the New York Fed: SOFR, EFFR, OBFR, TGCR, BGCR and the SOFR 30/90/180-day averages and index, with percentiles and volumes",
+      "endpoint": "https://markets.newyorkfed.org",
+      "docs": "https://markets.newyorkfed.org/static/docs/markets-api.html",
+      "cors": true,
+      "connector": "nyfed_rates",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "ex",
+          "entries": [
+            "Onshore USD Rates"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 900
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "treasury_xml",
+      "name": "US Treasury par yield curve (XML)",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "The official daily Treasury par yield curve 1M-30Y, same day 15:30 ET (also real yields and bill rates)",
+      "endpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages",
+      "docs": "https://home.treasury.gov/treasury-daily-interest-rate-xml-feed",
+      "cors": true,
+      "connector": "treasury_xml",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor",
+            "Yield Curves"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 1800
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "ecb_data",
+      "name": "ECB Data Portal",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "Euro area AAA government yield curve (YC), ECB policy rates (FM), euro reference exchange rates (EXR)",
+      "endpoint": "https://data-api.ecb.europa.eu/service/data",
+      "docs": "https://data.ecb.europa.eu/help/api/overview",
+      "cors": true,
+      "connector": "sdmx_json",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Yield Curves"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 3600
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "oecd",
+      "name": "OECD Data Explorer (SDMX)",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "G7/G20 consumer prices, unemployment and key economic indicators",
+      "endpoint": "https://sdmx.oecd.org/public/rest/data",
+      "docs": "https://gitlab.algobank.oecd.org/public-documentation/dotstat-migration/-/raw/main/OECD_Data_API_documentation.pdf",
+      "cors": true,
+      "connector": "sdmx_json",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Macro"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 21600
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "eurostat",
+      "name": "Eurostat",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "Euro area and EU member HICP inflation, unemployment, GDP (JSON-stat)",
+      "endpoint": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data",
+      "docs": "https://wikis.ec.europa.eu/display/EUROSTATHELP/API+Statistics+-+data+query",
+      "cors": true,
+      "connector": "jsonstat",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Macro"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Economic Calendar"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 21600
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "bls",
+      "name": "BLS Public Data API v2",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "US CPI, core CPI, nonfarm payrolls, unemployment rate: the official print, the morning of the release",
+      "endpoint": "https://api.bls.gov/publicAPI/v2",
+      "docs": "https://www.bls.gov/developers/api_signature_v2.htm",
+      "cors": true,
+      "connector": "bls_series",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Macro"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Economic Calendar"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 21600
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "bls_schedule",
+      "name": "BLS release schedule (iCalendar)",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "The scheduled date and time of every BLS news release (CPI, Employment Situation, PPI, JOLTS, ...)",
+      "endpoint": "https://www.bls.gov/schedule/news_release",
+      "docs": "https://www.bls.gov/schedule/",
+      "cors": false,
+      "connector": "ics_calendar",
+      "feeds": [
+        {
+          "tab": "nw",
+          "entries": [
+            "Economic Calendar"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 86400
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "forexfactory",
+      "name": "Forex Factory weekly calendar (Fair Economy)",
+      "category": "News-Alt",
+      "priority": 10,
+      "coverage": "This week's G10 + China economic events: time, country, impact, forecast (consensus), previous",
+      "endpoint": "https://nfs.faireconomy.media",
+      "docs": "https://www.forexfactory.com/calendar",
+      "cors": false,
+      "connector": "ff_calendar",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Economic Calendar"
+          ]
+        },
+        {
+          "tab": "eq",
+          "entries": [
+            "Watchlist & Alerts"
+          ]
+        }
+      ],
+      "attribution": "Calendar data: Forex Factory (Fair Economy)",
+      "schedule": {
+        "ttl_s": 900
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "central_banks",
+      "name": "Central bank meeting calendar (declared)",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "Policy decision days of the Fed, ECB, BoE and BoJ, from each bank's published schedule (data/central-banks.json)",
+      "endpoint": "asset:",
+      "docs": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "cors": true,
+      "connector": "declared_events",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Economic Calendar",
+            "Central Bank Calendar"
+          ]
+        },
+        {
+          "tab": "eq",
+          "entries": [
+            "Watchlist & Alerts"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 86400
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "polymarket",
+      "name": "Polymarket (Gamma API)",
+      "category": "News-Alt",
+      "priority": 10,
+      "coverage": "Market-implied probabilities: Fed decision by meeting, number of cuts this year",
+      "endpoint": "https://gamma-api.polymarket.com",
+      "docs": "https://docs.polymarket.com/developers/gamma-markets-api/overview",
+      "cors": true,
+      "connector": "polymarket_events",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "World Interest Rate Probabilities"
+          ]
+        },
+        {
+          "tab": "nw",
+          "entries": [
+            "Central Bank Calendar"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 900
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "frankfurter",
+      "name": "Frankfurter (ECB reference rates)",
+      "category": "FI-Macro",
+      "priority": 10,
+      "coverage": "ECB euro foreign exchange reference rates, daily around 16:00 CET, any base currency, with history",
+      "endpoint": "https://api.frankfurter.dev",
+      "docs": "https://frankfurter.dev",
+      "cors": true,
+      "connector": "frankfurter_rates",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "ex",
+          "entries": [
+            "FX"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 900
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "coinbase",
+      "name": "Coinbase Exchange public market data",
+      "category": "Equity-Exchange",
+      "priority": 10,
+      "coverage": "Crypto spot: 24h open/high/low/last and daily candles for BTC, ETH, SOL and every listed pair",
+      "endpoint": "https://api.exchange.coinbase.com",
+      "docs": "https://docs.cdp.coinbase.com/exchange/reference/exchangerestapi_getproductstats",
+      "cors": true,
+      "connector": "coinbase_exchange",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "ex",
+          "entries": [
+            "Crypto"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 60
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "cboe",
+      "name": "Cboe delayed quotes",
+      "category": "Equity-Exchange",
+      "priority": 10,
+      "coverage": "15-minute delayed quotes for US indices (SPX, NDX, DJX, RUT, VIX) and any listed stock or ETF, with daily history",
+      "endpoint": "https://cdn-api.cboe.com/api/global/delayed_quotes",
+      "docs": "https://www.cboe.com/delayed_quotes/",
+      "cors": false,
+      "connector": "cboe_quotes",
+      "feeds": [
+        {
+          "tab": "fi",
+          "entries": [
+            "Market Monitor"
+          ]
+        },
+        {
+          "tab": "eq",
+          "entries": [
+            "World Equity Indices",
+            "Quotes & Charts",
+            "Watchlist & Alerts"
+          ]
+        }
+      ],
+      "attribution": "Delayed 15 minutes. Data: Cboe",
+      "schedule": {
+        "ttl_s": 60
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "sec_edgar",
+      "name": "SEC EDGAR submissions",
+      "category": "Equity-Exchange",
+      "priority": 10,
+      "coverage": "Company profile (name, tickers, exchange, industry, fiscal year end) and every filing (10-K, 10-Q, 8-K, ...) with its link",
+      "endpoint": "https://data.sec.gov",
+      "docs": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+      "cors": true,
+      "paths": {
+        "filing": "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{document}"
+      },
+      "connector": "sec_submissions",
+      "feeds": [
+        {
+          "tab": "eq",
+          "entries": [
+            "Fundamentals"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 86400
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "sec_xbrl",
+      "name": "SEC EDGAR XBRL facts",
+      "category": "Equity-Exchange",
+      "priority": 10,
+      "coverage": "Reported financial facts per company and concept (revenue, net income, EPS, cash flow) by fiscal year",
+      "endpoint": "https://data.sec.gov/api/xbrl",
+      "docs": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+      "cors": false,
+      "connector": "sec_concept",
+      "feeds": [
+        {
+          "tab": "eq",
+          "entries": [
+            "Fundamentals"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 86400
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "nasdaq_calendar",
+      "name": "Nasdaq earnings calendar",
+      "category": "Equity-Exchange",
+      "priority": 10,
+      "coverage": "Earnings reports by day: company, time (before open / after close), EPS consensus, last year's EPS, market cap",
+      "endpoint": "https://api.nasdaq.com/api/calendar",
+      "docs": "https://www.nasdaq.com/market-activity/earnings",
+      "cors": false,
+      "connector": "nasdaq_earnings",
+      "feeds": [
+        {
+          "tab": "eq",
+          "entries": [
+            "Earnings Calendar"
+          ]
+        }
+      ],
+      "schedule": {
+        "ttl_s": 3600
+      },
+      "auth": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "finnhub",
+      "name": "Finnhub",
+      "category": "Equity-Exchange",
+      "priority": 20,
+      "coverage": "Real-time US quotes, company metrics, earnings calendar with EPS estimate and actual",
+      "endpoint": "https://finnhub.io/api/v1",
+      "docs": "https://finnhub.io/docs/api",
+      "cors": true,
+      "connector": null,
+      "feeds": [
+        {
+          "tab": "eq",
+          "entries": [
+            "Earnings Calendar",
+            "Quotes & Charts"
+          ]
+        }
+      ],
+      "auth": {
+        "type": "free_key",
+        "signup": "https://finnhub.io/register"
+      }
+    },
+    {
+      "id": "eia",
+      "name": "EIA Open Data v2",
+      "category": "FI-Macro",
+      "priority": 20,
+      "coverage": "WTI, Brent, Henry Hub spot and futures, inventories",
+      "endpoint": "https://api.eia.gov/v2",
+      "docs": "https://www.eia.gov/opendata/",
+      "cors": true,
+      "connector": null,
+      "feeds": [
+        {
+          "tab": "ex",
+          "entries": [
+            "Commodities"
+          ]
+        }
+      ],
+      "auth": {
+        "type": "free_key",
+        "signup": "https://www.eia.gov/opendata/register.php"
+      }
     }
   ],
   "dashboards": [
+    {
+      "id": "market_monitor",
+      "entry": "Market Monitor",
+      "tab": "fi",
+      "panels": [
+        {
+          "id": "next",
+          "title": "Next 48 hours: high-importance events",
+          "source": "forexfactory",
+          "view": "calendar",
+          "derive": "events",
+          "fetch": {
+            "provider": "ff_calendar",
+            "path": "/ff_calendar_thisweek.json",
+            "merge": true,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/economic",
+              "params": {
+                "days": "2",
+                "importance": "3"
+              },
+              "parse": "finterm_v1"
+            },
+            "fallbacks": [
+              {
+                "source": "forexfactory",
+                "provider": "ff_calendar",
+                "path": "/ff_calendar_nextweek.json"
+              },
+              {
+                "source": "central_banks",
+                "provider": "declared_events",
+                "path": "central-banks.json"
+              }
+            ],
+            "filter": {
+              "days_back": 0,
+              "days_ahead": 2,
+              "importance_min": 3
+            }
+          },
+          "columns": [
+            "Time (UTC)",
+            "Ctry",
+            "Event",
+            "Imp",
+            "Cons.",
+            "Actual",
+            "Prev."
+          ]
+        },
+        {
+          "id": "ust",
+          "title": "US Treasuries (par, official)",
+          "source": "treasury_xml",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "treasury_xml",
+            "path": "/xml",
+            "params": {
+              "data": "daily_treasury_yield_curve",
+              "field_tdr_date_value_month": "{yyyymm}"
+            },
+            "fallbacks": [
+              {
+                "source": "treasury_xml",
+                "provider": "treasury_xml",
+                "path": "/xml",
+                "params": {
+                  "data": "daily_treasury_yield_curve",
+                  "field_tdr_date_value_month": "{prev_yyyymm}"
+                }
+              }
+            ],
+            "labels": {
+              "BC_2YEAR": "UST 2Y",
+              "BC_10YEAR": "UST 10Y",
+              "BC_30YEAR": "UST 30Y"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/curves/ust_par",
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ],
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
+          "id": "funding",
+          "title": "USD funding (NY Fed)",
+          "source": "nyfed",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "nyfed_rates",
+            "path": "/api/rates/all/latest.json",
+            "labels": {
+              "SOFR": "SOFR",
+              "EFFR": "Effective Fed funds",
+              "SOFRAI_30D": "SOFR 30-day avg"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "nyfed:SOFR,nyfed:EFFR,nyfed:SOFRAI_30D"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ],
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
+          "id": "equity",
+          "title": "US equity indices (15-min delayed)",
+          "source": "cboe",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "cboe_quotes",
+            "path": "/quotes/{each}.json",
+            "each": [
+              "_SPX",
+              "_NDX",
+              "_DJX",
+              "_RUT",
+              "_VIX"
+            ],
+            "labels": {},
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "^SPX,^NDX,^DJX,^RUT,^VIX"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
+        {
+          "id": "fx",
+          "title": "FX (ECB reference, per USD)",
+          "source": "frankfurter",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "frankfurter_rates",
+            "path": "/v1/{from}..",
+            "params": {
+              "base": "USD",
+              "symbols": "EUR,GBP,JPY,CHF,CNY"
+            },
+            "lookback_days": 7,
+            "labels": {
+              "EUR": "EUR per USD",
+              "GBP": "GBP per USD",
+              "JPY": "JPY per USD",
+              "CHF": "CHF per USD",
+              "CNY": "CNY per USD"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/fx/spot",
+              "params": {
+                "base": "USD",
+                "symbols": "EUR,GBP,JPY,CHF,CNY"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
+        {
+          "id": "crypto",
+          "title": "Crypto (24h)",
+          "source": "coinbase",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "coinbase_exchange",
+            "path": "/products/{each}/stats",
+            "each": [
+              "BTC-USD",
+              "ETH-USD",
+              "SOL-USD"
+            ],
+            "labels": {
+              "BTC-USD": "Bitcoin",
+              "ETH-USD": "Ether",
+              "SOL-USD": "Solana"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "BTC-USD,ETH-USD,SOL-USD"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        }
+      ],
+      "slug": "market-monitor",
+      "subtitle": "Cross-asset tiles (rates, funding, indices, FX, crypto) and the next 48 hours of high-importance events"
+    },
     {
       "id": "yield_curves",
       "entry": "Yield Curves",
@@ -702,6 +1558,118 @@
             "1d bp",
             "Date"
           ]
+        },
+        {
+          "id": "ust_official",
+          "title": "US Treasury par curve (Treasury, official)",
+          "source": "treasury_xml",
+          "view": "curve",
+          "derive": "points",
+          "fetch": {
+            "provider": "treasury_xml",
+            "path": "/xml",
+            "params": {
+              "data": "daily_treasury_yield_curve",
+              "field_tdr_date_value_month": "{yyyymm}"
+            },
+            "fallbacks": [
+              {
+                "source": "treasury_xml",
+                "provider": "treasury_xml",
+                "path": "/xml",
+                "params": {
+                  "data": "daily_treasury_yield_curve",
+                  "field_tdr_date_value_month": "{prev_yyyymm}"
+                }
+              }
+            ],
+            "labels": {
+              "BC_1MONTH": "1M",
+              "BC_3MONTH": "3M",
+              "BC_6MONTH": "6M",
+              "BC_1YEAR": "1Y",
+              "BC_2YEAR": "2Y",
+              "BC_3YEAR": "3Y",
+              "BC_5YEAR": "5Y",
+              "BC_7YEAR": "7Y",
+              "BC_10YEAR": "10Y",
+              "BC_20YEAR": "20Y",
+              "BC_30YEAR": "30Y"
+            },
+            "years": {
+              "BC_1MONTH": 0.083333,
+              "BC_3MONTH": 0.25,
+              "BC_6MONTH": 0.5,
+              "BC_1YEAR": 1,
+              "BC_2YEAR": 2,
+              "BC_3YEAR": 3,
+              "BC_5YEAR": 5,
+              "BC_7YEAR": 7,
+              "BC_10YEAR": 10,
+              "BC_20YEAR": 20,
+              "BC_30YEAR": 30
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/curves/ust_par",
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Tenor",
+            "Yield %",
+            "1d bp",
+            "Date"
+          ],
+          "x_title": "maturity (years)",
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
+          "id": "euro",
+          "title": "Euro area AAA government curve (ECB, spot)",
+          "source": "ecb_data",
+          "view": "curve",
+          "derive": "points",
+          "fetch": {
+            "provider": "sdmx_json",
+            "path": "/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_1Y+SR_2Y+SR_5Y+SR_10Y+SR_20Y+SR_30Y",
+            "params": {
+              "lastNObservations": "2",
+              "format": "jsondata"
+            },
+            "key_dim": "DATA_TYPE_FM",
+            "labels": {
+              "SR_1Y": "1Y",
+              "SR_2Y": "2Y",
+              "SR_5Y": "5Y",
+              "SR_10Y": "10Y",
+              "SR_20Y": "20Y",
+              "SR_30Y": "30Y"
+            },
+            "years": {
+              "SR_1Y": 1,
+              "SR_2Y": 2,
+              "SR_5Y": 5,
+              "SR_10Y": 10,
+              "SR_20Y": 20,
+              "SR_30Y": 30
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/curves/ecb_aaa",
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Tenor",
+            "Yield %",
+            "1d bp",
+            "Date"
+          ],
+          "x_title": "maturity (years)",
+          "unit": "%",
+          "change_unit": "bp"
         },
         {
           "id": "sovereigns",
@@ -922,18 +1890,36 @@
         },
         {
           "id": "implied",
-          "title": "Market-implied rate path (probability by meeting)",
-          "source": "premium_fi",
-          "view": "table",
-          "placeholder": {
-            "columns": [
-              "Meeting",
-              "Cut %",
-              "Hold %",
-              "Hike %"
-            ],
-            "rows": 6
-          }
+          "title": "Market-implied Fed path (Polymarket, %)",
+          "source": "polymarket",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "polymarket_events",
+            "path": "/events",
+            "params": {
+              "tag_slug": "fed-rates",
+              "active": "true",
+              "closed": "false",
+              "limit": "6"
+            },
+            "last": 12,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/central-banks",
+              "params": {
+                "implied": "polymarket"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Market",
+            "Probability %",
+            "",
+            "Ends"
+          ],
+          "unit": "%"
         }
       ],
       "slug": "rate-probabilities",
@@ -1119,10 +2105,288 @@
       "subtitle": "Sovereign bond yields and spreads by country"
     },
     {
+      "id": "credit",
+      "entry": "Credit",
+      "tab": "fi",
+      "panels": [
+        {
+          "id": "oas",
+          "title": "ICE BofA option-adjusted spreads",
+          "source": "fred",
+          "view": "bars",
+          "derive": "level_change",
+          "fetch": {
+            "provider": "fred_series",
+            "lookback_days": 21,
+            "series": [
+              {
+                "id": "BAMLC0A0CM",
+                "label": "US investment grade"
+              },
+              {
+                "id": "BAMLH0A0HYM2",
+                "label": "US high yield"
+              },
+              {
+                "id": "BAMLEMCBPIOAS",
+                "label": "EM corporate"
+              },
+              {
+                "id": "BAMLHE00EHYIOAS",
+                "label": "Euro high yield"
+              }
+            ],
+            "primary": {
+              "source": "cloud_fincept",
+              "topic": "econ:fred:{id}"
+            }
+          },
+          "columns": [
+            "Index",
+            "OAS %",
+            "1d bp",
+            "Date"
+          ],
+          "chart_value": "level",
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
+          "id": "yields",
+          "title": "Corporate yields and curve slopes",
+          "source": "fred",
+          "view": "table",
+          "derive": "level_change",
+          "fetch": {
+            "provider": "fred_series",
+            "lookback_days": 21,
+            "series": [
+              {
+                "id": "DAAA",
+                "label": "Moody's Aaa"
+              },
+              {
+                "id": "DBAA",
+                "label": "Moody's Baa"
+              },
+              {
+                "id": "T10Y2Y",
+                "label": "10Y - 2Y"
+              },
+              {
+                "id": "T10Y3M",
+                "label": "10Y - 3M"
+              }
+            ],
+            "primary": {
+              "source": "cloud_fincept",
+              "topic": "econ:fred:{id}"
+            }
+          },
+          "columns": [
+            "Measure",
+            "Level %",
+            "1d bp",
+            "Date"
+          ],
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
+          "id": "cds",
+          "title": "CDX / iTraxx indices",
+          "source": "premium_fi",
+          "view": "table",
+          "placeholder": {
+            "columns": [
+              "Index",
+              "Spread bp",
+              "1d bp",
+              "Date"
+            ],
+            "rows": 4
+          }
+        }
+      ],
+      "slug": "credit",
+      "subtitle": "Corporate spreads (ICE BofA OAS), corporate yields and curve slopes"
+    },
+    {
+      "id": "macro",
+      "entry": "Macro",
+      "tab": "fi",
+      "panels": [
+        {
+          "id": "us",
+          "title": "US: latest official prints (BLS)",
+          "source": "bls",
+          "view": "table",
+          "derive": "points",
+          "fetch": {
+            "provider": "bls_series",
+            "path": "/timeseries/data/{each}",
+            "each": [
+              "CUUR0000SA0",
+              "CUUR0000SA0L1E",
+              "CES0000000001",
+              "LNS14000000"
+            ],
+            "labels": {
+              "CUUR0000SA0": "US CPI (index, NSA)",
+              "CUUR0000SA0L1E": "US core CPI (index, NSA)",
+              "CES0000000001": "Nonfarm payrolls (thousands)",
+              "LNS14000000": "Unemployment rate %"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "bls:CUUR0000SA0,bls:CUUR0000SA0L1E,bls:CES0000000001,bls:LNS14000000"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Indicator",
+            "Actual",
+            "Previous",
+            "Period"
+          ],
+          "value_columns": "actual_previous"
+        },
+        {
+          "id": "hicp",
+          "title": "Euro area HICP inflation, y/y % (Eurostat)",
+          "source": "eurostat",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "jsonstat",
+            "path": "/prc_hicp_minr",
+            "params": {
+              "coicop18": "TOTAL",
+              "unit": "RCH_A",
+              "lastTimePeriod": "2",
+              "geo": [
+                "EA",
+                "DE",
+                "FR",
+                "IT",
+                "ES",
+                "NL"
+              ]
+            },
+            "key_dim": "geo",
+            "labels": {
+              "EA": "Euro area",
+              "DE": "Germany",
+              "FR": "France",
+              "IT": "Italy",
+              "ES": "Spain",
+              "NL": "Netherlands"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "eurostat:prc_hicp_minr:EA,eurostat:prc_hicp_minr:DE,eurostat:prc_hicp_minr:FR,eurostat:prc_hicp_minr:IT,eurostat:prc_hicp_minr:ES,eurostat:prc_hicp_minr:NL"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Country",
+            "Actual",
+            "Previous",
+            "Period"
+          ],
+          "value_columns": "actual_previous",
+          "unit": "%"
+        },
+        {
+          "id": "g7cpi",
+          "title": "G7 CPI inflation, y/y % (OECD)",
+          "source": "oecd",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "sdmx_json",
+            "path": "/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0/USA+DEU+GBR+JPN+FRA+ITA+CAN.M.N.CPI.PA._T.N.GY",
+            "params": {
+              "lastNObservations": "2",
+              "format": "jsondata"
+            },
+            "key_dim": "REF_AREA",
+            "labels": {
+              "USA": "United States",
+              "DEU": "Germany",
+              "GBR": "United Kingdom",
+              "JPN": "Japan",
+              "FRA": "France",
+              "ITA": "Italy",
+              "CAN": "Canada"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "oecd:cpi:USA,oecd:cpi:DEU,oecd:cpi:GBR,oecd:cpi:JPN,oecd:cpi:FRA,oecd:cpi:ITA,oecd:cpi:CAN"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Country",
+            "Actual",
+            "Previous",
+            "Period"
+          ],
+          "value_columns": "actual_previous",
+          "unit": "%"
+        }
+      ],
+      "slug": "macro",
+      "subtitle": "Latest official prints: US (BLS), euro area (Eurostat), G7 inflation (OECD)"
+    },
+    {
       "id": "world_equity_indices",
       "entry": "World Equity Indices",
       "tab": "eq",
       "panels": [
+        {
+          "id": "cboe",
+          "title": "US indices (Cboe, 15-min delayed)",
+          "source": "cboe",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "cboe_quotes",
+            "path": "/quotes/{each}.json",
+            "each": [
+              "_SPX",
+              "_NDX",
+              "_DJX",
+              "_RUT",
+              "_VIX"
+            ],
+            "labels": {},
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "^SPX,^NDX,^DJX,^RUT,^VIX"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
         {
           "id": "us",
           "title": "Index levels (FRED)",
@@ -1188,10 +2452,369 @@
       "subtitle": "Major equity index levels and moves worldwide"
     },
     {
+      "id": "equity_quote",
+      "entry": "Quotes & Charts",
+      "tab": "eq",
+      "panels": [
+        {
+          "id": "quote",
+          "title": "Quotes (15-min delayed)",
+          "source": "cboe",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "cboe_quotes",
+            "path": "/quotes/{each}.json",
+            "each": [
+              "AAPL",
+              "MSFT",
+              "NVDA",
+              "AMZN",
+              "SPY",
+              "QQQ"
+            ],
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "AAPL,MSFT,NVDA,AMZN,SPY,QQQ"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
+        {
+          "id": "spx",
+          "title": "S&P 500, daily (1 year)",
+          "source": "cboe",
+          "view": "candles",
+          "derive": "candles",
+          "fetch": {
+            "provider": "cboe_quotes",
+            "path": "/charts/historical/_SPX.json",
+            "last": 252,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes/^SPX/history",
+              "params": {
+                "interval": "1d",
+                "range": "1y"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Date",
+            "Open",
+            "High",
+            "Low",
+            "Close"
+          ]
+        },
+        {
+          "id": "rt",
+          "title": "Real-time quotes and intraday charts",
+          "source": "finnhub",
+          "view": "table",
+          "placeholder": {
+            "columns": [
+              "Symbol",
+              "Last",
+              "Bid",
+              "Ask",
+              "Time"
+            ],
+            "rows": 4
+          }
+        }
+      ],
+      "slug": "equity-quote",
+      "subtitle": "Delayed quotes and daily charts for stocks, ETFs and indices"
+    },
+    {
+      "id": "equity_fundamentals",
+      "entry": "Fundamentals",
+      "tab": "eq",
+      "panels": [
+        {
+          "id": "profile",
+          "title": "Company profile (SEC EDGAR): Apple Inc.",
+          "source": "sec_edgar",
+          "view": "kv",
+          "derive": "kv",
+          "fetch": {
+            "provider": "sec_submissions",
+            "path": "/submissions/CIK{cik}.json",
+            "cik": "0000320193",
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/fundamentals/AAPL",
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Field",
+            "Value"
+          ]
+        },
+        {
+          "id": "netincome",
+          "title": "Net income by fiscal year (10-K, USD bn)",
+          "source": "sec_xbrl",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "sec_concept",
+            "path": "/companyconcept/CIK{cik}/us-gaap/NetIncomeLoss.json",
+            "cik": "0000320193",
+            "scale": 1e-9,
+            "last": 6,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/fundamentals/AAPL",
+              "params": {
+                "concept": "NetIncomeLoss"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Fiscal year",
+            "Actual",
+            "Previous",
+            "Period end"
+          ],
+          "value_columns": "actual_previous"
+        },
+        {
+          "id": "filings",
+          "title": "Latest filings (10-K, 10-Q, 8-K)",
+          "source": "sec_edgar",
+          "view": "news",
+          "derive": "filings",
+          "fetch": {
+            "provider": "sec_submissions",
+            "path": "/submissions/CIK{cik}.json",
+            "cik": "0000320193",
+            "forms": [
+              "10-K",
+              "10-Q",
+              "8-K"
+            ],
+            "last": 12,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/fundamentals/AAPL",
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Filing",
+            "Form",
+            "Filed"
+          ]
+        }
+      ],
+      "slug": "equity-fundamentals",
+      "subtitle": "SEC EDGAR company profile, reported financials and filings"
+    },
+    {
+      "id": "earnings_calendar",
+      "entry": "Earnings Calendar",
+      "tab": "eq",
+      "panels": [
+        {
+          "id": "week",
+          "title": "Earnings this week",
+          "source": "nasdaq_calendar",
+          "view": "calendar",
+          "derive": "events",
+          "fetch": {
+            "provider": "nasdaq_earnings",
+            "path": "/earnings",
+            "params": {
+              "date": "{each}"
+            },
+            "each_days": 7,
+            "merge": true,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/earnings",
+              "params": {
+                "days": "7"
+              },
+              "parse": "finterm_v1"
+            },
+            "filter": {
+              "days_back": 0,
+              "days_ahead": 7,
+              "importance_min": 2
+            }
+          },
+          "columns": [
+            "Date",
+            "Ctry",
+            "Company",
+            "Imp",
+            "EPS est.",
+            "EPS",
+            "EPS last yr"
+          ]
+        },
+        {
+          "id": "rt",
+          "title": "Earnings with actuals and surprise (real time)",
+          "source": "finnhub",
+          "view": "table",
+          "placeholder": {
+            "columns": [
+              "Symbol",
+              "Date",
+              "EPS est.",
+              "EPS",
+              "Surprise %"
+            ],
+            "rows": 4
+          }
+        }
+      ],
+      "slug": "earnings-calendar",
+      "subtitle": "Earnings this week with EPS consensus and last year's EPS"
+    },
+    {
+      "id": "watchlist",
+      "entry": "Watchlist & Alerts",
+      "tab": "eq",
+      "panels": [
+        {
+          "id": "quotes",
+          "title": "Your watchlist (15-min delayed)",
+          "source": "cboe",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "cboe_quotes",
+            "path": "/quotes/{each}.json",
+            "each": [
+              "AAPL",
+              "MSFT",
+              "_SPX"
+            ],
+            "each_user": "watchlist",
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "{each_csv}"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ],
+          "alerts": "price"
+        },
+        {
+          "id": "events",
+          "title": "Alerts: events at or above your importance level",
+          "source": "forexfactory",
+          "view": "calendar",
+          "derive": "events",
+          "fetch": {
+            "provider": "ff_calendar",
+            "path": "/ff_calendar_thisweek.json",
+            "merge": true,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/economic",
+              "params": {
+                "days": "7",
+                "importance": "2"
+              },
+              "parse": "finterm_v1"
+            },
+            "fallbacks": [
+              {
+                "source": "forexfactory",
+                "provider": "ff_calendar",
+                "path": "/ff_calendar_nextweek.json"
+              },
+              {
+                "source": "central_banks",
+                "provider": "declared_events",
+                "path": "central-banks.json"
+              }
+            ],
+            "filter": {
+              "days_back": 0,
+              "days_ahead": 7,
+              "importance_min": 2
+            }
+          },
+          "columns": [
+            "Time (UTC)",
+            "Ctry",
+            "Event",
+            "Imp",
+            "Cons.",
+            "Actual",
+            "Prev."
+          ],
+          "alerts": "event"
+        }
+      ],
+      "slug": "watchlist",
+      "subtitle": "Your symbols, price alerts and event alerts, kept on this device"
+    },
+    {
       "id": "fx",
       "entry": "FX",
       "tab": "ex",
       "panels": [
+        {
+          "id": "ecb",
+          "title": "ECB reference rates (per USD, Frankfurter)",
+          "source": "frankfurter",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "frankfurter_rates",
+            "path": "/v1/{from}..",
+            "params": {
+              "base": "USD",
+              "symbols": "EUR,GBP,JPY,CHF,CAD,AUD,CNY,MXN,BRL,INR"
+            },
+            "lookback_days": 7,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/fx/spot",
+              "params": {
+                "base": "USD",
+                "symbols": "EUR,GBP,JPY,CHF,CAD,AUD,CNY,MXN,BRL,INR"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
         {
           "id": "spot",
           "title": "Spot vs USD (Federal Reserve H.10 noon buying rates)",
@@ -1378,6 +3001,44 @@
       "tab": "ex",
       "panels": [
         {
+          "id": "nyfed",
+          "title": "NY Fed reference rates",
+          "source": "nyfed",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "nyfed_rates",
+            "path": "/api/rates/all/latest.json",
+            "labels": {
+              "SOFR": "SOFR",
+              "EFFR": "Effective Fed funds",
+              "OBFR": "Overnight bank funding",
+              "TGCR": "Tri-party general collateral",
+              "BGCR": "Broad general collateral",
+              "SOFRAI_30D": "SOFR 30-day average",
+              "SOFRAI_90D": "SOFR 90-day average",
+              "SOFRAI_180D": "SOFR 180-day average"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "nyfed:SOFR,nyfed:EFFR,nyfed:OBFR,nyfed:TGCR,nyfed:BGCR,nyfed:SOFRAI_30D,nyfed:SOFRAI_90D,nyfed:SOFRAI_180D"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Benchmark",
+            "Rate %",
+            "Chg bp",
+            "Date"
+          ],
+          "chart_value": "level",
+          "unit": "%",
+          "change_unit": "bp"
+        },
+        {
           "id": "benchmarks",
           "title": "Onshore USD benchmark rates",
           "source": "fred",
@@ -1447,6 +3108,294 @@
       ],
       "slug": "onshore-usd-rates",
       "subtitle": "Onshore USD rate benchmarks and curves"
+    },
+    {
+      "id": "crypto",
+      "entry": "Crypto",
+      "tab": "ex",
+      "panels": [
+        {
+          "id": "spot",
+          "title": "Crypto spot (24h)",
+          "source": "coinbase",
+          "view": "quotes",
+          "derive": "points",
+          "fetch": {
+            "provider": "coinbase_exchange",
+            "path": "/products/{each}/stats",
+            "each": [
+              "BTC-USD",
+              "ETH-USD",
+              "SOL-USD",
+              "XRP-USD",
+              "DOGE-USD",
+              "ADA-USD"
+            ],
+            "labels": {
+              "BTC-USD": "Bitcoin",
+              "ETH-USD": "Ether",
+              "SOL-USD": "Solana",
+              "XRP-USD": "XRP",
+              "DOGE-USD": "Dogecoin",
+              "ADA-USD": "Cardano"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes",
+              "params": {
+                "symbols": "BTC-USD,ETH-USD,SOL-USD,XRP-USD,DOGE-USD,ADA-USD"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Name",
+            "Last",
+            "Chg",
+            "Chg %",
+            "As of"
+          ]
+        },
+        {
+          "id": "btc",
+          "title": "Bitcoin, daily (300 days)",
+          "source": "coinbase",
+          "view": "candles",
+          "derive": "candles",
+          "fetch": {
+            "provider": "coinbase_exchange",
+            "path": "/products/BTC-USD/candles",
+            "params": {
+              "granularity": "86400"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/quotes/BTC-USD/history",
+              "params": {
+                "interval": "1d",
+                "range": "1y"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Date",
+            "Open",
+            "High",
+            "Low",
+            "Close"
+          ]
+        }
+      ],
+      "slug": "crypto",
+      "subtitle": "Crypto spot, 24h change and daily candles"
+    },
+    {
+      "id": "commodities",
+      "entry": "Commodities",
+      "tab": "ex",
+      "panels": [
+        {
+          "id": "energy",
+          "title": "Energy spot (FRED, daily)",
+          "source": "fred",
+          "view": "bars",
+          "derive": "level_change",
+          "fetch": {
+            "provider": "fred_series",
+            "lookback_days": 21,
+            "series": [
+              {
+                "id": "DCOILWTICO",
+                "label": "WTI crude $/bbl"
+              },
+              {
+                "id": "DCOILBRENTEU",
+                "label": "Brent crude $/bbl"
+              },
+              {
+                "id": "DHHNGSP",
+                "label": "Henry Hub gas $/MMBtu"
+              }
+            ],
+            "primary": {
+              "source": "cloud_fincept",
+              "topic": "econ:fred:{id}"
+            }
+          },
+          "columns": [
+            "Commodity",
+            "Level",
+            "1d %",
+            "Date"
+          ],
+          "chart_value": "change_pct",
+          "unit": "%"
+        },
+        {
+          "id": "eia",
+          "title": "EIA spot, futures and inventories",
+          "source": "eia",
+          "view": "table",
+          "placeholder": {
+            "columns": [
+              "Series",
+              "Last",
+              "1w %",
+              "Date"
+            ],
+            "rows": 4
+          }
+        }
+      ],
+      "slug": "commodities",
+      "subtitle": "Energy spot prices; EIA with your key"
+    },
+    {
+      "id": "economic_calendar",
+      "entry": "Economic Calendar",
+      "tab": "nw",
+      "panels": [
+        {
+          "id": "week",
+          "title": "This week and next: economic events",
+          "source": "forexfactory",
+          "view": "calendar",
+          "derive": "events",
+          "fetch": {
+            "provider": "ff_calendar",
+            "path": "/ff_calendar_thisweek.json",
+            "merge": true,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/economic",
+              "params": {
+                "days": "10"
+              },
+              "parse": "finterm_v1"
+            },
+            "fallbacks": [
+              {
+                "source": "forexfactory",
+                "provider": "ff_calendar",
+                "path": "/ff_calendar_nextweek.json"
+              },
+              {
+                "source": "bls_schedule",
+                "provider": "ics_calendar",
+                "path": "/bls.ics",
+                "importance": {
+                  "Consumer Price Index": 3,
+                  "Employment Situation": 3,
+                  "Producer Price Index": 2,
+                  "Real Earnings": 1,
+                  "Job Openings": 2,
+                  "Employment Cost Index": 2,
+                  "Import and Export Price": 1
+                }
+              },
+              {
+                "source": "central_banks",
+                "provider": "declared_events",
+                "path": "central-banks.json"
+              }
+            ],
+            "filter": {
+              "days_back": 1,
+              "days_ahead": 10,
+              "importance_min": 1
+            }
+          },
+          "columns": [
+            "Time (UTC)",
+            "Ctry",
+            "Event",
+            "Imp",
+            "Cons.",
+            "Actual",
+            "Prev."
+          ]
+        },
+        {
+          "id": "prints",
+          "title": "Latest official prints (US, BLS)",
+          "source": "bls",
+          "view": "table",
+          "derive": "points",
+          "fetch": {
+            "provider": "bls_series",
+            "path": "/timeseries/data/{each}",
+            "each": [
+              "CUUR0000SA0",
+              "CUUR0000SA0L1E",
+              "CES0000000001",
+              "LNS14000000"
+            ],
+            "labels": {
+              "CUUR0000SA0": "US CPI (index, NSA)",
+              "CUUR0000SA0L1E": "US core CPI (index, NSA)",
+              "CES0000000001": "Nonfarm payrolls (thousands)",
+              "LNS14000000": "Unemployment rate %"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "bls:CUUR0000SA0,bls:CUUR0000SA0L1E,bls:CES0000000001,bls:LNS14000000"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Indicator",
+            "Actual",
+            "Previous",
+            "Period"
+          ],
+          "value_columns": "actual_previous"
+        },
+        {
+          "id": "ea",
+          "title": "Euro area HICP y/y % (Eurostat)",
+          "source": "eurostat",
+          "view": "table",
+          "derive": "points",
+          "fetch": {
+            "provider": "jsonstat",
+            "path": "/prc_hicp_minr",
+            "params": {
+              "coicop18": "TOTAL",
+              "unit": "RCH_A",
+              "lastTimePeriod": "2",
+              "geo": [
+                "EA"
+              ]
+            },
+            "key_dim": "geo",
+            "labels": {
+              "EA": "Euro area HICP"
+            },
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/series",
+              "params": {
+                "ids": "eurostat:prc_hicp_minr:EA"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Indicator",
+            "Actual",
+            "Previous",
+            "Period"
+          ],
+          "value_columns": "actual_previous",
+          "unit": "%"
+        }
+      ],
+      "slug": "economic-calendar",
+      "subtitle": "Economic events by day: time, country, importance, consensus, actual, previous"
     },
     {
       "id": "news",
@@ -1522,6 +3471,128 @@
       ],
       "slug": "news",
       "subtitle": "Global news from the GDELT feed"
+    },
+    {
+      "id": "central_bank_calendar",
+      "entry": "Central Bank Calendar",
+      "tab": "nw",
+      "panels": [
+        {
+          "id": "meetings",
+          "title": "Next policy decisions",
+          "source": "central_banks",
+          "view": "calendar",
+          "derive": "events",
+          "fetch": {
+            "provider": "declared_events",
+            "path": "central-banks.json",
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/central-banks",
+              "parse": "finterm_v1"
+            },
+            "filter": {
+              "days_back": 0,
+              "days_ahead": 120,
+              "importance_min": 0
+            }
+          },
+          "columns": [
+            "Time (UTC)",
+            "Ctry",
+            "Decision",
+            "Imp",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "id": "policy",
+          "title": "Current central bank policy rates",
+          "source": "dbnomics",
+          "view": "table",
+          "derive": "latest_per_series",
+          "fetch": {
+            "provider": "dbnomics_series",
+            "path": "/series/BIS/WS_CBPOL",
+            "params": {
+              "observations": "1",
+              "metadata": "0",
+              "limit": "50",
+              "dimensions": {
+                "FREQ": [
+                  "M"
+                ],
+                "REF_AREA": [
+                  "US",
+                  "XM",
+                  "GB",
+                  "JP",
+                  "CH",
+                  "CA",
+                  "AU",
+                  "SE",
+                  "NO",
+                  "NZ"
+                ]
+              }
+            },
+            "labels": {
+              "M.US": "Federal Reserve (US)",
+              "M.XM": "ECB (Euro area)",
+              "M.GB": "Bank of England (UK)",
+              "M.JP": "Bank of Japan",
+              "M.CH": "SNB (Switzerland)",
+              "M.CA": "Bank of Canada",
+              "M.AU": "RBA (Australia)",
+              "M.SE": "Riksbank (Sweden)",
+              "M.NO": "Norges Bank",
+              "M.NZ": "RBNZ (New Zealand)"
+            }
+          },
+          "columns": [
+            "Central bank",
+            "Policy rate %",
+            "Last obs."
+          ]
+        },
+        {
+          "id": "implied",
+          "title": "Market-implied Fed path (Polymarket, %)",
+          "source": "polymarket",
+          "view": "bars",
+          "derive": "points",
+          "fetch": {
+            "provider": "polymarket_events",
+            "path": "/events",
+            "params": {
+              "tag_slug": "fed-rates",
+              "active": "true",
+              "closed": "false",
+              "limit": "6"
+            },
+            "last": 12,
+            "primary": {
+              "source": "cloud_fincept",
+              "api": "/v1/calendar/central-banks",
+              "params": {
+                "implied": "polymarket"
+              },
+              "parse": "finterm_v1"
+            }
+          },
+          "columns": [
+            "Market",
+            "Probability %",
+            "",
+            "Ends"
+          ],
+          "unit": "%"
+        }
+      ],
+      "slug": "central-bank-calendar",
+      "subtitle": "Next policy decisions, current policy rates and market-implied odds"
     },
     {
       "id": "portfolio_risk",
@@ -1896,5 +3967,320 @@
       "slug": "mp-30-70-dm-em",
       "subtitle": "30% Developed Markets, 70% Emerging Markets"
     }
-  ]
+  ],
+  "declared": {
+    "central-banks.json": {
+      "banks": [
+        {
+          "id": "fed",
+          "name": "Federal Reserve (FOMC)",
+          "country": "US",
+          "currency": "USD",
+          "tz": "America/New_York",
+          "time": "14:00",
+          "source_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+          "events": [
+            {
+              "date": "2026-01-28",
+              "ts": "2026-01-28T19:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2026-03-18",
+              "ts": "2026-03-18T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2026-04-29",
+              "ts": "2026-04-29T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2026-06-17",
+              "ts": "2026-06-17T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2026-07-29",
+              "ts": "2026-07-29T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2026-09-16",
+              "ts": "2026-09-16T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2026-10-28",
+              "ts": "2026-10-28T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2026-12-09",
+              "ts": "2026-12-09T19:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2027-01-27",
+              "ts": "2027-01-27T19:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2027-03-17",
+              "ts": "2027-03-17T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2027-04-28",
+              "ts": "2027-04-28T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2027-06-09",
+              "ts": "2027-06-09T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2027-07-28",
+              "ts": "2027-07-28T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2027-09-15",
+              "ts": "2027-09-15T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            },
+            {
+              "date": "2027-10-27",
+              "ts": "2027-10-27T18:00Z",
+              "title": "Federal Reserve (FOMC): rate decision"
+            },
+            {
+              "date": "2027-12-08",
+              "ts": "2027-12-08T19:00Z",
+              "title": "Federal Reserve (FOMC): rate decision + projections"
+            }
+          ]
+        },
+        {
+          "id": "ecb",
+          "name": "European Central Bank",
+          "country": "EA",
+          "currency": "EUR",
+          "tz": "Europe/Berlin",
+          "time": "14:15",
+          "source_url": "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html",
+          "events": [
+            {
+              "date": "2026-10-29",
+              "ts": "2026-10-29T13:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2026-12-17",
+              "ts": "2026-12-17T13:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-02-04",
+              "ts": "2027-02-04T13:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-03-18",
+              "ts": "2027-03-18T13:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-04-29",
+              "ts": "2027-04-29T12:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-06-10",
+              "ts": "2027-06-10T12:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-07-22",
+              "ts": "2027-07-22T12:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-09-09",
+              "ts": "2027-09-09T12:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-10-28",
+              "ts": "2027-10-28T12:15Z",
+              "title": "European Central Bank: rate decision"
+            },
+            {
+              "date": "2027-12-16",
+              "ts": "2027-12-16T13:15Z",
+              "title": "European Central Bank: rate decision"
+            }
+          ]
+        },
+        {
+          "id": "boe",
+          "name": "Bank of England (MPC)",
+          "country": "GB",
+          "currency": "GBP",
+          "tz": "Europe/London",
+          "time": "12:00",
+          "source_url": "https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates",
+          "events": [
+            {
+              "date": "2026-02-05",
+              "ts": "2026-02-05T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-03-19",
+              "ts": "2026-03-19T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-04-30",
+              "ts": "2026-04-30T11:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-06-18",
+              "ts": "2026-06-18T11:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-07-30",
+              "ts": "2026-07-30T11:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-09-17",
+              "ts": "2026-09-17T11:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-11-05",
+              "ts": "2026-11-05T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2026-12-17",
+              "ts": "2026-12-17T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2027-02-04",
+              "ts": "2027-02-04T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2027-03-18",
+              "ts": "2027-03-18T12:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            },
+            {
+              "date": "2027-04-29",
+              "ts": "2027-04-29T11:00Z",
+              "title": "Bank of England (MPC): rate decision"
+            }
+          ]
+        },
+        {
+          "id": "boj",
+          "name": "Bank of Japan (MPM)",
+          "country": "JP",
+          "currency": "JPY",
+          "tz": "Asia/Tokyo",
+          "time": "",
+          "source_url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm",
+          "events": [
+            {
+              "date": "2026-01-23",
+              "ts": "2026-01-23",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-03-19",
+              "ts": "2026-03-19",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-04-28",
+              "ts": "2026-04-28",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-06-16",
+              "ts": "2026-06-16",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-07-31",
+              "ts": "2026-07-31",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-09-18",
+              "ts": "2026-09-18",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-10-30",
+              "ts": "2026-10-30",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2026-12-18",
+              "ts": "2026-12-18",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-01-22",
+              "ts": "2027-01-22",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-03-18",
+              "ts": "2027-03-18",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-04-28",
+              "ts": "2027-04-28",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-06-11",
+              "ts": "2027-06-11",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-07-22",
+              "ts": "2027-07-22",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-09-22",
+              "ts": "2027-09-22",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-10-29",
+              "ts": "2027-10-29",
+              "title": "Bank of Japan (MPM): rate decision"
+            },
+            {
+              "date": "2027-12-17",
+              "ts": "2027-12-17",
+              "title": "Bank of Japan (MPM): rate decision"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

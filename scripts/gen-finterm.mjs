@@ -3,8 +3,9 @@
 //
 //   node scripts/gen-finterm.mjs [--android <dir>] [--check] [--root <dir>]
 //
-// Reads (read-only) from the Android repo: <ad_ folder>/data/sources.json (the source catalog), data/dashboards.json (the 17 dashboards,
-// panels, fetch specs, placeholders) and build.json ui.stacks (the entry -> dashboard mapping per tab, with each entry's subtitle).
+// Reads (read-only) from the Android repo: <ad_ folder>/data/sources.json (the source catalog), data/dashboards.json (the dashboards,
+// panels, fetch specs, placeholders), build.json ui.stacks (the entry -> dashboard mapping per tab, with each entry's subtitle) and the declared
+// data files a panel reads through an `asset:` source (data/central-banks.json), embedded under `declared`.
 // The fin-api mesh base is DERIVED from the vendored cloudy-u-containers declaration (scripts/fallback-services.json): never typed.
 // Writes packages/cloudy-ui/nav/finterm.json (the web terminal's declarations) and finterm-app.json (just the app id, for the route matcher). `--check` fails when the committed file differs
 // from a fresh render (CI drift guard, like gen-nav / gen-app-links).
@@ -30,7 +31,7 @@ export const strip = (v) => Array.isArray(v) ? v.map(strip)
 export const slugOf = (id) => id.toLowerCase().replace(/_/g, '-');
 
 /** Pure: the Android declarations + the containers declaration -> the web file. Throws on any contradiction. */
-export function buildFinterm({ sources, dashboards, build, services, appId }) {
+export function buildFinterm({ sources, dashboards, build, services, appId, declared = {} }) {
   const fail = (m) => { throw new Error(m); };
   const stacks = build.ui?.stacks ?? fail('build.json has no ui.stacks');
   const byId = new Map(dashboards.dashboards.map((d) => [d.id, d]));
@@ -51,7 +52,7 @@ export function buildFinterm({ sources, dashboards, build, services, appId }) {
   if (out.length !== byId.size) fail(`dashboards.json has ${byId.size} dashboards, ui.stacks maps ${out.length}`);
   const bySlug = new Map((services?.services ?? []).map((s) => [s.slug, s]));
   const mesh = {};
-  const keep = ['id', 'name', 'category', 'primary', 'priority', 'coverage', 'endpoint', 'fleet_endpoint', 'docs', 'cors', 'paths', 'connector', 'feeds', 'attribution', 'user_endpoint'];
+  const keep = ['id', 'name', 'category', 'primary', 'priority', 'coverage', 'endpoint', 'fleet_endpoint', 'docs', 'cors', 'paths', 'connector', 'feeds', 'attribution', 'user_endpoint', 'schedule'];
   const slim = sources.sources.map((s) => {
     const o = Object.fromEntries(keep.filter((k) => s[k] !== undefined).map((k) => [k, strip(s[k])]));
     o.auth = { type: s.auth?.type ?? 'none', ...(s.auth?.signup ? { signup: s.auth.signup } : {}) };
@@ -62,6 +63,17 @@ export function buildFinterm({ sources, dashboards, build, services, appId }) {
     }
     return o;
   });
+  // the data files a declared_events source reads (endpoint 'asset:' + path): every one a panel names must be supplied, nothing else is embedded
+  const wanted = new Set();
+  const assetIds = new Set(sources.sources.filter((s) => s.endpoint === 'asset:').map((s) => s.id));
+  for (const d of dashboards.dashboards) for (const p of d.panels) {
+    const f = p.fetch;
+    if (!f) continue;
+    if (assetIds.has(p.source)) wanted.add(f.path);
+    for (const fb of f.fallbacks ?? []) if (assetIds.has(fb.source)) wanted.add(fb.path);
+  }
+  const files = {};
+  for (const name of [...wanted].sort()) files[name] = strip(declared[name] ?? fail(`declared data file ${name} is named by a panel but not supplied`));
   return {
     _generated: HEADER,
     app_id: appId,
@@ -70,6 +82,7 @@ export function buildFinterm({ sources, dashboards, build, services, appId }) {
     stacks: tabStacks,
     sources: slim,
     dashboards: out,
+    declared: files,
   };
 }
 
@@ -82,6 +95,7 @@ if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
     doc = buildFinterm({
       sources: JSON.parse(need(`${dir}/data/sources.json`)), dashboards: JSON.parse(need(`${dir}/data/dashboards.json`)), build: JSON.parse(need(`${dir}/build.json`)),
       services: JSON.parse(readFileSync(join(root, 'scripts/fallback-services.json'), 'utf8')), appId,
+      declared: { 'central-banks.json': JSON.parse(need(`${dir}/data/central-banks.json`)) },
     });
   } catch (e) { console.error('FAIL', e.message); process.exit(1); }
   emit(root, { [OUT]: JSON.stringify(doc, null, 2) + '\n', [OUT_APP]: JSON.stringify({ _generated: HEADER, app_id: doc.app_id }, null, 2) + '\n' }, 'gen-finterm');

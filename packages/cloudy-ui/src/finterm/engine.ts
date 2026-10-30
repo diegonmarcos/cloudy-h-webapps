@@ -7,27 +7,34 @@
 
 export type Obs = { date: string; value: number };
 export type ChartPoint = { label: string; x: number; y: number };
-export type PanelData = { columns: string[]; rows: string[][]; links: string[]; chart: ChartPoint[]; asOf: string; note: string; servedBy: string };
+export type PanelData = { columns: string[]; rows: string[][]; links: string[]; chart: ChartPoint[]; asOf: string; note: string; servedBy: string; alerts?: string[] };
 
 export type Feed = { tab: string; entries: string[] };
 export type Source = {
   id: string; name: string; category?: string; primary?: boolean; priority: number; coverage?: string; endpoint: string; fleet_endpoint?: string; docs?: string;
   cors?: boolean; paths?: Record<string, string>; connector?: string | null; feeds: Feed[]; attribution?: string; user_endpoint?: boolean; auth: { type: string; signup?: string };
+  schedule?: { ttl_s: number };
 };
+/** A model panel's route (fetch.fallbacks[] and the panel's own fetch): source, provider, path, params, per-item list. */
+export type Route = { source?: string; provider?: string; path?: string; params?: Record<string, unknown>; each?: string[]; each_days?: number; each_user?: string; importance?: Record<string, number> };
 export type Fetch = {
   provider: string; lookback_days?: number; path?: string; params?: Record<string, unknown>; countries?: string[]; country_names?: Record<string, string>; labels?: Record<string, string>;
   series?: { id: string; label: string; years?: number; ccy?: string; quote?: string; pair?: string; dbnomics?: string }[];
   forward?: { grid: number[][]; curve_length?: number; curve_max_start?: number };
-  primary?: { source: string; topic: string };
+  primary?: { source: string; topic?: string; api?: string; params?: Record<string, unknown>; parse?: string };
+  // model panels (Feeds): routes, items, labels, curve tenors, SDMX / JSON-stat key dimension, event filter
+  fallbacks?: Route[]; merge?: boolean; each?: string[]; each_days?: number; each_user?: string; years?: Record<string, number>; key_dim?: string;
+  filter?: { days_back?: number; days_ahead?: number; importance_min?: number }; last?: number; scale?: number; forms?: string[]; cik?: string; concept?: string;
   /** The second-priority public source; a series carries its code there as `dbnomics` ("<provider>/<dataset>/<series>"). */
   fallback?: { source: string };
 };
 export type Panel = {
   id: string; title: string; source: string; view: string; derive?: string; fetch?: Fetch; columns?: string[]; unit?: string; chart_value?: string; change_unit?: string;
+  value_columns?: string; alerts?: string;
   placeholder?: { columns: string[]; rows: number };
 };
 export type Dashboard = { id: string; slug: string; entry: string; tab: string; subtitle: string; panels: Panel[]; model_portfolio?: { legs: [string, number][] } };
-export type Catalog = { mesh: Record<string, string>; sources: Source[]; dashboards: Dashboard[] };
+export type Catalog = { mesh: Record<string, string>; sources: Source[]; dashboards: Dashboard[]; declared?: Record<string, unknown> };
 
 /** A request failure: `blocked` = the browser could not read the answer (CORS, off the mesh, offline), `http` = the server answered an error. */
 export class FetchError extends Error {
@@ -43,9 +50,11 @@ export function buildUrl(endpoint: string, path: string, params: [string, string
   let p = path;
   for (const [k, v] of Object.entries(slots)) p = p.split(`{${k}}`).join(v);
   const q = params.map(([k, v]) => `${enc(k)}=${enc(v)}`).join('&');
-  return endpoint.replace(/\/+$/, '') + p + (q ? `?${q}` : '');
+  return endpoint.replace(/\/+$/, '') + p + (q ? (p.includes('?') ? '&' : '?') + q : '');
 }
-export const paramsOf = (f: Fetch): [string, string][] => Object.entries(f.params ?? {}).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)]);
+/** The declared params in order; an array repeats its key (geo=EA&geo=DE), an object is sent as its JSON text. */
+export const paramsOf = (f: { params?: Record<string, unknown> }): [string, string][] =>
+  Object.entries(f.params ?? {}).flatMap(([k, v]): [string, string][] => (Array.isArray(v) ? v.map((x) => [k, String(x)] as [string, string]) : [[k, typeof v === 'string' ? v : JSON.stringify(v)]]));
 export function minusDays(iso: string, days: number): string {
   const d = new Date(`${iso}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() - days);
@@ -173,7 +182,11 @@ const years = (v: number) => (v === Math.floor(v) ? String(v) : num(v, 1));
 // ------------------------------------------------------------------ engine
 
 export type PrimaryRoute = { source: Source; base: string; topic: string; peek: string };
-export type Ctx = { get: Get; today: string; sources: Source[]; mesh: Record<string, string>; reachable: (healthUrl: string) => Promise<boolean> };
+export type Ctx = {
+  get: Get; today: string; sources: Source[]; mesh: Record<string, string>; reachable: (healthUrl: string) => Promise<boolean>;
+  /** The user's watchlist and alert rules (kept in this browser), and now as UTC "YYYY-MM-DDTHH:MMZ". */
+  user?: UserLists; nowUtc?: string;
+};
 
 /** A browser can read a source unless it declares `cors: false` (no Access-Control-Allow-Origin header). */
 export const browserReadable = (s: Source | undefined): boolean => !!s && s.cors !== false;
@@ -201,6 +214,7 @@ export async function loadPanel(panel: Panel, dash: Dashboard, ctx: Ctx): Promis
   const f = panel.fetch;
   const source = ctx.sources.find((s) => s.id === panel.source);
   if (!f || !source) throw new Error(`panel ${panel.id} has no fetch`);
+  if (MODEL_DERIVES.includes(panel.derive ?? '')) return modelPanel(panel, dash, source, f, ctx);
   const fred = ['latest_curve', 'forward_grid', 'level_change', 'fx_spot', 'fx_cross'].includes(panel.derive ?? '');
   if (!fred && !browserReadable(source)) throw blocked(source); // no request: the source is known to be CORS-blocked
   let data: PanelData;
@@ -336,4 +350,360 @@ export function failureFor(panel: Panel, sources: Source[], e: unknown): Placeho
   const s = sources.find((x) => x.id === panel.source);
   if (e instanceof FetchError && e.kind === 'blocked') return { reason: 'blocked', note: `Mesh only / CORS: ${s?.name ?? 'the source'} does not allow browser requests; open this page on the mesh to read it through fin-api.` };
   return { reason: 'error', note: `${s?.name ?? 'The source'} is unavailable right now (${e instanceof Error ? e.message : 'error'}).` };
+}
+
+// ------------------------------------------------------------------ model panels (a port of Feeds.kt + Engine.model / Alerts.kt, #1351)
+// The normalised model every connector parses into: points (series, quotes, curve tenors), events (calendars), bars, key/value rows,
+// rows with links. Only the browser-readable connectors are parsed here (a `cors: false` source is never asked from the browser; the
+// container's /v1 answer covers it on the mesh): nyfed_rates, treasury_xml, sdmx_json, jsonstat, bls_series, frankfurter_rates,
+// coinbase_exchange, polymarket_events, sec_submissions, declared_events, finterm_v1.
+
+export type Pt = { key: string; label: string; x: number; value: number; prev: number | null; date: string };
+export type Ev = { ts: string; country: string; title: string; importance: number; consensus: string; actual: string; previous: string; kind: string };
+export type Bar = { date: string; o: number; h: number; l: number; c: number };
+export type Got = { points: Pt[]; events: Ev[]; bars: Bar[]; kv: [string, string][]; rows: string[][]; links: string[] };
+export const MODEL_DERIVES = ['points', 'events', 'candles', 'kv', 'filings'];
+const got = (g: Partial<Got> = {}): Got => ({ points: [], events: [], bars: [], kv: [], rows: [], links: [], ...g });
+const isEmpty = (g: Got) => !g.points.length && !g.events.length && !g.bars.length && !g.kv.length && !g.rows.length;
+const plus = (a: Got, b: Got): Got => ({ points: [...a.points, ...b.points], events: [...a.events, ...b.events], bars: [...a.bars, ...b.bars], kv: [...a.kv, ...b.kv], rows: [...a.rows, ...b.rows], links: [...a.links, ...b.links] });
+const fin = (v: unknown): number | null => { const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN; return Number.isFinite(n) ? n : null; };
+const s = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const objs = (a: unknown): any[] => (Array.isArray(a) ? a.filter((x) => x && typeof x === 'object' && !Array.isArray(x)) : []);
+const ev = (e: Partial<Ev> & Pick<Ev, 'ts' | 'country' | 'title' | 'importance'>): Ev => ({ consensus: '', actual: '', previous: '', kind: 'economic', ...e });
+
+export type ParseOpt = { spec: Record<string, any>; each?: string; paths?: Record<string, string> };
+/** One connector's answer -> the model; anything unrecognised is an empty model, never an error. */
+export function parseFeed(connector: string, body: string, o: ParseOpt): Got {
+  try {
+    switch (connector) {
+      case 'nyfed_rates': return feedNyfed(body);
+      case 'treasury_xml': return feedTreasury(body);
+      case 'sdmx_json': return feedSdmx(body, s(o.spec.key_dim));
+      case 'jsonstat': return feedJsonstat(body, s(o.spec.key_dim));
+      case 'bls_series': return feedBls(body);
+      case 'frankfurter_rates': return feedFrankfurter(body);
+      case 'coinbase_exchange': return feedCoinbase(body, o.each ?? '');
+      case 'polymarket_events': return feedPolymarket(body, o.spec.last ?? 12);
+      case 'sec_submissions': return feedSec(body, o);
+      case 'declared_events': return feedDeclared(body);
+      case 'finterm_v1': return feedV1(body, s(o.spec.concept));
+      default: return got();
+    }
+  } catch { return got(); }
+}
+export function feedNyfed(body: string): Got {
+  const out: Pt[] = [];
+  for (const r of objs(JSON.parse(body).refRates)) {
+    const type = s(r.type), date = s(r.effectiveDate);
+    if (type === 'SOFRAI') {
+      for (const [k, f] of [['SOFRAI_30D', 'average30day'], ['SOFRAI_90D', 'average90day'], ['SOFRAI_180D', 'average180day'], ['SOFRAI_INDEX', 'index']]) {
+        const v = fin(r[f]); if (v !== null) out.push({ key: k, label: k, x: out.length, value: v, prev: null, date });
+      }
+    } else { const v = fin(r.percentRate); if (v !== null) out.push({ key: type, label: type, x: out.length, value: v, prev: null, date }); }
+  }
+  return got({ points: out });
+}
+export function feedTreasury(body: string): Got {
+  const days: [string, Map<string, number>][] = [];
+  for (const m of body.matchAll(/<m:properties>([\s\S]*?)<\/m:properties>/g)) {
+    const date = /<d:NEW_DATE[^>]*>(\d{4}-\d{2}-\d{2})/.exec(m[1])?.[1];
+    if (!date) continue;
+    const vals = new Map<string, number>();
+    for (const v of m[1].matchAll(/<d:(BC_[0-9A-Z_]+) [^>]*>(-?[0-9.]+)<\/d:/g)) { const n = Number(v[2]); if (Number.isFinite(n)) vals.set(v[1], n); }
+    if (vals.size) days.push([date, vals]);
+  }
+  days.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const last = days[days.length - 1];
+  if (!last) return got();
+  const prev = days[days.length - 2]?.[1];
+  return got({ points: [...last[1].entries()].map(([k, v], i) => ({ key: k, label: k, x: i, value: v, prev: prev?.get(k) ?? null, date: last[0] })) });
+}
+export function feedSdmx(body: string, keyDim: string): Got {
+  const top = JSON.parse(body);
+  const root = top.data ?? top;
+  const dims = root.structure.dimensions;
+  const k = (dims.series as any[]).findIndex((d) => d.id === keyDim);
+  if (k < 0) return got();
+  const keyValues = dims.series[k].values as any[];
+  const times = dims.observation[0].values as any[];
+  const series = root.dataSets[0].series as Record<string, { observations: Record<string, unknown[]> }>;
+  const out: Pt[] = [];
+  for (const sk of Object.keys(series).sort()) {
+    const idx = Number(sk.split(':')[k]);
+    if (!Number.isInteger(idx)) continue;
+    const id = s(keyValues[idx]?.id);
+    const pairs = Object.entries(series[sk].observations).flatMap(([oi, arr]): [string, number][] => {
+      const t = times[Number(oi)]?.id; const v = fin(arr?.[0]);
+      return t !== undefined && v !== null && typeof arr?.[0] === 'number' ? [[String(t), v]] : [];
+    }).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    const last = pairs[pairs.length - 1];
+    if (last) out.push({ key: id, label: id, x: out.length, value: last[1], prev: pairs[pairs.length - 2]?.[1] ?? null, date: last[0] });
+  }
+  return got({ points: out });
+}
+export function feedJsonstat(body: string, keyDim: string): Got {
+  const o = JSON.parse(body);
+  const ids: string[] = o.id, size: number[] = o.size;
+  const posToId = (d: string): Map<number, string> => {
+    const idx = o.dimension[d].category.index; const m = new Map<number, string>();
+    if (Array.isArray(idx)) idx.forEach((x: string, i: number) => m.set(i, x)); else for (const [x, i] of Object.entries(idx)) m.set(Number(i), x);
+    return m;
+  };
+  const ki = ids.indexOf(keyDim), ti = ids.indexOf('time');
+  if (ki < 0 || ti < 0) return got();
+  const keyIds = posToId(keyDim), timeIds = posToId('time');
+  const flat = new Map<number, number>();
+  if (Array.isArray(o.value)) o.value.forEach((v: unknown, i: number) => { const n = fin(v); if (n !== null && typeof v === 'number') flat.set(i, n); });
+  else for (const [k, v] of Object.entries(o.value ?? {})) { if (typeof v === 'number' && Number.isFinite(v)) flat.set(Number(k), v); }
+  const byKey = new Map<string, [string, number][]>();
+  [...keyIds.keys()].sort((a, b) => a - b).forEach((p) => byKey.set(keyIds.get(p)!, []));
+  for (const [fi, v] of flat) {
+    let rest = fi; const coord = new Array(size.length).fill(0);
+    for (let d = size.length - 1; d >= 0; d--) { coord[d] = rest % size[d]; rest = Math.floor(rest / size[d]); }
+    const key = keyIds.get(coord[ki]), t = timeIds.get(coord[ti]);
+    if (key === undefined || t === undefined) continue;
+    byKey.get(key)!.push([t, v]);
+  }
+  const out: Pt[] = [];
+  for (const [key, list] of byKey) {
+    const srt = [...list].sort((a, b) => (a[0] < b[0] ? -1 : 1)); const last = srt[srt.length - 1];
+    if (last) out.push({ key, label: key, x: out.length, value: last[1], prev: srt[srt.length - 2]?.[1] ?? null, date: last[0] });
+  }
+  return got({ points: out });
+}
+export function feedBls(body: string): Got {
+  const out: Pt[] = [];
+  for (const sr of objs(JSON.parse(body).Results.series)) {
+    const data = objs(sr.data).flatMap((d): [string, number][] => {
+      const v = fin(d.value); const p = s(d.period);
+      return v === null ? [] : [[s(d.year) + (p.startsWith('M') && p !== 'M13' ? '-' + p.slice(1) : ''), v]];
+    }).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+    if (data[0]) out.push({ key: s(sr.seriesID), label: s(sr.seriesID), x: out.length, value: data[0][1], prev: data[1]?.[1] ?? null, date: data[0][0] });
+  }
+  return got({ points: out });
+}
+export function feedFrankfurter(body: string): Got {
+  const o = JSON.parse(body); const rates = o.rates ?? {}; const keys = Object.keys(rates);
+  if (!keys.length) return got();
+  if (rates[keys[0]] && typeof rates[keys[0]] === 'object') {
+    const dates = keys.sort(); const last = rates[dates[dates.length - 1]]; const prev = dates.length > 1 ? rates[dates[dates.length - 2]] : undefined;
+    return got({ points: Object.keys(last).sort().map((c, i) => ({ key: c, label: c, x: i, value: Number(last[c]), prev: prev && Number.isFinite(prev[c]) ? prev[c] : null, date: dates[dates.length - 1] })) });
+  }
+  return got({ points: keys.sort().map((c, i) => ({ key: c, label: c, x: i, value: Number(rates[c]), prev: null, date: s(o.date) })) });
+}
+export function feedCoinbase(body: string, each: string): Got {
+  const t = body.trimStart();
+  if (t.startsWith('[')) {
+    const bars = (JSON.parse(t) as unknown[]).filter((c): c is number[] => Array.isArray(c) && c.length >= 5)
+      .map((c) => ({ date: new Date(c[0] * 1000).toISOString().slice(0, 10), o: c[3], h: c[2], l: c[1], c: c[4] })).sort((a, b) => (a.date < b.date ? -1 : 1));
+    return got({ bars });
+  }
+  const o = JSON.parse(t); const last = fin(o.last);
+  return last === null ? got() : got({ points: [{ key: each, label: each, x: 0, value: last, prev: fin(o.open), date: '24h' }] });
+}
+export function feedPolymarket(body: string, last: number): Got {
+  const out: Pt[] = [];
+  for (const e of objs(JSON.parse(body))) for (const m of objs(e.markets)) {
+    if (m.closed === true) continue;
+    let prices: unknown; try { prices = JSON.parse(s(m.outcomePrices)); } catch { continue; }
+    const p = Array.isArray(prices) ? fin(prices[0]) : null;
+    if (p === null) continue;
+    const label = s(m.groupItemTitle) || s(m.question);
+    out.push({ key: s(m.slug) || label, label: `${s(e.title)}: ${label}`, x: out.length, value: p * 100, prev: null, date: s(e.endDate).slice(0, 10) });
+  }
+  return got({ points: out.slice(0, Math.max(1, last)) });
+}
+export function feedSec(body: string, o: ParseOpt): Got {
+  const d = JSON.parse(body); const fy = s(d.fiscalYearEnd);
+  const kv = ([['Name', s(d.name)], ['Tickers', (d.tickers ?? []).join(', ')], ['Exchanges', (d.exchanges ?? []).join(', ')], ['Industry', s(d.sicDescription)],
+    ['Filer category', s(d.category)], ['Fiscal year end', fy.length === 4 ? `${fy.slice(0, 2)}-${fy.slice(2)}` : fy], ['State of incorporation', s(d.stateOfIncorporation)], ['CIK', s(d.cik)]] as [string, string][])
+    .filter(([, v]) => v.trim() !== '');
+  const r = d.filings?.recent;
+  if (!r) return got({ kv });
+  const want = new Set<string>(o.spec.forms ?? []); const cik = s(d.cik).replace(/^0+/, ''); const tpl = o.paths?.filing ?? '';
+  const rows: string[][] = [], links: string[] = [];
+  const forms: string[] = r.form ?? [];
+  for (let i = 0; i < forms.length && rows.length < (o.spec.last ?? 12); i++) {
+    if (want.size && !want.has(forms[i])) continue;
+    rows.push([s(r.primaryDocDescription?.[i]).trim() || forms[i], forms[i], s(r.filingDate?.[i])]);
+    links.push(tpl ? tpl.replace('{cik}', cik).replace('{accession}', s(r.accessionNumber?.[i]).replace(/-/g, '')).replace('{document}', s(r.primaryDocument?.[i])) : '');
+  }
+  return got({ kv, rows, links });
+}
+export const feedDeclared = (body: string): Got => got({ events: objs(JSON.parse(body).banks).flatMap((b) => objs(b.events).map((e) => ev({ ts: s(e.ts), country: s(b.country), title: s(e.title), importance: 3, kind: 'central_bank' }))) });
+export function feedV1(body: string, concept: string): Got {
+  const o = JSON.parse(body); const pts: Pt[] = [];
+  for (const sr of objs(o.series)) {
+    const obs = objs(sr.obs).flatMap((x): [string, number][] => { const v = fin(x.value); return v === null ? [] : [[s(x.date), v]]; }).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    const last = obs[obs.length - 1]; if (!last) continue;
+    pts.push({ key: s(sr.id), label: s(sr.title) || s(sr.id), x: pts.length, value: last[1], prev: obs[obs.length - 2]?.[1] ?? null, date: last[0] });
+  }
+  for (const q of objs(o.quotes)) { const p = fin(q.price); if (p !== null) pts.push({ key: s(q.symbol), label: s(q.name) || s(q.symbol), x: pts.length, value: p, prev: fin(q.prev_close), date: s(q.ts).slice(0, 16).replace('T', ' ') }); }
+  const asof = s(o.asof); const prev = new Map<string, number>();
+  if (Array.isArray(o.prev)) for (const p of objs(o.prev)) { const v = fin(p.value); if (v !== null) prev.set(s(p.label), v); }
+  for (const p of objs(o.points)) { const v = fin(p.value); if (v === null) continue; const l = s(p.label); pts.push({ key: s(p.key) || l, label: l, x: fin(p.tenor_years) ?? pts.length, value: v, prev: prev.get(l) ?? null, date: asof }); }
+  if (o.rates && typeof o.rates === 'object') for (const c of Object.keys(o.rates).sort()) pts.push({ key: c, label: c, x: pts.length, value: Number(o.rates[c]), prev: fin(o.prev?.[c]), date: asof });
+  for (const m of objs(o.implied)) { const v = fin(m.prob); if (v !== null) pts.push({ key: s(m.label), label: s(m.label), x: pts.length, value: v, prev: null, date: s(m.ends) }); }
+  const facts = objs(o.facts?.[concept]).flatMap((x): [string, string, number][] => { const v = fin(x.val); return v === null ? [] : [[s(x.fy), s(x.end), v]]; }).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+  facts.forEach(([fy, end, v], i) => pts.push({ key: fy, label: fy, x: i, value: v, prev: facts[i - 1]?.[2] ?? null, date: end }));
+  const events = objs(o.events).map((e) => ev({ ts: s(e.ts), country: s(e.country), title: s(e.title), importance: Number(e.importance ?? 0), consensus: s(e.consensus), actual: s(e.actual), previous: s(e.previous), kind: s(e.kind) || 'economic' }));
+  const bars = objs(o.bars).flatMap((b): Bar[] => { const c = fin(b.c); return c === null ? [] : [{ date: s(b.t).slice(0, 10), o: fin(b.o) ?? c, h: fin(b.h) ?? c, l: fin(b.l) ?? c, c }]; }).sort((a, b) => (a.date < b.date ? -1 : 1));
+  const kv = o.profile && typeof o.profile === 'object' ? Object.keys(o.profile).sort().map((k) => [k, s(o.profile[k])] as [string, string]) : [];
+  const filings = objs(o.filings);
+  return { points: pts, events, bars, kv, rows: filings.map((f) => [s(f.title) || s(f.form), s(f.form), s(f.filed)]), links: filings.map((f) => s(f.url)) };
+}
+
+// ---- watchlist and alert rules (Alerts.kt)
+
+export type AlertRule = { kind: 'above' | 'below' | 'events'; symbol: string; level: number };
+export type UserLists = { watchlist: string[]; alerts: AlertRule[] };
+export const alertSymbol = (raw: string): string | null => { const t = raw.trim().toUpperCase(); return /^[A-Z0-9.^_=-]{1,15}$/.test(t) ? t : null; };
+export function alertRule(raw: string): AlertRule | null {
+  const t = raw.trim();
+  const e = /^events\s*>=\s*([0-3])$/i.exec(t);
+  if (e) return { kind: 'events', symbol: '', level: Number(e[1]) };
+  const m = /^(\S+?)\s*([<>])\s*(-?[0-9]+(?:\.[0-9]+)?)$/.exec(t);
+  if (!m) return null;
+  const sym = alertSymbol(m[1]);
+  return sym ? { kind: m[2] === '>' ? 'above' : 'below', symbol: sym, level: Number(m[3]) } : null;
+}
+export const ruleText = (r: AlertRule) => (r.kind === 'events' ? `events >= ${r.level}` : `${r.symbol} ${r.kind === 'above' ? '>' : '<'} ${sig(r.level)}`);
+const norm = (x: string) => { const u = x.toUpperCase().replace(/^[\^_]+/, ''); return u.slice(u.lastIndexOf(':') + 1); };
+export const sameSymbol = (a: string, b: string) => norm(a) === norm(b);
+export const priceHits = (rules: AlertRule[], pts: Pt[]): string[] => rules.filter((r) => r.kind !== 'events').flatMap((r) =>
+  pts.filter((p) => sameSymbol(p.key, r.symbol) || sameSymbol(p.label, r.symbol)).filter((p) => (r.kind === 'above' ? p.value > r.level : p.value < r.level))
+    .map((p) => `ALERT ${r.symbol} ${sig(p.value)} ${r.kind === 'above' ? '>' : '<'} ${sig(r.level)}`));
+export function eventHits(rules: AlertRule[], events: Ev[], nowUtc: string): string[] {
+  const lv = rules.filter((r) => r.kind === 'events').map((r) => r.level);
+  if (!lv.length || !nowUtc) return [];
+  const min = Math.min(...lv); const now = Date.parse(nowUtc.replace(/Z?$/, 'Z').replace(/(T\d{2}:\d{2})Z$/, '$1:00Z')); const end = now + 24 * 3600e3;
+  return events.filter((e) => e.importance >= min).filter((e) => {
+    if (e.ts.length === 10) return e.ts === nowUtc.slice(0, 10);
+    const t = Date.parse(e.ts.replace(/(T\d{2}:\d{2})Z$/, '$1:00Z'));
+    return Number.isFinite(t) && t >= now && t <= end;
+  }).map((e) => `ALERT ${e.ts.replace('T', ' ')} ${e.country} ${e.title}`);
+}
+
+// ---- the model engine
+
+/** The slots a path or parameter may carry. */
+export function slotsOf(f: { lookback_days?: number; cik?: string }, today: string, items: string[]): Record<string, string> {
+  const d = new Date(`${today}T00:00:00Z`); const p = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 1, 1));
+  const ym = (x: Date) => `${x.getUTCFullYear()}${String(x.getUTCMonth() + 1).padStart(2, '0')}`;
+  return { today, from: minusDays(today, f.lookback_days ?? 7), yyyymm: ym(d), prev_yyyymm: ym(p), cik: f.cik ?? '', each_csv: items.join(',') };
+}
+const fill = (v: string, sl: Record<string, string>) => Object.entries(sl).reduce((x, [k, y]) => x.split(`{${k}}`).join(y), v);
+export function eachOf(f: Route, today: string, user?: UserLists): string[] {
+  if (f.each_user === 'watchlist' && user?.watchlist.length) return user.watchlist;
+  if ((f.each_days ?? 0) > 0) return Array.from({ length: f.each_days! }, (_, i) => minusDays(today, -i));
+  return f.each ?? [];
+}
+const feedsEntryOf = feedsEntry;
+/** The container's /v1 route of a model panel (the mesh, when it answers its health path). */
+export async function apiRoute(panel: Panel, dash: Dashboard, ctx: Pick<Ctx, 'sources' | 'mesh' | 'reachable'>): Promise<{ source: Source; base: string } | null> {
+  const p = panel.fetch?.primary; const api = p?.api ?? '';
+  const src = ctx.sources.find((x) => x.id === p?.source); const own = ctx.sources.find((x) => x.id === panel.source);
+  const v1 = src?.paths?.v1 ?? '';
+  if (!p || !src || !own || !api || !v1 || !api.startsWith(v1) || !feedsEntryOf(src, dash.tab, dash.entry) || src.priority >= own.priority) return null;
+  const base = ctx.mesh[src.fleet_endpoint ?? ''] ?? '';
+  if (!base || !(await ctx.reachable(base.replace(/\/+$/, '') + (src.paths?.health ?? '')))) return null;
+  return { source: src, base };
+}
+async function fetchRoute(src: Source, spec: Fetch & Route, ctx: Ctx): Promise<Got> {
+  const items = eachOf(spec, ctx.today, ctx.user); const path = spec.path ?? ''; const ps = paramsOf(spec);
+  const perItem = items.length > 0 && (path.includes('{each}') || ps.some(([, v]) => v.includes('{each}')));
+  const list = perItem ? items : [''];
+  const conn = spec.provider || src.connector || '';
+  const res = await Promise.all(list.map(async (item) => {
+    const sl = { ...slotsOf(spec, ctx.today, items), each: item };
+    try { return parseFeed(conn, await ctx.get(buildUrl(src.endpoint, path, ps.map(([k, v]) => [k, fill(v, sl)] as [string, string]), sl)), { spec, each: item, paths: src.paths }); } catch (e) { return e instanceof Error ? e : new Error(String(e)); }
+  }));
+  const ok = res.filter((r): r is Got => !(r instanceof Error));
+  // every item failed: the first failure says why (a CORS / off-line block stays a block)
+  if (!ok.length) throw res[0];
+  return ok.reduce<Got>((a, b) => plus(a, b), got());
+}
+/** A fallback route's spec: the panel's options with the route's own path, params, items and provider. */
+function routeSpec(f: Fetch, fb: Route): Fetch & Route {
+  const { path: _p, params: _q, provider: _v, fallbacks: _f, primary: _r, each: _e, each_days: _d, each_user: _u, ...rest } = f as Fetch & Route;
+  return { ...rest, ...fb } as Fetch & Route;
+}
+async function modelPanel(panel: Panel, dash: Dashboard, source: Source, f: Fetch, ctx: Ctx): Promise<PanelData> {
+  let g = got(); let by = ''; let answered = false;
+  const api = await apiRoute(panel, dash, ctx);
+  if (api && f.primary?.api) {
+    try {
+      const items = eachOf(f as Route, ctx.today, ctx.user); const sl = slotsOf(f, ctx.today, items);
+      const r = parseFeed(f.primary.parse || 'finterm_v1', await ctx.get(buildUrl(api.base, fill(f.primary.api, sl), paramsOf(f.primary).map(([k, v]) => [k, fill(v, sl)] as [string, string]))), { spec: f });
+      if (!isEmpty(r)) { g = r; by = api.source.name; }
+    } catch { g = got(); }
+  }
+  if (isEmpty(g)) {
+    const routes: [Source, Fetch & Route][] = [];
+    if (browserReadable(source)) routes.push([source, f as Fetch & Route]);
+    for (const fb of f.fallbacks ?? []) {
+      const src = ctx.sources.find((x) => x.id === fb.source);
+      if (src && feedsEntry(src, dash.tab, dash.entry) && browserReadable(src)) routes.push([src, routeSpec(f, fb)]);
+    }
+    if (!routes.length) throw blocked(source); // every public route is CORS-blocked: no request at all
+    const names: string[] = []; let firstErr: unknown = null;
+    for (const [src, spec] of routes) {
+      let r: Got;
+      try { r = await fetchRoute(src, spec, ctx); answered = true; } catch (e) { firstErr ??= e; continue; }
+      if (isEmpty(r)) continue;
+      g = plus(g, r); names.push(src.name);
+      if (!f.merge) break;
+    }
+    const uniq = [...new Set(names)];
+    by = uniq.length === 1 && uniq[0] === source.name ? '' : uniq.join(' + ');
+    if (isEmpty(g) && !(answered && panel.derive === 'events')) throw firstErr ?? new Error('no data');
+  }
+  return { ...renderModel(panel, f, g, ctx), servedBy: by };
+}
+export function eventsIn(all: Ev[], filter: Fetch['filter'], today: string): Ev[] {
+  const from = minusDays(today, filter?.days_back ?? 1), to = minusDays(today, -(filter?.days_ahead ?? 7)), min = filter?.importance_min ?? 0;
+  const seen = new Set<string>();
+  return all.filter((e) => e.ts.length >= 10 && e.ts.slice(0, 10) >= from && e.ts.slice(0, 10) <= to && e.importance >= min)
+    .filter((e) => { const k = `${e.ts.slice(0, 13)}|${e.country}|${e.title.toLowerCase()}`; if (seen.has(k)) return false; seen.add(k); return true; })
+    .sort((a, b) => a.ts.slice(0, 10).localeCompare(b.ts.slice(0, 10)) || (a.ts.length === 10 ? '' : a.ts).localeCompare(b.ts.length === 10 ? '' : b.ts) || b.importance - a.importance);
+}
+export const dots = (n: number) => { const k = Math.max(0, Math.min(3, n)); return '\u25CF'.repeat(k) + '\u25CB'.repeat(3 - k); };
+const signedSig = (d: number) => (d >= 0 ? '+' : '-') + sig(Math.abs(d));
+function renderModel(panel: Panel, f: Fetch, g: Got, ctx: Ctx): PanelData {
+  const columns = panel.columns ?? [];
+  const base = { columns, links: [] as string[], chart: [] as ChartPoint[], asOf: '', note: '', servedBy: '' };
+  switch (panel.derive) {
+    case 'events': {
+      const evs = eventsIn(g.events, f.filter, ctx.today);
+      const alerts = panel.alerts === 'event' ? eventHits(ctx.user?.alerts ?? [], evs, ctx.nowUtc ?? '') : [];
+      return { ...base, rows: evs.map((e) => [e.ts.replace('T', ' ').replace(/Z$/, ''), e.country, e.title, dots(e.importance), e.consensus, e.actual, e.previous]), asOf: ctx.today, note: evs.length ? '' : 'No event in this window.', alerts };
+    }
+    case 'candles': {
+      const seen = new Set<string>(); const bars = g.bars.filter((b) => (seen.has(b.date) ? false : (seen.add(b.date), true))).sort((a, b) => (a.date < b.date ? -1 : 1));
+      return { ...base, chart: bars.map((b, i) => ({ label: b.date, x: i, y: b.c })), rows: bars.slice(-5).reverse().map((b) => [b.date, sig(b.o), sig(b.h), sig(b.l), sig(b.c)]), asOf: bars[bars.length - 1]?.date ?? '' };
+    }
+    case 'kv': return { ...base, rows: g.kv.map(([k, v]) => [k, v]) };
+    case 'filings': return { ...base, rows: g.rows, links: g.links, asOf: g.rows.reduce((m, r) => ((r[2] ?? '') > m ? r[2] : m), '') };
+    default: return renderPoints(panel, f, g.points, ctx, base);
+  }
+}
+function renderPoints(panel: Panel, f: Fetch, all: Pt[], ctx: Ctx, base: Omit<PanelData, 'rows'>): PanelData {
+  const keyIn = (o: Record<string, unknown>, k: string) => (k in o ? k : k.slice(k.lastIndexOf(':') + 1) in o ? k.slice(k.lastIndexOf(':') + 1) : null);
+  const seen = new Set<string>();
+  let pts = all.filter((p) => (seen.has(p.key) ? false : (seen.add(p.key), true)));
+  if (f.labels && Object.keys(f.labels).length) pts = pts.flatMap((p) => { const k = keyIn(f.labels!, p.key); return k === null ? [] : [{ ...p, label: f.labels![k] }]; });
+  if (f.years && Object.keys(f.years).length) pts = pts.flatMap((p) => { const k = keyIn(f.years!, p.key); return k === null ? [] : [{ ...p, x: f.years![k] }]; }).sort((a, b) => a.x - b.x);
+  const bp = panel.change_unit === 'bp'; const pctUnit = panel.unit === '%';
+  const v = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 1000 ? group(x) : sig(x));
+  const plain = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 10000 ? Math.round(x).toLocaleString('en-US') : String(Number(x.toFixed(4))));
+  const chg = (p: Pt) => (p.prev === null ? '-' : bp ? signed((p.value - p.prev) * 100, 1) : signedSig(p.value - p.prev));
+  const pctOf = (p: Pt) => (p.prev === null || p.prev === 0 ? null : (p.value / p.prev - 1) * 100);
+  const pctText = (p: Pt) => { const x = pctOf(p); return x === null ? '-' : signed(x, 2); };
+  const rows = pts.map((p) => panel.value_columns === 'actual_previous' ? [p.label, plain(p.value), p.prev === null ? '-' : plain(p.prev), p.date]
+    : panel.view === 'quotes' ? [p.label, v(p.value), chg(p), bp ? '-' : pctText(p), p.date] : [p.label, v(p.value), bp ? chg(p) : pctText(p), p.date]);
+  const chart = panel.view === 'curve' ? pts.map((p) => ({ label: p.label, x: p.x, y: p.value }))
+    : panel.view === 'bars' ? pts.map((p, i) => ({ label: p.label, x: i, y: panel.chart_value === 'change_pct' ? pctOf(p) ?? 0 : p.value }))
+    : panel.view === 'quotes' ? pts.map((p, i) => ({ label: p.label, x: i, y: bp ? (p.prev === null ? 0 : (p.value - p.prev) * 100) : pctOf(p) ?? 0 })) : [];
+  const alerts = panel.alerts === 'price' ? priceHits(ctx.user?.alerts ?? [], pts) : [];
+  return { ...base, rows, chart, asOf: pts.reduce((m, p) => (p.date > m ? p.date : m), ''), alerts };
 }

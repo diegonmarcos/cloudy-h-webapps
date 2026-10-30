@@ -32,6 +32,14 @@ describe('gen-finterm (pure)', () => {
     expect(JSON.stringify(o)).not.toContain('prose');
     expect(o.app_id).toBe('the-app');
   });
+  it('embeds exactly the declared data files a panel reads through an asset: source, and fails loudly on a missing one (#1351)', () => {
+    const a = clone();
+    a.sources.sources.push({ id: 'cb', name: 'CB', priority: 10, endpoint: 'asset:', auth: { type: 'none' }, connector: 'declared_events', feeds: [{ tab: 'fi', entries: ['Yield Curves'] }] });
+    a.dashboards.dashboards[0].panels.push({ id: 'm', title: 'M', source: 'cb', view: 'calendar', derive: 'events', fetch: { provider: 'declared_events', path: 'banks.json' } });
+    expect(() => buildFinterm(a)).toThrow(/declared data file banks.json/);
+    const o = buildFinterm({ ...a, declared: { 'banks.json': { _doc: 'prose', banks: [] }, 'other.json': {} } });
+    expect(o.declared).toEqual({ 'banks.json': { banks: [] } });
+  });
   it('carries the per-source cors flag through (false = a browser cannot read it), and leaves it out when undeclared', () => {
     const a = clone(); a.sources.sources[1].cors = false;
     const o = buildFinterm(a);

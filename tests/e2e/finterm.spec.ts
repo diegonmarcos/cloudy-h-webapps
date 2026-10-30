@@ -56,8 +56,11 @@ test('each FinTerm tab lists its dashboards as web pages, plus the Backend (mesh
   await expect(page.getByTestId('stack-card')).toHaveAttribute('data-planned', 'true');
 });
 
-test('each of the 17 dashboards renders: every panel is data or a placeholder that says why', async ({ page }) => {
-  expect(fin.dashboards).toHaveLength(17);
+/** A panel fed (also) by a declared data file (`asset:` source, e.g. the central bank calendar): it renders offline. */
+const declaredFed = (p: { source: string; fetch?: any }) => [p.source, ...((p.fetch?.fallbacks ?? []) as { source: string }[]).map((f) => f.source)].some((id) => src(id)?.endpoint === 'asset:');
+
+test('each of the 28 dashboards renders: every panel is data or a placeholder that says why', async ({ page }) => {
+  expect(fin.dashboards).toHaveLength(28);
   await net(page);
   for (const d of fin.dashboards) {
     await page.goto(`${BASE}/${fin.app_id}/${d.tab}/${d.slug}/`);
@@ -69,9 +72,9 @@ test('each of the 17 dashboards renders: every panel is data or a placeholder th
       const panel = panels.nth(i);
       const state = (await panel.getAttribute('data-state'))!;
       expect(state, `${d.id}/${p.id}`).toMatch(/^(data|placeholder-(keyed|user-mapped|no-connector|blocked))$/);
-      if (state === 'data') { await expect(panel.getByTestId('finterm-chart').or(panel.getByTestId('finterm-table')), `${d.id}/${p.id}`).not.toHaveCount(0); }
+      if (state === 'data') { await expect(panel.getByTestId('finterm-chart').or(panel.getByTestId('finterm-table')).or(panel.getByTestId('finterm-calendar')).or(panel.getByTestId('finterm-quotes')), `${d.id}/${p.id}`).not.toHaveCount(0); }
       else { await expect(panel.getByTestId('finterm-note'), `${d.id}/${p.id}`).not.toBeEmpty(); await expect(panel.getByTestId('finterm-placeholder')).toBeVisible(); }
-      if (p.fetch) expect(state, `${d.id}/${p.id}: offline fetch panel`).toBe('placeholder-blocked');
+      if (p.fetch) expect(state, `${d.id}/${p.id}: offline fetch panel`).toBe(declaredFed(p) ? 'data' : 'placeholder-blocked');
       await expect(panel.getByTestId('finterm-attr'), `${d.id}/${p.id}`).toContainText(src(p.source).name);
     }
   }
@@ -129,4 +132,79 @@ test('on the mesh fin-api serves first: the topic answer wins and the page says 
   await expect(ust).toHaveAttribute('data-state', 'data');
   await expect(ust.getByTestId('finterm-meta')).toContainText(`Source: ${api.name}`);
   expect(asked).not.toContain(new URL(src('fred').endpoint).host);
+});
+
+// #1351 mini Bloomberg: the economic calendar (top priority), the market monitor tiles, the watchlist and alert rules.
+test('NW Economic Calendar: off the mesh the declared central bank decisions fill the calendar, grouped by day', async ({ page }, info) => {
+  await net(page);
+  const cb = (fin as unknown as { declared: Record<string, { banks: { events: { ts: string; title: string }[] }[] }> }).declared['central-banks.json'];
+  const today = new Date().toISOString().slice(0, 10);
+  const horizon = new Date(Date.now() + 10 * 86400e3).toISOString().slice(0, 10);
+  const due = cb.banks.flatMap((b) => b.events).filter((e) => e.ts.slice(0, 10) >= new Date(Date.now() - 86400e3).toISOString().slice(0, 10) && e.ts.slice(0, 10) <= horizon);
+  await page.goto(`${BASE}/${fin.app_id}/nw/economic-calendar/`);
+  await settle(page);
+  const week = page.locator('[data-panel="week"]');
+  await expect(week).toHaveAttribute('data-state', 'data');
+  await expect(week.getByTestId('finterm-calendar')).toBeVisible();
+  if (due.length) await expect(week.getByTestId('finterm-calendar')).toContainText(due[0].title);
+  else await expect(week).toContainText('No event in this window.');
+  // the BLS prints are a public CORS-open source: offline they are a blocked placeholder, never an empty table
+  await expect(page.locator('[data-panel="prints"]')).toHaveAttribute('data-state', 'placeholder-blocked');
+  expect(today <= horizon).toBe(true);
+  await shot(page, info, 'finterm-economic-calendar');
+});
+
+test('NW Central Bank Calendar lists every declared bank and the Polymarket odds as bars', async ({ page }, info) => {
+  const poly = src('polymarket');
+  await net(page, (u) => (u.host === new URL(poly.endpoint).host ? { type: 'application/json', body: JSON.stringify([{ title: 'Fed decision in December?', endDate: '2026-12-10T00:00:00Z', markets: [
+    { groupItemTitle: '25 bps decrease', slug: 'cut', outcomePrices: '["0.62", "0.38"]' }, { groupItemTitle: 'No change', slug: 'hold', outcomePrices: '["0.36", "0.64"]' }] }]) } : null));
+  await page.goto(`${BASE}/${fin.app_id}/nw/central-bank-calendar/`);
+  await settle(page);
+  await expect(page.locator('[data-panel="meetings"]')).toHaveAttribute('data-state', 'data');
+  const implied = page.locator('[data-panel="implied"]');
+  await expect(implied).toHaveAttribute('data-state', 'data');
+  await expect(implied.getByTestId('finterm-chart')).toBeVisible();
+  await expect(implied.getByTestId('finterm-table')).toContainText('62.00');
+  await shot(page, info, 'finterm-central-banks');
+});
+
+test('FI Market Monitor: Treasury, NY Fed, ECB (Frankfurter) and Coinbase answer the browser; the tiles show last and change', async ({ page }, info) => {
+  const host = (id: string) => new URL(src(id).endpoint).host;
+  const xml = (d: string, two: number, ten: number, thirty: number) => `<m:properties><d:NEW_DATE m:type="Edm.DateTime">${d}T00:00:00</d:NEW_DATE><d:BC_2YEAR m:type="Edm.Double">${two}</d:BC_2YEAR><d:BC_10YEAR m:type="Edm.Double">${ten}</d:BC_10YEAR><d:BC_30YEAR m:type="Edm.Double">${thirty}</d:BC_30YEAR></m:properties>`;
+  await net(page, (u) => {
+    if (u.host === host('treasury_xml')) return { type: 'application/xml', body: `<feed>${xml('2026-10-29', 3.5, 4.1, 4.7)}${xml('2026-10-30', 3.52, 4.15, 4.71)}</feed>` };
+    if (u.host === host('nyfed')) return { type: 'application/json', body: JSON.stringify({ refRates: [{ effectiveDate: '2026-10-29', type: 'SOFR', percentRate: 3.91 }, { effectiveDate: '2026-10-29', type: 'EFFR', percentRate: 3.88 }] }) };
+    if (u.host === host('frankfurter')) return { type: 'application/json', body: JSON.stringify({ base: 'USD', rates: { '2026-10-29': { EUR: 0.89, JPY: 156 }, '2026-10-30': { EUR: 0.9, JPY: 157.25 } } }) };
+    if (u.host === host('coinbase')) return { type: 'application/json', body: JSON.stringify({ open: '100000', last: '101000' }) };
+    return null;
+  });
+  await page.goto(`${BASE}/${fin.app_id}/fi/market-monitor/`);
+  await settle(page);
+  const ust = page.locator('[data-panel="ust"]');
+  await expect(ust).toHaveAttribute('data-state', 'data');
+  await expect(ust.getByTestId('finterm-quotes')).toContainText('UST 10Y');
+  await expect(ust.getByTestId('finterm-quotes')).toContainText('+5.0');
+  await expect(page.locator('[data-panel="funding"]').getByTestId('finterm-quotes')).toContainText('3.91');
+  await expect(page.locator('[data-panel="fx"]').getByTestId('finterm-quotes')).toContainText('EUR per USD');
+  await expect(page.locator('[data-panel="crypto"]').getByTestId('finterm-quotes')).toContainText('+1.00');
+  // Cboe sends no CORS header: off the mesh the equity tiles are a blocked placeholder
+  await expect(page.locator('[data-panel="equity"]')).toHaveAttribute('data-state', 'placeholder-blocked');
+  await shot(page, info, 'finterm-market-monitor');
+});
+
+test('EQ Watchlist & Alerts: symbols and rules are kept in this browser; a bad entry is refused', async ({ page }) => {
+  await net(page);
+  await page.goto(`${BASE}/${fin.app_id}/eq/watchlist/`);
+  const box = page.getByTestId('finterm-userlists');
+  await expect(box).toBeVisible();
+  const entry = page.getByTestId('finterm-entry');
+  await entry.fill('nvda'); await entry.press('Enter');
+  await entry.fill('NVDA > 120'); await entry.press('Enter');
+  await entry.fill('events >= 3'); await entry.press('Enter');
+  await entry.fill('not a rule !'); await entry.press('Enter');
+  await expect(box).toContainText('Not a symbol or a rule.');
+  await page.reload();
+  await expect(page.getByTestId('finterm-userlists')).toContainText('NVDA');
+  await expect(page.getByTestId('finterm-userlists')).toContainText('NVDA > 120.00');
+  await expect(page.getByTestId('finterm-userlists')).toContainText('events >= 3');
 });
