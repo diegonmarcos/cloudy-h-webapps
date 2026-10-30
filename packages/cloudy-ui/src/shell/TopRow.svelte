@@ -8,7 +8,7 @@
   let { atHome, backHref = null, historyBack = false, orbHref = null, islandHref = null, onMenu }: {
     atHome: boolean; historyBack?: boolean; backHref?: string | null; orbHref?: string | null; islandHref?: string | null; onMenu: () => void;
   } = $props();
-  // About pages (#1322): the arrow is history-back when the visitor came from inside this site, else the plain link (the grid).
+  // About pages (#1326): the arrow is history-back when the visitor came from inside this site, else the plain link (the grid).
   const goBack = (e: MouseEvent) => {
     // client-side navigations do not update document.referrer, so ask the Navigation API for the previous entry when there is one
     const nav = (window as unknown as { navigation?: { canGoBack: boolean; currentEntry: { index: number }; entries: () => { url: string }[] } }).navigation;

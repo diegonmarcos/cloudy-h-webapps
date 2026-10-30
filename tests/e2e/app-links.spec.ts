@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { shot } from './shot';
 import { BASE } from './helpers';
 
-// #1322: every fleet app links back to its real web service; phone-only apps are grey and open an About page.
+// #1326: every fleet app links back to its real web service; phone-only apps are grey and open an About page.
 const links = JSON.parse(readFileSync('packages/cloudy-ui/nav/app-links.json', 'utf8')).links as { id: string; kind: string; href: string | null }[];
 const container = (id: string) => links.find((l) => l.id === id)!;
 

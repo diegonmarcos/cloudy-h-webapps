@@ -4,7 +4,7 @@ import { join } from 'node:path';
 // @ts-expect-error plain .mjs generator
 import { resolveLinks } from './gen-app-links.mjs';
 
-// #1322: the app -> web service mapping (data/app-links.json) and its GENERATED resolution.
+// #1326: the app -> web service mapping (data/app-links.json) and its GENERATED resolution.
 const root = join(__dirname, '..');
 const read = (p: string) => JSON.parse(readFileSync(join(root, p), 'utf8'));
 const mapping = read('data/app-links.json') as { links: { id: string; kind: string; service?: string; url?: string; href?: string; path?: string }[] };

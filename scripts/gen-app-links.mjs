@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// gen-app-links.mjs — resolves data/app-links.json (the one app -> web service mapping, #1322) into
+// gen-app-links.mjs — resolves data/app-links.json (the one app -> web service mapping, #1326) into
 // packages/cloudy-ui/nav/app-links.json, the file both sites read at build time.
 //
 //   node scripts/gen-app-links.mjs [--services-file <fallback-services.json>] [--containers <checkout>] [--check]

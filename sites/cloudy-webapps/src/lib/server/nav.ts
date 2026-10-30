@@ -31,7 +31,7 @@ export function href(base: string, target: string | undefined | null): { href: s
   return { href: null, external: false };
 }
 
-// #1322: every fleet app resolves to its real web service (data/app-links.json -> app-links.json, GENERATED).
+// #1326: every fleet app resolves to its real web service (data/app-links.json -> app-links.json, GENERATED).
 export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string };
 export const LINKS = new Map((appLinks.links as AppLink[]).map((l) => [l.id, l]));
 /** The mapping entry a tile resolves through: its `extapp:<app>[#page:..]` app, else its own id (c3-bot, ai-chat). */
@@ -309,7 +309,7 @@ function whatItDoes(a: App & { description?: string | null }): string {
   const first = d.match(/^.{20,}?[.!?](?=\s|$)/)?.[0] ?? d;
   return first.length > 300 ? `${first.slice(0, 297).trimEnd()}...` : first;
 }
-/** /<app>/about/ : the About page of a phone-only app (#1322). */
+/** /<app>/about/ : the About page of a phone-only app (#1326). */
 export function aboutView(base: string, path: string): AboutView | null {
   const parts = path.split('/').filter(Boolean);
   if (parts.length !== 2 || parts[1] !== 'about' || !ABOUT_IDS.includes(parts[0])) return null;

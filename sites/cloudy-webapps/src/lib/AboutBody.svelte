@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The About page of a phone-only fleet app (#1322): icon, name, the fixed phone-only line, what it does (nav.json, i.e. the
+  // The About page of a phone-only fleet app (#1326): icon, name, the fixed phone-only line, what it does (nav.json, i.e. the
   // app's build.json), where to get it. The back arrow lives in the shell's toolbar (history back, falls back to the grid).
   import { Icon } from '@cloudy/ui';
   import type { AboutView } from '$lib/server/nav';

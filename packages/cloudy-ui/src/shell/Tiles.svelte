@@ -43,7 +43,7 @@
   .cell { position: relative; flex: none; width: 60px; }
   .tile { display: flex; flex-direction: column; align-items: center; padding: 6px; color: var(--role-text-primary); text-decoration: none; -webkit-tap-highlight-color: transparent; }
   .tile.missing { color: var(--role-text-secondary); }
-  /* phone-only apps (#1322): desaturated with the token palette, still a link (to the About page) */
+  /* phone-only apps (#1326): desaturated with the token palette, still a link (to the About page) */
   .tile.grey { color: var(--role-text-secondary); }
   .tile.grey .glyph { filter: grayscale(1); opacity: 0.5; }
   .glyph { position: relative; display: block; line-height: 0; }
