@@ -34,6 +34,13 @@ export function extract(data: unknown, filter?: (r: PanelRow) => boolean, max = 
   if (list && typeof list === 'object' && !Array.isArray(list)) {
     const arr = Object.values(list as object).find((v) => Array.isArray(v) && v.length && typeof v[0] === 'object');
     if (arr) list = arr;
+    else {
+      // a single wrapper key ({ services: { name: {...} } }) -> its value; a map of objects -> rows named by the key
+      const vals = Object.entries(list as object).filter(([k]) => !k.startsWith('_'));
+      if (vals.length === 1 && vals[0][1] && typeof vals[0][1] === 'object' && !Array.isArray(vals[0][1])) list = vals[0][1];
+      const ents = Object.entries(list as object).filter(([k]) => !k.startsWith('_'));
+      if (ents.length && ents.every(([, v]) => v && typeof v === 'object' && !Array.isArray(v))) list = ents.map(([k, v]) => ({ name: k, ...(v as object) }));
+    }
   }
   let out: PanelRow[];
   if (Array.isArray(list)) {

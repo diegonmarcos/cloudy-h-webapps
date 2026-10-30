@@ -13,3 +13,11 @@ describe('portal panels', () => {
     expect(extract({ a: 1, _doc: 'x' })).toEqual([{ title: 'a', subtitle: '1', meta: '' }]);
   });
 });
+
+describe('extract: keyed maps', () => {
+  it('a { wrapper: { name: {...} } } dataset draws one row per name, not a JSON dump', () => {
+    const rows = extract({ services: { 'matrix-continuwuity': { vm: 'oci-apps', vm_cpu: 4 }, authelia: { vm: 'gcp-proxy' } } });
+    expect(rows.map((r) => r.title)).toEqual(['matrix-continuwuity', 'authelia']);
+    expect(rows[0].subtitle).toBe('oci-apps');
+  });
+});
