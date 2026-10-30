@@ -4,7 +4,7 @@
 //   stub folders, /cloud-mobile/) -> its new page (scripts/lib/old-paths.mjs), query + hash kept so ?embed=1 survives;
 //   /c__Cloud/, /c__Cloud/<group>/, /c__Cloud/<group>/<app>/ -> /cloud-webapps/[<app>/].
 // A stub never replaces a page the deploy already has (until the cut-over the old sites still publish theirs), except
-// the two the APK's history depends on (FORCE).
+// FORCE: the two the APK's history depends on, and the /cloud-web/ grid (its Wasm pages under /cloud-web/apps/ stay).
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,7 @@ const GROUPS = {
   'c_data-apps': 'cloud-contacts cloud-drive cloud-gallery cloud-media cloud-notes cloud-office cloud-tasks cloud-vault',
   c_tools: 'cloud-browser cloud-calc cloud-camera cloud-keyboard cloud-me cloud-nav cloud-wallet cloud-writer',
 };
-const FORCE = { '/cloud-mobile/': '/cloud-webapps/', '/cloud-superapp/cloud/apps/': '/cloud-webapps/' };
+const FORCE = { '/cloud-mobile/': '/cloud-webapps/', '/cloud-superapp/cloud/apps/': '/cloud-webapps/', '/cloud-web/': '/cloud-webapps/cloud/webapps/' };
 export const stub = (to) => `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Moved</title><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="https://diegonmarcos.github.io${to}"><script>location.replace(${JSON.stringify(to)}+location.search+location.hash)</script></head><body>Moved to <a href="${to}">${to}</a></body></html>\n`;
 let written = 0, kept = 0;
 const put = (url, to, force = false) => {
