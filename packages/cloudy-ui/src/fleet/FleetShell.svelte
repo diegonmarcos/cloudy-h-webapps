@@ -9,31 +9,62 @@
   import FleetBottomBar from './FleetBottomBar.svelte';
   import FleetSecondRows from './FleetSecondRows.svelte';
   import FleetSideMenu from './FleetSideMenu.svelte';
+  import FleetCleanDrawer from './FleetCleanDrawer.svelte';
+  import NavUiDialog from '../shell/NavUiDialog.svelte';
+  import { onMount } from 'svelte';
+  import { navChromePlan, scrollHideStep, cleanDrawerModel, declaredNavUi, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from '../shell/navUi';
+  import { navUi, loadNavUi, saveNavUi } from '../shell/navUiStore';
   type Tab = { id: string; label: string; icon: string; href: string | null };
-  let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], children }: {
+  let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], navUiDecl = null, children }: {
     app: string; background?: string; crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
     sections: { id: string; label: string; icon: string; href: string }[]; section: string | null; tabs?: Tab[]; tab?: string | null; subtabs?: Tab[]; subtab?: string | null;
     aiHref?: string | null; profileHref?: string | null; configsHref?: string | null; children: Snippet;
+    /** build.json::ui.nav_ui of the app: the nav mode and scroll-hide it starts in (Cloud Notes: clean). */
+    navUiDecl?: { mode?: string; scroll_hide?: boolean } | null;
     mode?: string; groups?: { id: string; label: string; pages: Tab[] }[]; sideItems?: { id: string; label: string; icon: string; depth: number; heading: boolean; href: string | null }[];
   } = $props();
-  let collapsed = $state(false);
   let width = $state(0);
   let last = 0;
-  const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y; if (d > 0 && y > 0) collapsed = true; else if (d < 0) collapsed = false; };
+  // The nav UI choice of THIS app (Configs > UI): the declared default, then the user's saved choice (and a ?nav= override).
+  const declared: NavUiSettings = $derived(declaredNavUi(navUiDecl));
+  let ui = $state<NavUiSettings>(DEFAULT_NAV_UI);
+  $effect(() => { const u = navUi.subscribe((v) => (ui = v)); return u; });
+  onMount(() => { loadNavUi(app, declared); });
+  const plan = $derived(navChromePlan(ui.mode));
+  // scroll-hide: a downward scroll hides ALL bars (first row, second rows, bottom) until an upward scroll reveals them
+  let chrome = $state<ChromeState>('shown');
+  const hidden = $derived(chrome === 'hidden');
+  const onScroll = (e: Event) => {
+    const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y;
+    chrome = scrollHideStep(chrome, y <= 0 ? -1 : d, ui.scrollHide);
+  };
+  $effect(() => { if (!ui.scrollHide) chrome = 'shown'; });
+  let drawerOpen = $state(false);
+  let uiOpen = $state(false);
+  const bottomPages = $derived(sections.map((s) => ({ id: s.id, label: s.label, href: s.href })));
+  const childPages = $derived(tabs.map((t) => ({ id: t.id, label: t.label, href: t.href })));
+  const drawerModel = $derived(cleanDrawerModel(bottomPages, section, childPages, tab));
+  const change = (next: NavUiSettings) => saveNavUi(app, declared, next);
 </script>
 
-<div class="fleet" class:light={background === 'light'} class:theme={background === 'theme'} class:collapsed data-app={app} data-testid="fleet-shell">
-  <div class="top" class:away={collapsed}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} /></div>
+<div class="fleet" class:light={background === 'light'} class:theme={background === 'theme'} class:clean={plan.hamburger} class:hidden data-app={app} data-nav-mode={ui.mode} data-testid="fleet-shell">
+  <div class="top" class:away={hidden}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} clean={plan.hamburger} onMenu={() => (drawerOpen = true)} onConfigsUi={() => (uiOpen = true)} /></div>
   <div class="body" bind:clientWidth={width}>
-  {#if mode === 'vertical_side_menu' && sideItems.length}<FleetSideMenu items={sideItems} selected={subtab ?? tab} narrow={width > 0 && width < 600} />{/if}
+  {#if plan.secondRow && mode === 'vertical_side_menu' && sideItems.length}<FleetSideMenu items={sideItems} selected={subtab ?? tab} narrow={width > 0 && width < 600} />{/if}
   <main class="content" onscroll={onScroll} data-testid="fleet-content">
-    {#if mode === 'horizontal_two_rows' && groups.length}<FleetSecondRows {groups} selected={tab} compact={collapsed} />
-    {:else if mode !== 'vertical_side_menu' && tabs.length > 1}<FleetSecondRow tabs={tabs} selected={tab} compact={collapsed} />{/if}
-    {#if subtabs.length > 1}<FleetSecondRow tabs={subtabs} selected={subtab} compact={collapsed} testid="fleet-third-row" />{/if}
+    {#if plan.secondRow}
+    <div class="rows" class:away={hidden}>
+    {#if mode === 'horizontal_two_rows' && groups.length}<FleetSecondRows {groups} selected={tab} compact={false} />
+    {:else if mode !== 'vertical_side_menu' && tabs.length > 1}<FleetSecondRow tabs={tabs} selected={tab} compact={false} />{/if}
+    {#if subtabs.length > 1}<FleetSecondRow tabs={subtabs} selected={subtab} compact={false} testid="fleet-third-row" />{/if}
+    </div>
+    {/if}
     {@render children()}
   </main>
   </div>
-  {#if sections.length > 1}<FleetBottomBar items={sections} selected={section} {collapsed} />{/if}
+  {#if sections.length > 1}<FleetBottomBar items={sections} selected={section} clean={plan.hamburger} {hidden} />{/if}
+  {#if plan.hamburger}<FleetCleanDrawer bind:open={drawerOpen} model={drawerModel} {aiHref} {profileHref} {configsHref} onConfigsUi={() => (uiOpen = true)} />{/if}
+  <NavUiDialog bind:open={uiOpen} settings={ui} {declared} onChange={change} />
 </div>
 
 <style>
@@ -61,9 +92,12 @@
     --f-bar-fill: var(--fleet-searchhtml-fill-light); --f-bar-border: var(--fleet-searchhtml-border-light); --f-bar-accent: var(--fleet-searchhtml-accent-light); --f-bar-idle: var(--fleet-searchhtml-idle-light); } }
   .top { flex: none; overflow: hidden; height: var(--fleet-top1-height); transition: height 200ms; }
   .top.away { height: 0; }
+  /* scroll-hide: the second rows ride on top of the content and leave with the other bars */
+  .rows { position: sticky; top: 0; z-index: 5; transition: transform 220ms, opacity 220ms; }
+  .rows.away { transform: translateY(-100%); opacity: 0; pointer-events: none; }
   .body { flex: 1; min-height: 0; display: flex; position: relative; }
   .content { flex: 1; min-width: 0; overflow-y: auto; padding-bottom: calc(var(--fleet-bottom-height) + var(--fleet-bottom-bottom-margin)); position: relative; container: pane / inline-size; }
-  @media (prefers-reduced-motion: reduce) { .top { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .top, .rows { transition: none; } }
   :global(html.embed) .fleet { position: static; overflow: visible; background: none; }
   :global(html.embed) .top, :global(html.embed) .fleet :global(.second-row) { display: none; }
   :global(html.embed) .content { overflow: visible; padding: 0; }

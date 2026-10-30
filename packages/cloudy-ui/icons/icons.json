@@ -405,7 +405,9 @@
     "account_circle",
     "arrow_drop_down",
     "auto_awesome",
-    "more_vert"
+    "menu",
+    "more_vert",
+    "settings"
   ],
   "brand": [
     "assistant"

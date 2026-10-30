@@ -4884,6 +4884,10 @@
         "sms"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "home",
@@ -4966,6 +4970,10 @@
         "about"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "people",
@@ -5020,6 +5028,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5045,6 +5055,10 @@
         "contacts"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "mail",
@@ -5154,6 +5168,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5171,6 +5187,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5188,6 +5206,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5205,6 +5225,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5230,6 +5252,8 @@
         "myterminal"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": [
         {
           "id": "backlog",
@@ -5323,6 +5347,10 @@
         "tracker"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "routes",
@@ -5445,6 +5473,10 @@
           "configs"
         ]
       },
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "tasks",
@@ -5533,6 +5565,10 @@
         "configs"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "media",
@@ -5611,6 +5647,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -5634,6 +5672,8 @@
         "events"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": [
         {
           "id": "ids",
@@ -5718,6 +5758,10 @@
         "llc"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "health",
@@ -6356,6 +6400,10 @@
         "configs"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "favourites",
@@ -6475,6 +6523,8 @@
         "settings"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": [
         {
           "id": "vault",
@@ -6517,6 +6567,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6534,6 +6586,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6551,6 +6605,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6581,6 +6637,10 @@
           "configs"
         ]
       },
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "infra",
@@ -6729,6 +6789,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6746,6 +6808,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6771,6 +6835,10 @@
         "objects"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "screenshots",
@@ -6858,6 +6926,8 @@
       "default_section": null,
       "bottom_nav": [],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": []
     },
     {
@@ -6879,6 +6949,8 @@
         "video"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [],
       "sections": [
         {
           "id": "qr_scan",
@@ -6946,6 +7018,13 @@
         "search"
       ],
       "top_bar": null,
+      "nav_ui": {
+        "mode": "clean",
+        "scroll_hide": true
+      },
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "home",
@@ -7076,6 +7155,10 @@
         "settings"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "documents",
@@ -7151,6 +7234,10 @@
         "toolkit"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "calculator",
@@ -7319,6 +7406,10 @@
         "brokers"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "news",
@@ -7664,6 +7755,10 @@
         "cgcs"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "notebook",
@@ -7891,6 +7986,10 @@
         "web"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "cloud",
@@ -8095,6 +8194,10 @@
         "costs"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "apps",
@@ -8213,6 +8316,10 @@
           "configs"
         ]
       },
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "cloud",
@@ -8352,6 +8459,10 @@
         "activity"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "personal",
@@ -8641,6 +8752,10 @@
           "configs"
         ]
       },
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "explorer",
@@ -8805,6 +8920,10 @@
         "vr-store"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "galaxy",
@@ -8854,6 +8973,10 @@
         "my-pm"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "fi",
@@ -8924,6 +9047,10 @@
         "solidworks"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "mcad",
@@ -8970,6 +9097,10 @@
         "ansys"
       ],
       "top_bar": null,
+      "nav_ui": null,
+      "configs_ui": [
+        "nav_ui"
+      ],
       "sections": [
         {
           "id": "sap2000",

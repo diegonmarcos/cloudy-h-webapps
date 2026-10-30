@@ -61,7 +61,7 @@ async function fetchGlyph(g) {
 const svgs = await pool(glyphs, 8, fetchGlyph);
 // The first row's own glyphs (libs:ui-nav-bars draws Icons.Filled.AutoAwesome / AccountCircle / MoreVert / ArrowDropDown).
 const NAVBARS = 'ab_cloud-libs-shared/libs/ui-nav-bars/src/main/kotlin/com/diegonmarcos/superapp';
-const filled = [...new Set(['navbartop1/NavBarTopFirstRow.kt', 'navbartop2/NavBarTopSecondRow.kt', 'navbarbottom/NavBarBottom.kt']
+const filled = [...new Set(['navbartop1/NavBarTopFirstRow.kt', 'navbartop1/NavCleanDrawer.kt', 'navbartop2/NavBarTopSecondRow.kt', 'navbarbottom/NavBarBottom.kt']
   .flatMap((f) => [...need(`${NAVBARS}/${f}`).matchAll(/Icons\.Filled\.(\w+)/g)].map((m) => snake(m[1]))))].sort();
 async function fetchFilled(g) {
   const r = await get(`https://cdn.jsdelivr.net/npm/@material-design-icons/svg@${MDI}/filled/${g}.svg`);

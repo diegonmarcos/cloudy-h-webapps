@@ -331,6 +331,12 @@ export const tokens = {
     "slide_out_down": 220
   },
   "nav": {
+    "cleanBarHeight": 44,
+    "cleanBottomMargin": 6,
+    "cleanCellHeight": 40,
+    "cleanDrawerRowHeight": 48,
+    "cleanDrawerWidth": 320,
+    "cleanIconSize": 22,
     "collapseMs": 220,
     "endInset": 6,
     "fitIconLabelGap": 4,
@@ -386,6 +392,14 @@ export const tokens = {
     "tabsTextMinSize": 8,
     "tabsTextSize": 12,
     "tabsTopInset": 10,
+    "topRowFill": "#00000000",
+    "ui": {
+      "cleanDrawerActions": "ai,profile,settings",
+      "cleanDrawerRows": "page_dropdown,actions,sub_page_dropdown",
+      "defaultMode": "classic",
+      "modes": "classic,clean",
+      "scrollHideDefault": 1
+    },
     "widthFraction": 0.8
   },
   "shape": {
@@ -549,4 +563,4 @@ export type Tokens = typeof tokens;
 export const THEME_IDS = ["cloud","cloud_minimalist_black"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const PALETTE_ROLES = ["window","surface","surface_selected","text_primary","text_secondary","accent","hairline","tile_ink"] as const;
-export const TOKEN_COUNT = 391;
+export const TOKEN_COUNT = 403;

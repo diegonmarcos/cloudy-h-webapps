@@ -117,6 +117,9 @@ for (const e of ui.external_apps ?? []) {
     default_section: aui.default_section ?? aui.bottom_nav?.[0] ?? sections[0]?.id ?? null,
     bottom_nav: aui.bottom_nav ?? sections.map((s) => s.id),
     top_bar: strip(aui.top_bar ?? null),
+    // the nav UI (Classic / Clean + scroll-hide): the app's declared default and the Configs > UI settings it lists (NavUi.kt)
+    nav_ui: strip(aui.nav_ui ?? null),
+    configs_ui: strip(aui.configs_ui ?? []),
     sections,
   });
 }

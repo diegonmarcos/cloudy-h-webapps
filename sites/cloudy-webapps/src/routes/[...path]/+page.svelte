@@ -20,7 +20,7 @@
   </SuperAppShell>
 {:else if v.kind === 'app'}
   <FleetShell app={v.app.id} background={v.background} crumbs={v.crumbs} related={v.related} sections={v.sections} section={v.section}
-    tabs={v.tabs} tab={v.tabSelected} subtabs={v.subtabs} subtab={v.subSelected} aiHref={v.aiHref} profileHref={v.profileHref} configsHref={v.configsHref} mode={v.mode} groups={v.groups} sideItems={v.sideItems}>
+    tabs={v.tabs} tab={v.tabSelected} subtabs={v.subtabs} subtab={v.subSelected} aiHref={v.aiHref} profileHref={v.profileHref} configsHref={v.configsHref} mode={v.mode} groups={v.groups} sideItems={v.sideItems} navUiDecl={v.navUi}>
     {#if data.body}{@const Body = data.body}<Body view={v} data={v.data} />{/if}
   </FleetShell>
 {/if}

@@ -168,6 +168,20 @@ put('color.web.background', 'color', kColor(/val FleetWebBackground = (Color\(0x
     const m = new RegExp(`const val ${k}: Int = (\\d+)`).exec(decl) ?? fail(`NavDecl.${k}`);
     put(`nav.limits.${k}`, 'number', Number(m[1]), `${NAV}/NavDecl.kt#${k}`);
   }
+  // the nav UI declaration (NavUi.kt): Classic / Clean, the Clean drawer's rows and icons, the scroll-hide default
+  const navUi = need(`${NAV}/NavUi.kt`).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const enumStrings = (name) => {
+    const body = new RegExp(`enum class ${name}\\([^)]*\\)\\s*\\{([\\s\\S]*?)\\n\\}`).exec(navUi)?.[1] ?? fail(`NavUi.kt: enum ${name} not found`);
+    const v = [...body.matchAll(/^\s*\w+\("([^"]+)"\)/gm)].map((m) => m[1]);
+    if (!v.length) fail(`NavUi.kt: enum ${name} has no entries`);
+    return v;
+  };
+  const uiSrc = `${NAV}/NavUi.kt`;
+  put('nav.ui.modes', 'string', enumStrings('NavUiMode').join(','), `${uiSrc}#NavUiMode`);
+  put('nav.ui.cleanDrawerRows', 'string', enumStrings('DrawerRow').join(','), `${uiSrc}#DrawerRow`);
+  put('nav.ui.cleanDrawerActions', 'string', enumStrings('NavQuickAction').join(','), `${uiSrc}#NavQuickAction`);
+  put('nav.ui.defaultMode', 'string', /val DEFAULT: NavUiSettings = NavUiSettings\(NavUiMode\.(\w+)/.exec(navUi)?.[1]?.toLowerCase() ?? fail('NavUiDecl.DEFAULT'), `${uiSrc}#NavUiDecl.DEFAULT`);
+  put('nav.ui.scrollHideDefault', 'number', /DEFAULT: NavUiSettings = NavUiSettings\([^)]*scrollHide = (true|false)/.exec(navUi)?.[1] === 'true' ? 1 : 0, `${uiSrc}#NavUiDecl.DEFAULT`);
   // the Android resources must agree with the defaults (FleetParityTest pins the same on Android)
   const dimens = xmlValues(`${NAV_RES}/dimens.xml`, 'dimen');
   const pairs = { pillInset: 'bottom_nav_pill_inset', iconSize: 'bottom_nav_icon_size', labelTextSize: 'bottom_nav_label_text_size', tabsPillRadius: 'page_tabs_pill_radius', islandBottomMargin: 'bottom_nav_island_bottom_margin' };

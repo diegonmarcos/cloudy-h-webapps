@@ -241,6 +241,12 @@
   --motion-fan-enter: 220ms;
   --motion-slide-in-up: 280ms;
   --motion-slide-out-down: 220ms;
+  --nav-clean-bar-height: 44px;
+  --nav-clean-bottom-margin: 6px;
+  --nav-clean-cell-height: 40px;
+  --nav-clean-drawer-row-height: 48px;
+  --nav-clean-drawer-width: 320px;
+  --nav-clean-icon-size: 22px;
   --nav-collapse-ms: 220ms;
   --nav-end-inset: 6px;
   --nav-fit-icon-label-gap: 4px;
@@ -294,6 +300,8 @@
   --nav-tabs-text-min-size: 8px;
   --nav-tabs-text-size: 12px;
   --nav-tabs-top-inset: 10px;
+  --nav-top-row-fill: #00000000;
+  --nav-ui-scroll-hide-default: 1;
   --nav-width-fraction: 0.8;
   --shape-card-padding: 14px;
   --shape-card-radius: 12px;

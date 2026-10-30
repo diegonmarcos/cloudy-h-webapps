@@ -19,7 +19,7 @@ import { stripChips, stripRight, stripShowsBattery, type StatusBarDecl } from '@
 type Page = { id: string; label: string; icon?: string; hidden?: boolean; action?: string; is_action?: boolean; pages?: Page[]; mirror_section?: string; mode?: string; url?: string; separator_before?: boolean; group?: string; subgroup?: string };
 type Tile = { id?: string; label: string; icon?: string; target?: string; separator?: boolean; tint?: boolean };
 type Section = Record<string, unknown> & { id: string; label: string; icon?: string; pages?: Page[]; tile_groups?: { title: string; tiles: Tile[] }[] };
-type App = { id: string; name: string; label: string; icon: string | null; kind: string; wasm: string | null; package: string | null; default_section: string | null; bottom_nav: string[]; top_bar: Record<string, unknown> | null; sections: (Page & { background?: string })[] };
+type App = { id: string; name: string; label: string; icon: string | null; kind: string; wasm: string | null; package: string | null; default_section: string | null; bottom_nav: string[]; top_bar: Record<string, unknown> | null; nav_ui?: { mode?: string; scroll_hide?: boolean } | null; configs_ui?: string[]; sections: (Page & { background?: string })[] };
 
 export const SA = nav.superapp as unknown as { default_section: string; bottom_nav: string[]; sections: Section[]; top_orbs?: { right?: string }; dynamic_island_action?: string; external_apps: { id: string; install_package?: string; hub_package?: string }[]; [k: string]: unknown };
 export const APPS = nav.apps as unknown as App[];
@@ -239,6 +239,8 @@ export type AppView = {
   listDetail: boolean; background: string;
   crumbs: { label: string; href: string | null }[]; related: { id: string; label: string; href: string | null; indent: number; selected: boolean }[];
   aiHref: string | null; profileHref: string | null; configsHref: string | null;
+  /** build.json::ui.nav_ui of the app: the nav mode (classic / clean) and scroll-hide it starts in. */
+  navUi: { mode?: string; scroll_hide?: boolean } | null;
   portalInfo: { url: string; service: string; embeddable: boolean; serviceHref: string } | null;
   wasmHref: string | null; portalHref: string | null;
   mode: string; groups: { id: string; label: string; pages: FleetTab[] }[];
@@ -345,6 +347,7 @@ export function appView(base: string, path: string): AppView | null {
     configsHref: has('configs') ? joinBase(base, `${app.id}/configs/`) : has('settings') ? joinBase(base, `${app.id}/settings/`) : null,
     portalInfo: p ? { ...p, serviceHref: joinBase(base, `${p.service}/`) } : null,
     mode, groups, sideItems,
+    navUi: app.nav_ui ?? null,
     // the live Kotlin/Wasm page (published by the Pages repo at /cloud-web/apps/<slug>/) while the app has no mimic body
     wasmHref: app.wasm ? `/cloud-web/apps/${app.wasm}/` : null,
     portalHref: app.wasm || p ? joinBase(base, `${app.id}/portal/`) : null,

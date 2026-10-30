@@ -8,8 +8,13 @@
   import { fitCrumbs } from './fleetNav';
   type Crumb = { label: string; href: string | null };
   type Rel = { id: string; label: string; href: string | null; indent: number; selected: boolean };
-  let { crumbs, related, aiHref = null, profileHref = null, configsHref = null }: {
+  import { CONFIGS_UI_LABEL } from '../shell/navUi';
+  let { crumbs, related, aiHref = null, profileHref = null, configsHref = null, clean = false, onMenu = () => {}, onConfigsUi = null }: {
     crumbs: Crumb[]; related: Rel[]; aiHref?: string | null; profileHref?: string | null; configsHref?: string | null;
+    /** Clean mode: the row is ONLY the top-left hamburger (the title and the icons live in the left drawer). */
+    clean?: boolean; onMenu?: () => void;
+    /** Non-null: the dropdown ends with the Configs > UI entry. */
+    onConfigsUi?: (() => void) | null;
   } = $props();
   let open = $state(false);
   let room = $state(0);
@@ -28,7 +33,10 @@
 
 <svelte:window onkeydown={(e) => { if (e.key === 'Escape') open = false; }} />
 
-<div class="app-top-bar first-row" data-testid="fleet-first-row">
+<div class="app-top-bar first-row" class:clean data-testid="fleet-first-row">
+  {#if clean}
+    <button class="ic menu" onclick={onMenu} aria-label="Open the menu" data-testid="fleet-menu"><Icon set="fleet" name="filled:menu" /></button>
+  {:else}
   <div class="left" bind:clientWidth={room}>
     <button class="island" onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
     {#if open}
@@ -41,6 +49,7 @@
         {#each related as r, i (i)}
           <svelte:element this={r.href ? 'a' : 'span'} class="item" class:on={r.selected} href={r.href} role="menuitem" style:padding-left="{16 + 16 * r.indent}px">{r.label}</svelte:element>
         {/each}
+        {#if onConfigsUi}<hr /><button class="item cfg" role="menuitem" onclick={() => { open = false; onConfigsUi(); }} data-testid="fleet-configs-ui">{CONFIGS_UI_LABEL}</button>{/if}
       </div>
     {/if}
   </div>
@@ -49,15 +58,19 @@
     <svelte:element this={profileHref ? 'a' : 'span'} class="ic" href={profileHref} aria-label="Account"><Icon set="fleet" name="filled:account_circle" /></svelte:element>
     <svelte:element this={configsHref ? 'a' : 'span'} class="ic" href={configsHref} aria-label="Configs"><Icon set="fleet" name="filled:more_vert" /></svelte:element>
   </div>
+  {/if}
 </div>
 
 <style>
   .first-row { display: flex; align-items: center; height: var(--fleet-top1-height); color: var(--f-ink); }
   .left { position: relative; flex: 1; min-width: 0; padding-left: calc(var(--fleet-top1-island-pad-h) / 2); }
-  .island { max-width: 100%; display: inline-flex; border-radius: var(--fleet-top1-island-radius); background: var(--f-island); border: 1px solid var(--f-island-border);
+  /* NavTokens.topRowFill: the title box has NO fill and NO outline in any mode, the app's background shows through */
+  .island { max-width: 100%; display: inline-flex; border-radius: var(--fleet-top1-island-radius); background: var(--nav-top-row-fill); border: 0;
     padding: var(--fleet-top1-island-pad-v) var(--fleet-top1-island-pad-h); color: var(--f-on-island); cursor: pointer; }
   h1 { margin: 0; font: 600 13px / normal var(--type-family-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .slot { width: var(--fleet-top1-slot); display: flex; justify-content: flex-end; flex: none; }
+  .menu { background: var(--nav-top-row-fill); border: 0; padding: 0; cursor: pointer; }
+  .cfg { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; }
   .ic { width: var(--fleet-top1-icon-target); height: var(--fleet-top1-icon-target); display: grid; place-items: center; color: var(--f-ink); }
   .scrim { position: fixed; inset: 0; z-index: 30; }
   .dropdown { position: absolute; z-index: 31; top: calc(100% + 4px); left: 4px; width: var(--fleet-top1-dropdown-width); max-height: var(--fleet-top1-dropdown-max-height); overflow-y: auto;

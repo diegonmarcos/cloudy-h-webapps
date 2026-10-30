@@ -6,7 +6,8 @@
   import { planIsland, lerp } from './planIsland';
   import { tokens } from '../../tokens/tokens';
   import type { NavItem } from './types';
-  let { items, selected, collapsed = false, label = 'Sections' }: { items: NavItem[]; selected: string | null; collapsed?: boolean; label?: string } = $props();
+  /** clean: the Clean bottom nav (icons only, tokens nav.clean*); hidden: scroll-hide has taken the island away. */
+  let { items, selected, collapsed = false, label = 'Sections', clean = false, hidden = false }: { items: NavItem[]; selected: string | null; collapsed?: boolean; label?: string; clean?: boolean; hidden?: boolean } = $props();
   const T = tokens.nav;
   let width = $state(0);
   const plan = $derived(width ? planIsland(width, T.widthFraction, T.endInset, items.length, T) : null);
@@ -16,14 +17,14 @@
   const text = $derived(fitted && plan ? lerp(T.fitLabelTextSize, T.labelTextSize, plan.scale) : T.labelTextSize);
 </script>
 
-<nav class="bottom-nav" aria-label={label} bind:clientWidth={width} data-testid="bottom-nav" data-collapsed={collapsed ? '1' : '0'}>
+<nav class="bottom-nav" class:clean class:away={hidden} aria-label={label} bind:clientWidth={width} data-testid="bottom-nav" data-collapsed={collapsed || clean ? '1' : '0'}>
   <div class="island" role="tablist" data-testid="island"
     style:width={fitted && plan ? `${plan.islandWidth}px` : null}
     style:padding-inline={plan ? `${plan.endInset}px` : null}>
     {#each items as it, i (i)}
       <a class="bottom-nav__item item" class:on={it.id === selected} href={it.href} role="tab" aria-selected={it.id === selected}
-        aria-label={collapsed ? it.label : undefined} aria-posinset={i + 1} aria-setsize={items.length} data-testid="bottom-nav-{it.id}">
-        <span class="slot" style:padding-block={fitted ? `${(T.iconSize - icon) / 2}px` : null}><Icon name={it.icon} size={icon} /></span>
+        aria-label={collapsed || clean ? it.label : undefined} aria-posinset={i + 1} aria-setsize={items.length} data-testid="bottom-nav-{it.id}">
+        <span class="slot" style:padding-block={fitted ? `${(T.iconSize - icon) / 2}px` : null}><Icon name={it.icon} size={clean ? T.cleanIconSize : icon} /></span>
         <span class="label" style:padding-top="{gap}px" style:font-size="{text}px" style:padding-inline={fitted ? `${T.fitLabelInset}px` : null}>{it.label}</span>
       </a>
     {/each}
@@ -44,5 +45,13 @@
     transition: max-height var(--nav-collapse-ms) ease, opacity var(--nav-collapse-ms) ease, padding-top var(--nav-collapse-ms) ease; }
   [data-collapsed='1'] .label { max-height: 0; opacity: 0; padding-top: 0 !important; }
   @media (prefers-reduced-motion: reduce) { .label { transition: none; } }
+  /* Clean: compact, icons only, a smaller island (the labels fold away as when collapsed) */
+  .clean { padding-bottom: calc(var(--nav-clean-bottom-margin) + env(safe-area-inset-bottom, 0px)); }
+  .clean .item { margin-block: 0; padding-block: calc((var(--nav-clean-bar-height) - var(--nav-clean-icon-size)) / 2); }
+  /* scroll-hide */
+  .bottom-nav { transition: transform 220ms, opacity 220ms; }
+  .away { transform: translateY(100%); opacity: 0; }
+  .away .island { pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .bottom-nav { transition: none; } }
   :global(html.embed) .bottom-nav { display: none; }
 </style>

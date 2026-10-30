@@ -11,6 +11,10 @@
   import BottomNavIsland from './BottomNavIsland.svelte';
   import PageTabs from './PageTabs.svelte';
   import Drawer from './Drawer.svelte';
+  import FleetCleanDrawer from '../fleet/FleetCleanDrawer.svelte';
+  import NavUiDialog from './NavUiDialog.svelte';
+  import { navChromePlan, scrollHideStep, cleanDrawerModel, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from './navUi';
+  import { navUi, loadNavUi, saveNavUi } from './navUiStore';
   import EmptyState from '../components/EmptyState.svelte';
   import { swipe } from './gestures';
   import { trackLayout } from './layout';
@@ -24,12 +28,22 @@
   } = $props();
 
   let drawerOpen = $state(false);
-  let collapsed = $state(false);
   let stripH = $state(0);
-  onMount(() => trackLayout());
-  // BottomNavCollapse / collapseFor: a downward scroll collapses the island to icons, an upward one restores the labels.
+  // The nav UI choice of the SuperApp (Configs > UI): Classic or Clean, and scroll-hide. SuperApp declares Classic.
+  const declared: NavUiSettings = DEFAULT_NAV_UI;
+  let ui = $state<NavUiSettings>(DEFAULT_NAV_UI);
+  $effect(() => navUi.subscribe((v) => (ui = v)));
+  onMount(() => { loadNavUi('cloud-superapp', declared); return trackLayout(); });
+  const plan = $derived(navChromePlan(ui.mode));
+  // scroll-hide: a downward scroll hides ALL bars (top row, island) until an upward scroll reveals them
+  let chrome = $state<ChromeState>('shown');
+  const hidden = $derived(chrome === 'hidden');
+  $effect(() => { if (!ui.scrollHide) chrome = 'shown'; });
   let lastY = 0;
-  const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - lastY; lastY = y; if (d > 0) collapsed = y > 0; else if (d < 0) collapsed = false; };
+  const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - lastY; lastY = y; chrome = scrollHideStep(chrome, y <= 0 ? -1 : d, ui.scrollHide); };
+  let uiOpen = $state(false);
+  const cleanModel = $derived(cleanDrawerModel(shell.bottom.map((b) => ({ id: b.id, label: b.label, href: b.href })), atHome ? 'home' : section,
+    tabs.map((t) => ({ id: t.id, label: t.label, href: t.href })), tabSelected));
   const tabSwipe = (dir: -1 | 1) => {
     const i = tabs.findIndex((t) => t.id === tabSelected);
     const next = tabHrefs[i + dir];
@@ -41,11 +55,11 @@
 <div class="shell" data-section={section} data-home={atHome ? '1' : '0'} style:--strip-h={stripH ? `${stripH}px` : null}>
   <Window />
   <div class="strip-wrap" bind:clientHeight={stripH}><StatusStrip chips={shell.chips} right={shell.right} battery={shell.battery} /></div>
-  <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} />
+  <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} clean={plan.hamburger} {hidden} />
   <div class="panes" class:split={!atHome}>
     <main class="pane master content" onscroll={onScroll} use:swipe={{ onTab: tabSwipe, onEdge: () => (drawerOpen = true) }} data-testid="content">
-      {#if tabs.length}<PageTabs {tabs} selected={tabSelected} />{/if}
-      {#if subtabs.length}<PageTabs tabs={subtabs} selected={subSelected} sub />{/if}
+      {#if plan.secondRow && tabs.length}<PageTabs {tabs} selected={tabSelected} />{/if}
+      {#if plan.secondRow && subtabs.length}<PageTabs tabs={subtabs} selected={subSelected} sub />{/if}
       {@render children()}
     </main>
     {#if !atHome}
@@ -55,8 +69,13 @@
       </section>
     {/if}
   </div>
-  <BottomNavIsland items={shell.bottom} selected={section} {collapsed} />
-  <Drawer bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} />
+  <BottomNavIsland items={shell.bottom} selected={section} clean={plan.hamburger} {hidden} />
+  {#if plan.hamburger}
+    <FleetCleanDrawer bind:open={drawerOpen} model={cleanModel} configsHref={shell.orbHref} onConfigsUi={() => (uiOpen = true)} />
+  {:else}
+    <Drawer bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} onConfigsUi={() => (uiOpen = true)} />
+  {/if}
+  <NavUiDialog bind:open={uiOpen} settings={ui} {declared} onChange={(n) => saveNavUi('cloud-superapp', declared, n)} />
 </div>
 
 <style>

@@ -6,18 +6,19 @@
   import Icon from '../shell/Icon.svelte';
   import { cellWidth } from './fleetNav';
   type Item = { id: string; label: string; icon: string; href: string };
-  let { items, selected, collapsed = false }: { items: Item[]; selected: string | null; collapsed?: boolean } = $props();
+  /** clean: icons only, the Clean sizes (tokens nav.clean*); hidden: scroll-hide has taken the bar away. */
+  let { items, selected, collapsed = false, clean = false, hidden = false }: { items: Item[]; selected: string | null; collapsed?: boolean; clean?: boolean; hidden?: boolean } = $props();
   let bar = $state(0);
   const cell = $derived(bar ? cellWidth(bar, items.length) : 56);
 </script>
 
-<nav class="fleet-bottom bottom-nav" data-testid="fleet-bottom" class:collapsed>
+<nav class="fleet-bottom bottom-nav" data-testid="fleet-bottom" class:collapsed class:clean class:away={hidden}>
   <div class="bar" role="tablist" bind:clientWidth={bar}>
     {#each items as it, i (i)}
       {@const on = it.id === selected}
-      <a class="cell" class:on class:labelled={!collapsed || on} href={it.href} role="tab" aria-selected={on} style:width="{cell}px" data-testid="fbottom-{it.id}">
-        <span class="ico"><Icon set="fleet" name={it.icon} size={24} /></span>
-        <span class="lbl">{it.label}</span>
+      <a class="cell" class:on class:labelled={!clean && (!collapsed || on)} href={it.href} role="tab" aria-selected={on} aria-label={clean ? it.label : undefined} style:width="{cell}px" data-testid="fbottom-{it.id}">
+        <span class="ico"><Icon set="fleet" name={it.icon} size={clean ? 22 : 24} /></span>
+        {#if !clean}<span class="lbl">{it.label}</span>{/if}
       </a>
     {/each}
   </div>
@@ -30,6 +31,13 @@
     padding: 0 var(--fleet-bottom-inner-pad); border-radius: var(--fleet-bottom-radius); background: var(--f-bar-fill); border: 1px solid var(--f-bar-border);
     backdrop-filter: blur(12px); transition: height 200ms; }
   .collapsed .bar { height: var(--fleet-bottom-collapsed-height); }
+  /* Clean (NavUiMode): compact, icons only, a smaller bar so the reading area gets the room */
+  .clean .bar { height: var(--nav-clean-bar-height); }
+  .clean .cell { height: var(--nav-clean-cell-height); }
+  .clean { padding-bottom: calc(var(--nav-clean-bottom-margin) + env(safe-area-inset-bottom, 0px)); }
+  /* scroll-hide: a downward scroll takes the bar away, an upward one brings it back */
+  .away { transform: translateY(100%); opacity: 0; pointer-events: none; }
+  .fleet-bottom { transition: transform 220ms, opacity 220ms; }
   .cell { position: relative; height: var(--fleet-bottom-cell); border-radius: 999px; display: grid; place-items: center; color: var(--f-bar-idle); text-decoration: none; flex: none; }
   .collapsed .cell { height: var(--fleet-bottom-collapsed-cell); }
   .cell.on { color: var(--f-bar-accent); }
@@ -38,6 +46,6 @@
   .lbl { position: absolute; left: 0; right: 0; bottom: var(--fleet-bottom-label-bottom); text-align: center; font: 500 var(--fleet-bottom-label) / normal var(--type-family-sans);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity 200ms; }
   .labelled .lbl { opacity: 1; }
-  @media (prefers-reduced-motion: reduce) { .bar, .ico, .lbl, .cell { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .bar, .ico, .lbl, .cell, .fleet-bottom { transition: none; } }
   :global(html.embed) .fleet-bottom { display: none; }
 </style>
