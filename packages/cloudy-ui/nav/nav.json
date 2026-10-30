@@ -1438,7 +1438,8 @@
                 "id": "tools-account",
                 "label": "Account",
                 "icon": "ic_p_accounts",
-                "target": "page:config/profile"
+                "target": "page:config/profile",
+                "fleet_app": "account"
               },
               {
                 "id": "me",
@@ -8835,7 +8836,7 @@
       "icon": "ic_p_markets_terminal",
       "group": "Lnktree",
       "category": "android",
-      "description": "Capital-FinTerm: the Capital area's capital-markets terminal as an Android app behind the SuperApp's Cloud > Lnktree row. Six tabs on the shared bottom nav, FI | EQ | EX | NW | PM | MY-PM: fixed income, equity, FX, news, portfolio and risk, and a personal portfolio (a simple local holdings list, nothing fetched or priced). Entries open the Capital-Stack-Fin-Terminal web apps and the GDELT news page through addresses read at build time from the SuperApp's declarations, or are planned and greyed; no price, rate or chart is drawn that is not real.",
+      "description": "Capital-FinTerm: the Capital area's capital-markets terminal as an Android app behind the SuperApp's Cloud > Lnktree row. Six tabs on the shared bottom nav, FI | EQ | EX | NW | PM | MY-PM, each entry a dashboard drawn from a DECLARED source (data/sources.json): Cloud-Fincept / fin_api on the private mesh first (with a Start / Stop / Restart control for its container), the key-free public sources (FRED, DBnomics, IMF, World Bank, GDELT) as fallback, and dashed placeholders where a source needs a key you add in Config > Sources (stored encrypted on the phone). MY-PM is a simple local holdings list. Every figure shown is what its source returned, with its date and attribution.",
       "kind": "app",
       "wasm": null,
       "default_section": "fi",
@@ -8889,6 +8890,12 @@
           "id": "about",
           "label": "About",
           "icon": "info",
+          "pages": []
+        },
+        {
+          "id": "config",
+          "label": "Config",
+          "icon": "settings",
           "pages": []
         }
       ]

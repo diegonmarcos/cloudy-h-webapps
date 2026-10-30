@@ -25,13 +25,18 @@ const args = process.argv.slice(2);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? resolve(args[i + 1]) : ''; };
 
 /** Pure: mapping + services -> resolved links. Throws on any contradiction. */
-export function resolveLinks(mapping, servicesDoc) {
+// An entry may list `alias_ids` (an app renamed on the Android side, e.g. ad_Capital-FinTerm -> ad_Capital-Stack-FinTerminal): the link is emitted
+// under whichever of its ids is a fleet app in `appIds` (nav.json apps), so regenerating after the rename needs no hand edit. `entries_open_app` (optional)
+// makes the app's own stack entries (FinTerm tabs) open this link instead of their declared sources.
+export function resolveLinks(mapping, servicesDoc, appIds = null) {
   const bySlug = new Map(servicesDoc.services.map((s) => [s.slug, s]));
   const seen = new Set();
-  const links = mapping.links.map((m) => {
+  const links = mapping.links.map((m0) => {
+    const ids = [m0.id, ...(m0.alias_ids ?? [])];
+    const m = { ...m0, id: (appIds && ids.find((i) => appIds.includes(i))) || m0.id };
     if (seen.has(m.id)) throw new Error(`duplicate mapping entry ${m.id}`);
     seen.add(m.id);
-    const base = { id: m.id, kind: m.kind, reason: m.reason };
+    const base = { id: m.id, kind: m.kind, reason: m.reason, ...(m.entries_open_app ? { entries_open_app: true } : {}) };
     if (m.kind === 'phone-only') return { ...base, href: null, about: true };
     if (m.kind === 'external') {
       if (!/^https:\/\//.test(m.url)) throw new Error(`${m.id}: external url must be https`);
@@ -54,6 +59,11 @@ export function resolveLinks(mapping, servicesDoc) {
   return { _generated: HEADER, links };
 }
 
+function appIds() {
+  const f = join(root, 'packages/cloudy-ui/nav/nav.json');
+  return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')).apps.map((a) => a.id) : null;
+}
+
 function services() {
   const f = opt('--services-file') || (opt('--containers') && join(opt('--containers'), '_shared/fallback-services.json'));
   if (f) return JSON.parse(readFileSync(f, 'utf8'));
@@ -65,7 +75,7 @@ function services() {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const mapping = JSON.parse(readFileSync(join(root, 'data/app-links.json'), 'utf8'));
   let text;
-  try { text = JSON.stringify(resolveLinks(mapping, services()), null, 2) + '\n'; } catch (e) { console.error('FAIL', e.message); process.exit(1); }
+  try { text = JSON.stringify(resolveLinks(mapping, services(), appIds()), null, 2) + '\n'; } catch (e) { console.error('FAIL', e.message); process.exit(1); }
   if (args.includes('--check')) {
     if (!existsSync(OUT) || readFileSync(OUT, 'utf8') !== text) { console.error('FAIL drift: packages/cloudy-ui/nav/app-links.json is stale vs cloudy-u-containers; run node scripts/gen-app-links.mjs'); process.exit(1); }
     console.log('ok: app-links.json current');

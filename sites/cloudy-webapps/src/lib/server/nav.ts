@@ -5,6 +5,7 @@ import targetsJson from '@cloudy/ui/nav/targets.json';
 import routesJson from '@cloudy/ui/nav/routes.json';
 import overlay from '@cloudy/ui/nav/nav-overlay.json';
 import appLinks from '@cloudy/ui/nav/app-links.json';
+import appsUi from '@cloudy/ui/nav/apps-ui.json';
 import { titleHierarchy, titleNav, type Entry } from '@cloudy/ui/src/fleet/fleetNav.ts';
 import { drawerRows, resolveTarget, joinBase, type ShellData, type Tab, type TileGroup, type TileItem } from '@cloudy/ui';
 import content from '../../apps/superapp/data/sections-content.json';
@@ -34,7 +35,7 @@ export function href(base: string, target: string | undefined | null): { href: s
 }
 
 // #1326: every fleet app resolves to its real web service (data/app-links.json -> app-links.json, GENERATED).
-export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string };
+export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string; entries_open_app?: boolean };
 export const LINKS = new Map((appLinks.links as AppLink[]).map((l) => [l.id, l]));
 /** The mapping entry a tile resolves through: its `extapp:<app>[#page:..]` app, else its own id (c3-bot, ai-chat). */
 export function linkOf(t: Tile): AppLink | undefined {
@@ -111,7 +112,7 @@ function tabsOf(base: string, prefix: string, pages: Page[]): Tab[] {
   }));
 }
 
-export type StackCardData = { title: string; subtitle: string; rows: [string, string][]; caption: string; href: string | null; planned?: boolean };
+export type StackCardData = { title: string; subtitle: string; rows: [string, string][]; caption: string; href: string | null; planned?: boolean; mesh?: boolean; external?: boolean };
 export type ItemRow = { title: string; subtitle: string; meta: string; href: string | null; lead: string };
 export type Body = {
   cube?: boolean;
@@ -148,6 +149,39 @@ function stackCards(base: string, declared: { kind?: string; title: string; subt
       caption: (s?.caption as string) ?? 'Live on the device: this card reads phone or fleet state a browser cannot reach.', href: href(base, s?.target as string).href });
   }
   return out;
+}
+
+type AppEntry = { kind?: string; title?: string; subtitle?: string; url?: string; planned?: boolean; note?: string };
+/**
+ * The page body of a Lnktree app section (#1335): the app's own ui.stacks[<section>] entries (apps-ui.json, GENERATED), each a card with ONE target.
+ * An `entry` opens the URL gen-navdata resolved from its declared source (greyed "planned" when it has none). When the app's link says
+ * `entries_open_app` (FinTerm) every dashboard entry opens that link, the app's own web service (the terminal): a container link is the private
+ * mesh URL (lock badge, new tab), never a public host. Kinds the web cannot show (holdings kept on the phone) are greyed. null = not a stack page.
+ */
+export function appStack(appId: string, sectionId: string | null): StackCardData[] | null {
+  const app = APPS.find((a) => a.id === appId);
+  const l = LINKS.get(appId);
+  const list = (appsUi.apps as Record<string, { stacks?: Record<string, AppEntry[]> }>)[appId]?.stacks?.[sectionId ?? ''];
+  if (!app || !list) return null;
+  const own = l?.entries_open_app && l.href ? l : null;
+  const cards: StackCardData[] = [];
+  for (const e of list) {
+    if (e.kind === 'section_title') { cards.push({ title: e.title ?? '', subtitle: '', rows: [], caption: '', href: null }); continue; }
+    if (e.kind === 'about') {
+      if (!l || l.kind === 'phone-only') return null;
+      cards.push({ title: app.name, subtitle: whatItDoes(app as never), rows: [], caption: '', href: own?.href ?? null, mesh: !!own?.mesh, external: own ? own.kind !== 'webapp' : false });
+      continue;
+    }
+    if (e.kind === 'dashboard' && own) { cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: '', href: own.href, mesh: !!own.mesh, external: own.kind !== 'webapp' }); continue; }
+    if (e.kind === 'dashboard' || e.kind === 'entry' || !e.kind) {
+      const url = e.kind === 'dashboard' ? null : e.url ?? null;
+      cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: url ? '' : (e.note ?? 'Planned'), href: url, planned: !url, external: !!url });
+      continue;
+    }
+    if (e.kind === 'holdings') { cards.push({ title: e.title ?? '', subtitle: e.subtitle ?? '', rows: [], caption: 'Kept on the phone: a browser cannot reach it.', href: null, planned: true }); continue; }
+    return null; // sources and other device-only kinds: the generic body
+  }
+  return cards;
 }
 
 export function pageBody(base: string, section: Section, page: Page | null): Body {

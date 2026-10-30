@@ -202,31 +202,32 @@
     },
     {
       "id": "cg-omniverse",
-      "kind": "phone-only",
-      "reason": "CG-Omniverse: a phone app (Galaxy opens the CG Galaxy web app); no web service of its own",
-      "href": null,
-      "about": true
+      "kind": "webapp",
+      "reason": "CG-Omniverse: its pages (Galaxy, Game Store, VR Store) are web pages of cloudy-webapps; Galaxy opens the CG Galaxy web app (registry 2.1.1), the stores are planned",
+      "href": "/cloud-webapps/cg-omniverse/"
     },
     {
       "id": "capital-finterm",
-      "kind": "phone-only",
-      "reason": "Capital-FinTerm: a phone app whose entries open the Fin Terminal, CentralBank, MarketWatch and GDELT News web apps; no web service of its own",
-      "href": null,
-      "about": true
+      "kind": "container",
+      "reason": "Capital-FinTerm: the web version of the terminal = FinceptTerminal (upstream Fincept-Corporation/FinceptTerminal), the fin-api container on oci-apps (cloudy-u-containers user-fin_fin-api), reached over the private mesh only; the private URL is derived from its declaration, never a public host. Every FinTerm tab entry opens this link (the terminal's routes are API topics, no per-tab page, so the deep link is the terminal home = its info route). Not the public fin-terminal/ web app (unpublished, 404)",
+      "entries_open_app": true,
+      "href": "https://fin-api.mesh.diegonmarcos.com/api/v1/info",
+      "service": "fin-api",
+      "dir": "user-fin_fin-api",
+      "mesh": true,
+      "via": "mesh"
     },
     {
       "id": "hardtech-cad",
-      "kind": "phone-only",
-      "reason": "Hardtech-CAD: a phone app (MCAD and BIM open their repo folders); no web service of its own",
-      "href": null,
-      "about": true
+      "kind": "webapp",
+      "reason": "Hardtech-CAD: its pages (MCAD, BIM, SolidWorks) are web pages of cloudy-webapps; MCAD and BIM open their repo folders, SolidWorks is planned",
+      "href": "/cloud-webapps/hardtech-cad/"
     },
     {
       "id": "hardtech-sim2real",
-      "kind": "phone-only",
-      "reason": "Hardtech-Sim2Real: a phone app, all planned; no web service of its own",
-      "href": null,
-      "about": true
+      "kind": "webapp",
+      "reason": "Hardtech-Sim2Real: its pages (SAP2000, MATLAB, Ansys) are web pages of cloudy-webapps; all planned (greyed)",
+      "href": "/cloud-webapps/hardtech-sim2real/"
     },
     {
       "id": "cloud-superintel",

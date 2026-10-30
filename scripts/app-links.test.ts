@@ -61,6 +61,13 @@ describe('resolveLinks', () => {
   it('fails when the private URL would be a public host', () => {
     expect(() => one({ kind: 'container', service: 'x' }, { services: [{ ...svc.services[0], hosts: ['x.mesh.diegonmarcos.com'] }] })).toThrow(/public host/);
   });
+  it('alias_ids: the link is emitted under whichever id is a fleet app, so an Android rename needs no hand edit', () => {
+    const m = { links: [{ id: 'old-id', alias_ids: ['new-id'], kind: 'container', service: 'x', entries_open_app: true, reason: 'r' }] };
+    expect(resolveLinks(m, svc, ['new-id']).links[0].id).toBe('new-id');
+    expect(resolveLinks(m, svc, ['old-id']).links[0].id).toBe('old-id');
+    expect(resolveLinks(m, svc, ['new-id']).links[0].entries_open_app).toBe(true);
+    expect(resolveLinks(m, svc).links[0].id).toBe('old-id');
+  });
   it('fails on a duplicate entry', () => {
     expect(() => resolveLinks({ links: [{ id: 'a', kind: 'phone-only', reason: '' }, { id: 'a', kind: 'phone-only', reason: '' }] }, svc)).toThrow(/duplicate/);
   });

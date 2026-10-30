@@ -24,7 +24,9 @@ describe('Lnktree apps (#1335)', () => {
   const row = sec('cloud').tile_groups.find((g: { title: string }) => g.title === 'Lnktree');
   const apps = (JSON.parse(readFileSync(join(root, 'packages/cloudy-ui/nav/nav.json'), 'utf8')) as { apps: { id: string; name: string; dir: string | null; bottom_nav: string[] }[] }).apps;
   it('each tile launches a real app of the Lnktree family (extapp:), and the in-app pages are gone', () => {
-    const want: Record<string, string> = { Omniverse: 'extapp:cg-omniverse', FinTerm: 'extapp:capital-finterm', CAD: 'extapp:hardtech-cad', Sim2Real: 'extapp:hardtech-sim2real' };
+    // the FinTerm app id follows the Android folder (ad_Capital-FinTerm -> ad_Capital-Stack-FinTerminal): matched by its ad_Capital- folder, not by a typed id
+    const finterm = apps.find((a) => a.dir?.startsWith('ad_Capital-'))!;
+    const want: Record<string, string> = { Omniverse: 'extapp:cg-omniverse', FinTerm: `extapp:${finterm.id}`, CAD: 'extapp:hardtech-cad', Sim2Real: 'extapp:hardtech-sim2real' };
     for (const t of row.tiles.filter((x: { separator?: boolean }) => !x.separator)) expect(t.target, t.label).toBe(want[t.label]);
     expect(nav.superapp.sections.map((s) => s.id)).not.toContain('finterm');
     for (const k of ['stack_omniverse', 'stack_cad', 'stack_sim2real']) expect(sec('cloud')[k], k).toBeUndefined();
@@ -32,10 +34,67 @@ describe('Lnktree apps (#1335)', () => {
   it('the four apps are fleet apps with their pages from their own build.json (ad_ folders)', () => {
     const by = Object.fromEntries(apps.map((a) => [a.id, a]));
     expect(by['cg-omniverse'].bottom_nav).toEqual(['galaxy', 'game-store', 'vr-store']);
-    expect(by['capital-finterm'].bottom_nav).toEqual(['fi', 'eq', 'ex', 'nw', 'pm', 'my-pm']);
+    const fin = apps.find((a) => a.dir?.startsWith('ad_Capital-'))!;
+    expect(fin.bottom_nav).toEqual(['fi', 'eq', 'ex', 'nw', 'pm', 'my-pm']);
     expect(by['hardtech-cad'].bottom_nav).toEqual(['mcad', 'bim', 'solidworks']);
     expect(by['hardtech-sim2real'].bottom_nav).toEqual(['sap2000', 'matlab', 'ansys']);
-    expect(by['capital-finterm'].dir).toBe('ad_Capital-FinTerm');
     expect(by['cg-omniverse'].name).toBe('CG-Omniverse');
+  });
+});
+
+// The web of the four Lnktree apps (the Lnktree row on the web grid, their pages, the FinTerm terminal link).
+describe('Lnktree apps on the web', () => {
+  const read = (p: string) => JSON.parse(readFileSync(join(root, p), 'utf8'));
+  const links = read('packages/cloudy-ui/nav/app-links.json').links as { id: string; kind: string; href: string | null; mesh?: boolean; service?: string; entries_open_app?: boolean }[];
+  const mapping = read('data/app-links.json').links as Record<string, unknown>[];
+  const services = read('scripts/fallback-services.json').services as { slug: string; hosts: string[] }[];
+  const stacks = read('packages/cloudy-ui/nav/apps-ui.json').apps as Record<string, { stacks: Record<string, { kind?: string; title?: string; url?: string; planned?: boolean; registry?: string; repo?: string; site?: string }[]> }>;
+  const apps = (read('packages/cloudy-ui/nav/nav.json').apps as { id: string; dir: string | null }[]);
+  const fin = apps.find((a) => a.dir?.startsWith('ad_Capital-'))!;
+
+  it('Omniverse, CAD and Sim2Real are web pages of this site (not About stubs); FinTerm is the terminal', () => {
+    for (const id of ['cg-omniverse', 'hardtech-cad', 'hardtech-sim2real']) {
+      const l = links.find((x) => x.id === id)!;
+      expect(l.kind, id).toBe('webapp');
+      expect(l.href, id).toBe(`/cloud-webapps/${id}/`);
+    }
+  });
+
+  it('the FinTerm link is the declared container (private mesh URL), never a public internet host', () => {
+    const l = links.find((x) => x.id === fin.id)!;
+    expect(l.kind).toBe('container');
+    expect(l.mesh).toBe(true);
+    const u = new URL(l.href!);
+    expect(u.host).toMatch(/^[a-z0-9-]+\.mesh\.diegonmarcos\.com$|^c3-pvt\.diegonmarcos\.com$/);
+    const svc = services.find((s) => s.slug === l.service)!;
+    expect(svc, 'declared in cloudy-u-containers').toBeTruthy();
+    expect(svc.hosts).not.toContain(u.host);
+    expect(l.entries_open_app).toBe(true);
+  });
+
+  it('no hand-typed URL for the container, and none for the apps in the mapping (webapp paths are root-absolute)', () => {
+    for (const m of mapping.filter((x) => ['capital-finterm', 'cg-omniverse', 'hardtech-cad', 'hardtech-sim2real'].includes(x.id as string))) {
+      expect(m.url, m.id as string).toBeUndefined();
+      expect(m.href, m.id as string).toBeUndefined();
+      expect(JSON.stringify(m.path ?? ''), m.id as string).not.toMatch(/https?:/);
+    }
+  });
+
+  it('every page entry carries a declared-source URL or is planned (no typed URL, no dead entry), source keys are consumed', () => {
+    for (const id of ['cg-omniverse', 'hardtech-cad', 'hardtech-sim2real']) for (const [sec, list] of Object.entries(stacks[id].stacks)) for (const e of list) {
+      if (e.kind) continue;
+      expect(Boolean(e.url) !== Boolean(e.planned), `${id}/${sec}/${e.title}`).toBe(true);
+      expect(e.registry ?? e.repo, `${id}/${e.title}`).toBeUndefined();
+    }
+    const by = (id: string, sec: string) => stacks[id].stacks[sec][0];
+    expect(by('cg-omniverse', 'galaxy').url).toMatch(/^https:\/\//);
+    expect(by('cg-omniverse', 'game-store').planned).toBe(true);
+    expect(by('hardtech-cad', 'mcad').url).toMatch(/^https:\/\/github\.com\//);
+    expect(by('hardtech-cad', 'solidworks').planned).toBe(true);
+    for (const sec of ['sap2000', 'matlab', 'ansys']) expect(by('hardtech-sim2real', sec).planned, sec).toBe(true);
+  });
+
+  it('the FinTerm tabs are FI, EQ, EX, NW, PM, MY-PM and each tab has entries', () => {
+    expect(Object.keys(stacks[fin.id].stacks).filter((k) => ['fi', 'eq', 'ex', 'nw', 'pm', 'my-pm'].includes(k))).toEqual(['fi', 'eq', 'ex', 'nw', 'pm', 'my-pm']);
   });
 });

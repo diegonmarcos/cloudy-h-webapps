@@ -9162,7 +9162,7 @@
           {
             "title": "Galaxy",
             "subtitle": "CG Galaxy: the 3D galaxy worlds web app",
-            "registry": "2.1.1"
+            "url": "https://diegonmarcos.github.io/galaxy/"
           }
         ],
         "game-store": [
@@ -9192,115 +9192,122 @@
       "stacks": {
         "fi": [
           {
+            "kind": "dashboard",
             "title": "Yield Curves",
             "subtitle": "Spot, forward and zero curves, US and major sovereigns",
-            "site": "Fin Terminal"
+            "dashboard": "yield_curves"
           },
           {
+            "kind": "dashboard",
             "title": "Forward Rates",
             "subtitle": "Forward rate curves and the paths they imply",
-            "site": "Fin Terminal"
+            "dashboard": "forward_rates"
           },
           {
+            "kind": "dashboard",
             "title": "World Interest Rate Probabilities",
             "subtitle": "Market-implied central bank rate paths",
-            "site": "CentralBank"
+            "dashboard": "rate_probabilities"
           },
           {
+            "kind": "dashboard",
             "title": "World Bonds",
             "subtitle": "Sovereign bond yields and spreads by country",
-            "site": "Fin Terminal"
+            "dashboard": "world_bonds"
           }
         ],
         "eq": [
           {
+            "kind": "dashboard",
             "title": "World Equity Indices",
             "subtitle": "Major equity index levels and moves worldwide",
-            "site": "MarketWatch"
+            "dashboard": "world_equity_indices"
           }
         ],
         "ex": [
           {
+            "kind": "dashboard",
             "title": "FX",
             "subtitle": "Comprehensive real-time currency pricing, matrix crosses, spot rates, and forwards",
-            "site": "Fin Terminal"
+            "dashboard": "fx"
           },
           {
+            "kind": "dashboard",
             "title": "Onshore USD Rates",
             "subtitle": "Onshore USD rate benchmarks and curves",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "onshore_usd_rates"
           }
         ],
         "nw": [
           {
+            "kind": "dashboard",
             "title": "News",
             "subtitle": "Global news from the GDELT feed",
-            "site": "GDELT News"
+            "dashboard": "news"
           }
         ],
         "pm": [
           {
+            "kind": "dashboard",
             "title": "Portfolio & Risk Analytics",
             "subtitle": "Comprehensive portfolio tracking, attribution analysis, factor exposures and scenario stress testing for well-known portfolios",
-            "planned": true,
-            "note": "Planned: analytics coming"
+            "dashboard": "portfolio_risk"
           },
           {
             "kind": "section_title",
             "title": "Model portfolios: bonds / equity"
           },
           {
+            "kind": "dashboard",
             "title": "40/60",
             "subtitle": "40% bonds, 60% equity",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_40_60"
           },
           {
+            "kind": "dashboard",
             "title": "70/30",
             "subtitle": "70% bonds, 30% equity",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_70_30"
           },
           {
+            "kind": "dashboard",
             "title": "60/40",
             "subtitle": "60% bonds, 40% equity",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_60_40"
           },
           {
+            "kind": "dashboard",
             "title": "30/70",
             "subtitle": "30% bonds, 70% equity",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_30_70"
           },
           {
             "kind": "section_title",
             "title": "Model portfolios: DM / EM"
           },
           {
+            "kind": "dashboard",
             "title": "70/30 DM/EM",
             "subtitle": "70% Developed Markets, 30% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_70_30_DM_EM"
           },
           {
+            "kind": "dashboard",
             "title": "60/40 DM/EM",
             "subtitle": "60% Developed Markets, 40% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_60_40_DM_EM"
           },
           {
+            "kind": "dashboard",
             "title": "40/60 DM/EM",
             "subtitle": "40% Developed Markets, 60% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_40_60_DM_EM"
           },
           {
+            "kind": "dashboard",
             "title": "30/70 DM/EM",
             "subtitle": "30% Developed Markets, 70% Emerging Markets",
-            "planned": true,
-            "note": "Planned: coming"
+            "dashboard": "mp_30_70_DM_EM"
           }
         ],
         "my-pm": [
@@ -9314,6 +9321,16 @@
           {
             "kind": "about"
           }
+        ],
+        "config": [
+          {
+            "kind": "sources",
+            "title": "Sources",
+            "subtitle": "The data sources behind every dashboard, and your own API keys (kept encrypted on this phone)"
+          },
+          {
+            "kind": "about"
+          }
         ]
       }
     },
@@ -9323,16 +9340,14 @@
           {
             "title": "MCAD",
             "subtitle": "Mechanical CAD: FreeCAD and AutoCAD agents (MCP)",
-            "repo": "HardTech-Stack-CAD-Simulators",
-            "path": "Structural-Designer/OpenCAD"
+            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenCAD"
           }
         ],
         "bim": [
           {
             "title": "BIM",
             "subtitle": "Building information models: IFC and Bonsai agents (MCP)",
-            "repo": "HardTech-Stack-CAD-Simulators",
-            "path": "Structural-Designer/OpenBIM"
+            "url": "https://github.com/diegonmarcos/HardTech-Stack-CAD-Simulators/tree/main/Structural-Designer/OpenBIM"
           }
         ],
         "solidworks": [

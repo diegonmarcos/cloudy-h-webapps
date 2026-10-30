@@ -93,6 +93,14 @@ for (const e of ui.external_apps ?? []) {
   // the rest of the app's ui (modes, keys, c3_ops, ...): page bodies read it at build time, the client never loads the file
   const rest = Object.fromEntries(Object.entries(aui).filter(([k]) => !k.startsWith('_') && !['sections', 'bottom_nav', 'default_section', 'top_bar', 'permissions', 'debug_api'].includes(k)));
   if (Object.keys(rest).length) appsUi[e.id] = strip(rest);
+  // An app's own ui.stacks (the ad_ Lnktree apps, #1335) resolve their entries exactly like the SuperApp's: `site` / `registry` / `repo`+`path` -> url, the
+  // same way the APK bakes UI_TARGETS_B64. The web may route an app's entries to the app's own web service
+  // (data/app-links.json `entries_open_app`, the FinTerm terminal); planned or unresolved entries get no url.
+  for (const list of Object.values(appsUi[e.id]?.stacks ?? {})) for (const en of list) {
+    if (en.kind && en.kind !== 'entry') continue;
+    const u = entryUrl(en); if (u) en.url = u;
+    for (const f of ['registry', 'repo', 'path']) delete en[f];
+  }
   apps.push({
     id: e.id,
     dir: raw ? dir : null,
