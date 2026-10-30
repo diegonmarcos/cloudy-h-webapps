@@ -10,7 +10,7 @@
   import FleetSecondRows from './FleetSecondRows.svelte';
   import FleetSideMenu from './FleetSideMenu.svelte';
   import { onMount } from 'svelte';
-  import { navChromePlan, scrollHideStep, cleanDrawerModel, declaredNavUi, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from '../shell/navUi';
+  import { navChromePlan, scrollHideStep, declaredNavUi, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from '../shell/navUi';
   import { navUi, loadNavUi, saveNavUi } from '../shell/navUiStore';
   type Tab = { id: string; label: string; icon: string; href: string | null };
   let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], navUiDecl = null, children }: {
@@ -39,9 +39,6 @@
   $effect(() => { if (!ui.scrollHide) chrome = 'shown'; });
   let drawerOpen = $state(false);
   let uiOpen = $state(false);
-  const bottomPages = $derived(sections.map((s) => ({ id: s.id, label: s.label, href: s.href })));
-  const childPages = $derived(tabs.map((t) => ({ id: t.id, label: t.label, href: t.href })));
-  const drawerModel = $derived(cleanDrawerModel(bottomPages, section, childPages, tab));
   const change = (next: NavUiSettings) => saveNavUi(app, declared, next);
 </script>
 
@@ -62,7 +59,7 @@
   </div>
   {#if sections.length > 1}<FleetBottomBar items={sections} selected={section} clean={plan.hamburger} {hidden} />{/if}
   <!-- loaded when first needed: the shell's up-front JS has a budget -->
-  {#if plan.hamburger}{#await import('./FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} model={drawerModel} {aiHref} {profileHref} {configsHref} onConfigsUi={() => (uiOpen = true)} />{/await}{/if}
+  {#if plan.hamburger}{#await import('./FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} bottom={sections} {section} childPages={tabs} selectedChild={tab} {aiHref} {profileHref} {configsHref} onConfigsUi={() => (uiOpen = true)} />{/await}{/if}
   {#if uiOpen}{#await import('../shell/NavUiDialog.svelte') then m}<m.default bind:open={uiOpen} settings={ui} {declared} onChange={change} />{/await}{/if}
 </div>
 

@@ -3,10 +3,13 @@
   // AI / Profile / Settings icons, row 3 a dropdown of the child pages; then the Configs > UI entry. Rows come from the declaration
   // (cleanDrawerModel), never from a literal here.
   import Icon from '../shell/Icon.svelte';
-  import { CONFIGS_UI_LABEL, type CleanDrawerModel } from '../shell/navUi';
-  let { open = $bindable(false), model, aiHref = null, profileHref = null, configsHref = null, onConfigsUi }: {
-    open?: boolean; model: CleanDrawerModel; aiHref?: string | null; profileHref?: string | null; configsHref?: string | null; onConfigsUi: () => void;
+  import { CONFIGS_UI_LABEL, cleanDrawerModel } from '../shell/navUi';
+  type Page = { id: string; label: string; href: string | null };
+  let { open = $bindable(false), bottom, section, childPages, selectedChild, aiHref = null, profileHref = null, configsHref = null, onConfigsUi }: {
+    open?: boolean; bottom: Page[]; section: string | null; childPages: Page[]; selectedChild: string | null;
+    aiHref?: string | null; profileHref?: string | null; configsHref?: string | null; onConfigsUi: () => void;
   } = $props();
+  const model = $derived(cleanDrawerModel(bottom, section, childPages, selectedChild));
   const go = (e: Event) => { const v = (e.currentTarget as HTMLSelectElement).value; if (v) { open = false; location.assign(v); } };
   const hrefOf = { ai: () => aiHref, profile: () => profileHref, settings: () => configsHref };
   const glyph = { ai: 'filled:auto_awesome', profile: 'filled:account_circle', settings: 'filled:settings' };

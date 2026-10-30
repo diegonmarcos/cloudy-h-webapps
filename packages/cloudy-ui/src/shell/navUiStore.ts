@@ -1,9 +1,14 @@
 // The nav UI choice of the page, per app, persisted in localStorage (the web twin of NavUiPrefs). A `?nav=clean|classic` query is a
 // one-off override that is not saved (links, screenshots, the e2e walk).
-import { writable, type Writable } from 'svelte/store';
 import { DEFAULT_NAV_UI, NAV_UI_KEY, NAV_UI_MODES, parseNavUi, type NavUiMode, type NavUiSettings } from './navUi';
 
-export const navUi: Writable<NavUiSettings> = writable(DEFAULT_NAV_UI);
+// A hand-rolled store (the Svelte store contract: subscribe/set), so the shell's up-front JS does not carry svelte/store (budget).
+const subscribers = new Set<(v: NavUiSettings) => void>();
+let current: NavUiSettings = DEFAULT_NAV_UI;
+export const navUi = {
+  subscribe(fn: (v: NavUiSettings) => void): () => void { fn(current); subscribers.add(fn); return () => { subscribers.delete(fn); }; },
+  set(v: NavUiSettings): void { current = v; subscribers.forEach((fn) => fn(v)); },
+};
 
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 

@@ -11,7 +11,7 @@
   import BottomNavIsland from './BottomNavIsland.svelte';
   import PageTabs from './PageTabs.svelte';
   import Drawer from './Drawer.svelte';
-  import { navChromePlan, scrollHideStep, cleanDrawerModel, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from './navUi';
+  import { navChromePlan, scrollHideStep, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from './navUi';
   import { navUi, loadNavUi, saveNavUi } from './navUiStore';
   import EmptyState from '../components/EmptyState.svelte';
   import { swipe } from './gestures';
@@ -40,8 +40,7 @@
   let lastY = 0;
   const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - lastY; lastY = y; chrome = scrollHideStep(chrome, y <= 0 ? -1 : d, ui.scrollHide); };
   let uiOpen = $state(false);
-  const cleanModel = $derived(cleanDrawerModel(shell.bottom.map((b) => ({ id: b.id, label: b.label, href: b.href })), atHome ? 'home' : section,
-    tabs.map((t) => ({ id: t.id, label: t.label, href: t.href })), tabSelected));
+
   const tabSwipe = (dir: -1 | 1) => {
     const i = tabs.findIndex((t) => t.id === tabSelected);
     const next = tabHrefs[i + dir];
@@ -70,7 +69,7 @@
   <BottomNavIsland items={shell.bottom} selected={section} clean={plan.hamburger} {hidden} />
   <!-- the Clean drawer and the Configs > UI dialog are loaded when first needed: the shell's up-front JS has a budget -->
   {#if plan.hamburger}
-    {#await import('../fleet/FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} model={cleanModel} configsHref={shell.orbHref} onConfigsUi={() => (uiOpen = true)} />{/await}
+    {#await import('../fleet/FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} bottom={shell.bottom} section={atHome ? 'home' : section} childPages={tabs} selectedChild={tabSelected} configsHref={shell.orbHref} onConfigsUi={() => (uiOpen = true)} />{/await}
   {:else}
     <Drawer bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} onConfigsUi={() => (uiOpen = true)} />
   {/if}
