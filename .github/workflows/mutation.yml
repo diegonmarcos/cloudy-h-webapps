@@ -30,7 +30,7 @@ jobs:
           esac
           git diff --stat
       - name: Unit
-        run: npx vitest run
+        run: npm run sync --workspaces --if-present && npx vitest run
       - name: Build + route check
         run: npm run build && node scripts/test-routes.mjs
       - name: E2E (visual)

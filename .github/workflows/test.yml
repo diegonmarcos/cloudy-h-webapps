@@ -47,7 +47,7 @@ jobs:
           # npm ci when the lockfile matches package.json; a dependency change refreshes the lockfile (committed back on main)
           npm ci --no-audit --no-fund || npm install --no-audit --no-fund
       - name: Unit (Vitest)
-        run: npx vitest run
+        run: npm run sync --workspaces --if-present && npx vitest run
       - name: Build both sites
         run: npm run build
       - name: Every routes.json path prerendered (trailing slash)

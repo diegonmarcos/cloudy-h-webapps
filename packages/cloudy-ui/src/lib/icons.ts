@@ -13,3 +13,12 @@ export function iconHref(name: string | null | undefined): string {
   if (name && SA.has(`ic_${name}`)) return `${saUrl}#sa-ic_${name}`;
   return `${uiUrl}#mi-${icons.fallback}`;
 }
+
+/** A fleet app's nav glyph (libs:ui-icons UiIcons): the catalog only — a name it does not hold draws FALLBACK, never a
+ *  SuperApp drawable (UiIcons.icon(name) ?: FALLBACK). `filled:<name>` = an Icons.Filled glyph the first row draws. */
+export function fleetIconHref(name: string | null | undefined): string {
+  if (name?.startsWith('filled:')) return `${uiUrl}#mf-${name.slice(7)}`;
+  if (name === 'assistant') return `${uiUrl}#brand-assistant`;
+  if (name && UI[name]) return `${uiUrl}#mi-${UI[name]}`;
+  return `${uiUrl}#mi-${icons.fallback}`;
+}

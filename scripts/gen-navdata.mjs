@@ -9,6 +9,7 @@
 //   routes.json  : every URL path both shells prerender (relative to the site base), with what it renders
 //   targets.json : Android target string -> canonical web path (section:, page:, extapp:, extapp:#page:) for /t/<target>
 //   app-ids.json : the [app=appId] param matcher list
+//   apps-ui.json : each fleet app's other ui declarations (calc modes/keys, c3_ops, ...), read at build time only
 // Hand-written companion: packages/cloudy-ui/nav/nav-overlay.json (what Android cannot say: list-detail flags, portals).
 // The legacy shared nav (scripts/gen-nav.mjs -> /cloud-webapps/nav.js, used by the service pages) is a separate script.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -52,6 +53,7 @@ for (const t of cloudSec?.tiles_labs ?? []) {
 }
 const portals = overlay.portals ?? {};
 const apps = [];
+const appsUi = {};
 for (const e of ui.external_apps ?? []) {
   const dir = `ac_${e.id}`;
   const raw = readRaw(`${dir}/build.json`);
@@ -59,6 +61,9 @@ for (const e of ui.external_apps ?? []) {
   const aui = b.ui ?? {};
   const sections = strip(aui.sections ?? []);
   const tile = tileOf.get(e.id) ?? {};
+  // the rest of the app's ui (modes, keys, c3_ops, ...): page bodies read it at build time, the client never loads the file
+  const rest = Object.fromEntries(Object.entries(aui).filter(([k]) => !k.startsWith('_') && !['sections', 'bottom_nav', 'default_section', 'top_bar', 'permissions', 'debug_api'].includes(k)));
+  if (Object.keys(rest).length) appsUi[e.id] = strip(rest);
   apps.push({
     id: e.id,
     dir: raw ? dir : null,
@@ -125,6 +130,7 @@ emit(root, {
   [`${OUT}/routes.json`]: json({ _generated: HEADER, count: routes.length, routes }),
   [`${OUT}/targets.json`]: json({ _generated: HEADER, count: Object.keys(targets).length, targets }),
   [`${OUT}/app-ids.json`]: json(appIds),
+  [`${OUT}/apps-ui.json`]: json({ _generated: HEADER, apps: appsUi }),
 }, 'gen-navdata');
 const declared = apps.filter((a) => a.kind === 'app');
 console.log(`${CHECK ? 'ok' : 'wrote'}: ${superapp.sections.length} SuperApp sections, ${apps.length} fleet apps (${declared.length} with ui.sections), ${routes.length} routes, ${Object.keys(targets).length} targets`);
