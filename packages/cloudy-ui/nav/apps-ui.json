@@ -2321,6 +2321,22 @@
           }
         ]
       },
+      "lnktree_cache": {
+        "enabled": true,
+        "section": "lnktree",
+        "ttl_days": 7,
+        "max_cache_mb": 40,
+        "holder_max_webviews": 8,
+        "hard_refresh_scope": "page",
+        "exclude_pages": [],
+        "prefetch": {
+          "enabled": true,
+          "concurrency": 3,
+          "network": "unmetered",
+          "max_pages": 12,
+          "max_subresources_per_page": 40
+        }
+      },
       "settings": [
         "lnktree",
         "configs"
