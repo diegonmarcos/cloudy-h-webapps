@@ -16,9 +16,9 @@
   import { trackLayout } from './layout';
   import type { Tab, ShellData } from './types';
 
-  let { shell, section, sectionLabel = '', atHome = false, backHref = null, tabs = [], tabSelected = null, subtabs = [], subSelected = null,
+  let { shell, section, sectionLabel = '', atHome = false, backHref = null, historyBack = false, tabs = [], tabSelected = null, subtabs = [], subSelected = null,
     tabHrefs = [], children, detail }: {
-    shell: ShellData; section: string; sectionLabel?: string; atHome?: boolean; backHref?: string | null;
+    shell: ShellData; section: string; sectionLabel?: string; atHome?: boolean; backHref?: string | null; historyBack?: boolean;
     tabs?: Tab[]; tabSelected?: string | null; subtabs?: Tab[]; subSelected?: string | null; tabHrefs?: string[];
     children: Snippet; detail?: Snippet;
   } = $props();
@@ -41,7 +41,7 @@
 <div class="shell" data-section={section} data-home={atHome ? '1' : '0'} style:--strip-h={stripH ? `${stripH}px` : null}>
   <Window />
   <div class="strip-wrap" bind:clientHeight={stripH}><StatusStrip chips={shell.chips} right={shell.right} battery={shell.battery} /></div>
-  <TopRow {atHome} {backHref} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} />
+  <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} />
   <div class="panes" class:split={!atHome}>
     <main class="pane master content" onscroll={onScroll} use:swipe={{ onTab: tabSwipe, onEdge: () => (drawerOpen = true) }} data-testid="content">
       {#if tabs.length}<PageTabs {tabs} selected={tabSelected} />{/if}

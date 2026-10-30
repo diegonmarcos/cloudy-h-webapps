@@ -5,9 +5,16 @@
   // hamburger | Back, 56dp touch boxes, 24dp glyphs in text_primary. The Dynamic Island (120x22) sits in the centre.
   import Icon from './Icon.svelte';
   import { fxCanvas, drawIslandWave, drawPrism, drawWaveLine, WAVE_PERIOD_MS, PRISM_PERIOD_MS, WAVELINE_PERIOD_MS } from './fx';
-  let { atHome, backHref = null, orbHref = null, islandHref = null, onMenu }: {
-    atHome: boolean; backHref?: string | null; orbHref?: string | null; islandHref?: string | null; onMenu: () => void;
+  let { atHome, backHref = null, historyBack = false, orbHref = null, islandHref = null, onMenu }: {
+    atHome: boolean; historyBack?: boolean; backHref?: string | null; orbHref?: string | null; islandHref?: string | null; onMenu: () => void;
   } = $props();
+  // About pages (#1322): the arrow is history-back when the visitor came from inside this site, else the plain link (the grid).
+  const goBack = (e: MouseEvent) => {
+    // client-side navigations do not update document.referrer, so ask the Navigation API for the previous entry when there is one
+    const nav = (window as unknown as { navigation?: { canGoBack: boolean; currentEntry: { index: number }; entries: () => { url: string }[] } }).navigation;
+    const inSite = nav ? nav.canGoBack && (nav.entries()[nav.currentEntry.index - 1]?.url ?? '').startsWith(location.origin) : document.referrer.startsWith(location.origin);
+    if (historyBack && history.length > 1 && inSite) { e.preventDefault(); history.back(); }
+  };
 </script>
 
 <div class="app-top-bar top-row" data-testid="top-row">
@@ -16,7 +23,7 @@
     {#if orbHref}<a class="orb right" href={orbHref} aria-label="Configs"><Icon name="ic_wallet" /></a>{/if}
   {:else}
     <button class="tool left" aria-label="Open the main menu" data-testid="toolbar-menu" onclick={onMenu}><Icon name="ic_hamburger_asymmetric" /></button>
-    {#if backHref !== null}<a class="tool right" href={backHref} aria-label="Back" data-testid="toolbar-back"><Icon name="ic_back" /></a>{/if}
+    {#if backHref !== null}<a class="tool right" href={backHref} aria-label="Back" data-testid="toolbar-back" onclick={goBack}><Icon name="ic_back" /></a>{/if}
   {/if}
   <div class="music"><canvas use:fxCanvas={{ draw: drawWaveLine, periodMs: WAVELINE_PERIOD_MS }}></canvas></div>
   {#if islandHref}

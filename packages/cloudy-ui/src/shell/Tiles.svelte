@@ -17,8 +17,8 @@
         {#each g.tiles as t, ti (ti)}
           <div class="cell">
             {#if t.href}
-              <a class="tile" class:missing={t.missing} href={t.href} target={t.external ? '_blank' : undefined} rel={t.external ? 'noopener' : undefined} data-tile={t.id}>
-                <Icon name={t.missing ? 'ic_app_not_installed' : t.icon} size={32} />
+              <a class="tile" class:missing={t.missing} class:grey={t.grey} href={t.href} target={t.external ? '_blank' : undefined} rel={t.external ? 'noopener' : undefined} data-tile={t.id}>
+                <span class="glyph"><Icon name={t.missing ? 'ic_app_not_installed' : t.icon} size={32} />{#if t.mesh}<span class="mesh" title="Private: needs the WireGuard mesh" data-testid="mesh-badge"><Icon name="ic_lock" size={11} /></span>{/if}</span>
                 <span class="tile__label">{t.label}</span>
               </a>
             {:else}
@@ -43,6 +43,12 @@
   .cell { position: relative; flex: none; width: 60px; }
   .tile { display: flex; flex-direction: column; align-items: center; padding: 6px; color: var(--role-text-primary); text-decoration: none; -webkit-tap-highlight-color: transparent; }
   .tile.missing { color: var(--role-text-secondary); }
+  /* phone-only apps (#1322): desaturated with the token palette, still a link (to the About page) */
+  .tile.grey { color: var(--role-text-secondary); }
+  .tile.grey .glyph { filter: grayscale(1); opacity: 0.5; }
+  .glyph { position: relative; display: block; line-height: 0; }
+  .mesh { position: absolute; right: -5px; bottom: -4px; width: 14px; height: 14px; border-radius: 50%; display: grid; place-items: center; line-height: 0;
+    background: var(--role-surface); color: var(--role-text-primary); border: 1px solid var(--role-hairline); }
   .tile__label { padding-top: 4px; font: 400 12px / normal var(--type-family-sans); text-align: center; color: color-mix(in srgb, var(--role-text-primary) 80%, transparent);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; max-width: 48px; }
   .tile-sep { position: absolute; right: 0; top: 22px; width: 0.5px; height: 32px; margin-top: -16px; background: var(--role-hairline); }

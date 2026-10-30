@@ -4,6 +4,7 @@ import nav from '@cloudy/ui/nav/nav.json';
 import targetsJson from '@cloudy/ui/nav/targets.json';
 import routesJson from '@cloudy/ui/nav/routes.json';
 import overlay from '@cloudy/ui/nav/nav-overlay.json';
+import appLinks from '@cloudy/ui/nav/app-links.json';
 import { titleHierarchy, titleNav, type Entry } from '@cloudy/ui/src/fleet/fleetNav.ts';
 import { drawerRows, resolveTarget, joinBase, type ShellData, type Tab, type TileGroup, type TileItem } from '@cloudy/ui';
 import content from '../../apps/superapp/data/sections-content.json';
@@ -30,11 +31,30 @@ export function href(base: string, target: string | undefined | null): { href: s
   return { href: null, external: false };
 }
 
+// #1322: every fleet app resolves to its real web service (data/app-links.json -> app-links.json, GENERATED).
+export type AppLink = { id: string; kind: 'container' | 'webapp' | 'external' | 'phone-only'; href: string | null; reason: string; about?: boolean; mesh?: boolean; service?: string };
+export const LINKS = new Map((appLinks.links as AppLink[]).map((l) => [l.id, l]));
+/** The mapping entry a tile resolves through: its `extapp:<app>[#page:..]` app, else its own id (c3-bot, ai-chat). */
+export function linkOf(t: Tile): AppLink | undefined {
+  const m = /^extapp:([a-z0-9-]+)/.exec(t.target ?? '');
+  return m ? LINKS.get(m[1]) : t.id && !t.target?.startsWith('page:') && !t.target?.startsWith('section:') ? LINKS.get(t.id) : undefined;
+}
+/** Phone-only apps open their own About page. */
+export const aboutPath = (appId: string) => `${appId}/about/`;
+export const ABOUT_IDS = [...LINKS.values()].filter((l) => l.kind === 'phone-only').map((l) => l.id);
+
 /** TileStrip input: a separator rides on the previous tile (separatorAfter). */
 export function tileItems(base: string, tiles: Tile[]): TileItem[] {
   const out: TileItem[] = [];
   for (const t of tiles ?? []) {
     if (t.separator || t.label === '|') { if (out.length) out[out.length - 1].separatorAfter = true; continue; }
+    const l = linkOf(t);
+    if (l) {
+      const id = t.id ?? t.label;
+      if (l.kind === 'phone-only') out.push({ id, label: t.label, icon: t.icon ?? null, href: joinBase(base, aboutPath(l.id)), external: false, grey: true });
+      else out.push({ id, label: t.label, icon: t.icon ?? null, href: l.href, external: l.kind === 'container' || l.kind === 'external', mesh: !!l.mesh });
+      continue;
+    }
     const h = href(base, t.target ?? t.id);
     out.push({ id: t.id ?? t.label, label: t.label, icon: t.icon ?? null, href: h.href, external: h.external });
   }
@@ -278,5 +298,28 @@ export function appView(base: string, path: string): AppView | null {
   };
 }
 
-/** Every prerendered path except home ('') and the explicit routes. */
-export const ENTRY_PATHS = ROUTES.map((r) => r.path).filter((p) => p !== '');
+export type AboutView = {
+  kind: 'about'; app: { id: string; label: string; icon: string | null; what: string }; title: string; path: string;
+  backHref: string; storeHref: string; gridHref: string;
+};
+/** What the app does, from nav.json (its build.json description): the first sentence, capped. */
+function whatItDoes(a: App & { description?: string | null }): string {
+  const d = (a.description ?? '').replace(/\s+/g, ' ').trim();
+  if (!d) return `${a.label} is one of the apps of the cloudy APK fleet.`;
+  const first = d.match(/^.{20,}?[.!?](?=\s|$)/)?.[0] ?? d;
+  return first.length > 300 ? `${first.slice(0, 297).trimEnd()}...` : first;
+}
+/** /<app>/about/ : the About page of a phone-only app (#1322). */
+export function aboutView(base: string, path: string): AboutView | null {
+  const parts = path.split('/').filter(Boolean);
+  if (parts.length !== 2 || parts[1] !== 'about' || !ABOUT_IDS.includes(parts[0])) return null;
+  const app = APPS.find((a) => a.id === parts[0]);
+  if (!app) return null;
+  return {
+    kind: 'about', app: { id: app.id, label: app.label, icon: app.icon, what: whatItDoes(app as never) },
+    title: `About ${app.label}`, path, backHref: joinBase(base, ''), gridHref: joinBase(base, ''), storeHref: joinBase(base, aboutPath('cloud-store')),
+  };
+}
+
+/** Every prerendered path except home ('') and the explicit routes; plus the About page of every phone-only app. */
+export const ENTRY_PATHS = [...ROUTES.map((r) => r.path).filter((p) => p !== ''), ...ABOUT_IDS.map(aboutPath)];

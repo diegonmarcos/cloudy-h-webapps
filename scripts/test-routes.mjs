@@ -27,3 +27,9 @@ const old = readFileSync(join(root, 'scripts/old-app-paths.txt'), 'utf8').split(
 const lost = old.filter((p) => { const t = oldAppTarget(p, have); return t === null || !existsSync(join(dist, t, 'index.html')); });
 if (lost.length) { console.error(`FAIL ${lost.length} old app page(s) resolve to nothing: ${lost.slice(0, 8).join(', ')}`); process.exit(1); }
 console.log(`ok: ${old.length} old app pages resolve`);
+
+// #1322: every phone-only app has a prerendered About page (the grey tile's target), each with its own direct URL.
+const links = JSON.parse(readFileSync(join(root, 'packages/cloudy-ui/nav/app-links.json'), 'utf8')).links;
+const aboutMissing = links.filter((l) => l.kind === 'phone-only' && !existsSync(join(dist, l.id, 'about', 'index.html'))).map((l) => `${l.id}/about/`);
+if (aboutMissing.length) { console.error(`FAIL ${aboutMissing.length} About page(s) not prerendered: ${aboutMissing.slice(0, 10).join(', ')}`); process.exit(1); }
+console.log(`ok: ${links.filter((l) => l.kind === 'phone-only').length} About pages prerendered`);

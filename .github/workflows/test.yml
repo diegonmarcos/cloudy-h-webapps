@@ -42,6 +42,7 @@ jobs:
           node scripts/gen-tokens.mjs --check
           node scripts/gen-navdata.mjs --check
           node scripts/gen-icons.mjs --check
+          node scripts/gen-app-links.mjs --check
       - name: Portal probe (declared embeddable == what each vendor site allows)
         run: node scripts/probe-portals.mjs
       - name: Install (npm ci when the lockfile exists)
