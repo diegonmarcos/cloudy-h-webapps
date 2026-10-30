@@ -6,7 +6,7 @@
 #  dist   : dist is committed code (rule 12). On a push to main the fresh dists (and the lockfile) are committed
 #           back when they differ, then the Pages mirror is bumped.
 # Also runs daily and on repository_dispatch superapp-updated, so an Android-side change fails here even when
-# this repo does not move (the token/nav drift checks land with M1).
+# this repo does not move (gen-tokens / gen-navdata / gen-icons --check).
 name: test
 on:
   push:
@@ -35,6 +35,13 @@ jobs:
         run: bash scripts/test.sh
       - name: Vendored service data == cloud-u-containers
         run: node scripts/sync-fallback-services.mjs --check
+      - name: Drift - tokens, nav data, icon sprites == cloudy-u-android main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/gen-tokens.mjs --check
+          node scripts/gen-navdata.mjs --check
+          node scripts/gen-icons.mjs --check
       - name: Install (npm ci when the lockfile exists)
         run: |
           if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
