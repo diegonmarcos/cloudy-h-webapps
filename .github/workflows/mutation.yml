@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route'
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url'
         required: true
 permissions:
   contents: read
@@ -28,6 +28,7 @@ jobs:
             portal-flag)    node -e 'const f="packages/cloudy-ui/nav/nav-overlay.json",fs=require("fs"),j=JSON.parse(fs.readFileSync(f));j.portals["cloud-chat"].embeddable=true;fs.writeFileSync(f,JSON.stringify(j,null,2)+"\n")'; node scripts/probe-portals.mjs; exit $? ;;
             client-order)   sed -i 's/get(fetcher, MESH_BASE + path)/get(fetcher, PUBLIC_BASE + path)/' packages/c3-data/client.ts ;;
             c3-route)       sed -i "s/const page = PORTAL.find((p) => p.id === id);/const page = PORTAL.find((p) => p.id === id \&\& p.id !== 'gallery');/" sites/cloudy-c3/src/lib/server/c3.ts ;;
+            old-url)        sed -i "/'cloud-media': /d" scripts/lib/old-paths.mjs ;;
             island-width)   echo "MUTATION=island-width" >> "$GITHUB_ENV" ;;
             *) echo "unknown mutation"; exit 2 ;;
           esac
@@ -35,6 +36,6 @@ jobs:
       - name: Unit
         run: npm run sync --workspaces --if-present && npx vitest run
       - name: Build + route check
-        run: npm run build && node scripts/test-routes.mjs
+        run: npm run build && node scripts/test-routes.mjs && node scripts/test-old-urls.mjs
       - name: E2E (visual)
         run: npx playwright install --with-deps chromium && npx playwright test -c tests/playwright.config.ts
