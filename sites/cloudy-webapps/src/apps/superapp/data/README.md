@@ -1,6 +1,6 @@
 # SuperApp page bodies (seed content)
 
-Hand-written page bodies copied from the old SuperApp web replica (`cloudy-h-webapps-2` `a_Portals/cloud-superapp/src/data`,
+Hand-written page bodies copied from the old SuperApp web replica (`cloudy-h-webapps-desk` `a_Portals/cloud-superapp/src/data`,
 commit 626c2db) by #1320 M2: `sections-content.json` (list/agenda/grid/cards bodies per section page), `sections-core.json`
 (stack card rows and captions of the aggregator sections), `linktree.json`, `mock-apps.json`, `shell.json` (status strip mock,
 drawer identity). They are content, not navigation: every section, page, label, icon and target comes from the GENERATED

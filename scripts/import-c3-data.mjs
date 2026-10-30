@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// One-time import (#1320 D.2) of the C3 control-centre datasets from the old portal (cloudy-h-webapps-2
+// One-time import (#1320 D.2) of the C3 control-centre datasets from the old portal (cloudy-h-webapps-desk
 // a_Portals/cloud/src/data/{c3-*,cloud}.json) into packages/c3-data/data/, the committed snapshot both sites prerender from.
 // Live mode reads the c3-infra-api (mesh first, public bearer fallback); this snapshot is what a browser without it sees.
 // Redacted on the way in: key/credential paths, cloud instance ids, WireGuard keys, personal emails (the old portal published

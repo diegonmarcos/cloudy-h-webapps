@@ -4,7 +4,7 @@
   "src": "src",
   "dist": "dist",
   "build": [
-    { "_doc": "SvelteKit adapter-static, base /cloud-webapps. dist/ is committed (built in cloudy-h-webapps CI); the Pages deploy maps it, it does not rebuild.", "mod": "sveltekit" }
+    { "_doc": "SvelteKit adapter-static, base /cloud-webapps. dist/ is committed (built in cloudy-h-webapps-mob CI); the Pages deploy maps it, it does not rebuild.", "mod": "sveltekit" }
   ],
   "deploy": {}
 }

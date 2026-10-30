@@ -1,4 +1,4 @@
-# cloudy-h-webapps CI (#1320). Builds run here only (owner rule: no local npm/Gradle).
+# cloudy-h-webapps-mob CI (#1320). Builds run here only (owner rule: no local npm/Gradle).
 #  legacy : scripts/test.sh (service fallback pages, shared nav, redirects) + vendored-data drift
 #  unit   : Vitest (packages/*, scripts/*)
 #  build  : both SvelteKit sites (adapter-static) -> sites/<site>/dist, budgets

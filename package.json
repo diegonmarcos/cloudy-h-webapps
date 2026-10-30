@@ -1,5 +1,5 @@
 {
-  "name": "cloudy-h-webapps",
+  "name": "cloudy-h-webapps-mob",
   "private": true,
   "type": "module",
   "description": "cloudy-webapps (SuperApp mobile/tablet mimic, base /cloud-webapps) + cloudy-c3 (control centre, base /cloudy-c3) on one @cloudy/ui package (#1320).",

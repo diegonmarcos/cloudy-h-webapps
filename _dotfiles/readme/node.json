@@ -1,14 +1,14 @@
 {
   "schema": "readme-node/v1",
   "generated_by": "_git-repos-master 0_registry/readme-render.js nodeData() from projects-repos.json; DO NOT EDIT (node 0_registry/repos-sot.js sync-readmes)",
-  "name": "cloudy-h-webapps",
-  "label": "cloudy-h-webapps",
+  "name": "cloudy-h-webapps-mob",
+  "label": "cloudy-h-webapps-mob",
   "code": "1.1.4.1",
   "kind": "repo",
   "variant": "repo",
   "description": "Cloud web apps: the SuperApp + fleet mimic (/cloud-webapps/) and the C3 console (/cloudy-c3/), one SvelteKit workspace",
   "visibility": "public",
-  "url": "https://github.com/diegonmarcos/cloudy-h-webapps",
+  "url": "https://github.com/diegonmarcos/cloudy-h-webapps-mob",
   "developer": "Leaf.y",
   "farm": "1.1.Cloudy",
   "breadcrumb": [
