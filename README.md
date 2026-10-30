@@ -4,7 +4,7 @@
 
 🐧 Unix `1` › ☁️ Cloudy `1.1` › WebApps `1.1.4`
 
-> Cloud web apps: per-app independent sites with a shared top nav
+> Cloud web apps: the SuperApp + fleet mimic (/cloud-webapps/) and the C3 console (/cloudy-c3/), one SvelteKit workspace
 
 | Code | Visibility | Hub | Developer | Farm folder |
 |---|---|---|---|---|
