@@ -54,6 +54,8 @@ jobs:
         run: npm run build
       - name: Every routes.json path prerendered (trailing slash)
         run: node scripts/test-routes.mjs
+      - name: No credential shapes in the published dists
+        run: sh scripts/scan-dists.sh
       - name: Budgets
         run: node scripts/budget.mjs
       - name: Playwright + Chromium

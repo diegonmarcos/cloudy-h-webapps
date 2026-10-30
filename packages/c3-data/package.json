@@ -4,5 +4,12 @@
   "private": true,
   "type": "module",
   "description": "The C3 control-centre dataset snapshot (imported once from the old /cloud/ portal, redacted by scripts/import-c3-data.mjs) both sites prerender from; read at build time only.",
-  "exports": { ".": "./index.ts", "./data/*": "./data/*" }
+  "exports": {
+    ".": "./index.ts",
+    "./views": "./views.ts",
+    "./client": "./client.ts",
+    "./panels": "./panels.ts",
+    "./ui/*": "./ui/*",
+    "./data/*": "./data/*"
+  }
 }

@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 function treeVersion() {
   try {
     const t = (p) => execFileSync('git', ['rev-parse', `HEAD:${p}`], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().slice(0, 10);
-    return `${t('sites/cloudy-c3/src')}-${t('packages/cloudy-ui')}`;
+    return `${t('sites/cloudy-c3/src')}-${t('packages/cloudy-ui')}-${t('packages/c3-data')}`;
   } catch {
     return 'dev';
   }
@@ -21,7 +21,11 @@ export default {
     // /cloudy-c3 is fixed by contract: the owner chose /cloudy-c3/ (#1320); old /cloud/* URLs redirect here at the M7 cut-over.
     paths: { base: '/cloudy-c3', relative: false },
     version: { name: treeVersion() },
-    prerender: { entries: ['*'], handleHttpError: 'fail', handleMissingId: 'fail' },
-    alias: { $apps: 'src/apps' },
+    prerender: {
+      entries: ['*'],
+      handleMissingId: 'fail',
+      // links into the other site (/cloud-webapps/...) are published by its own build
+      handleHttpError: ({ path, message }) => { if (!path.startsWith('/cloudy-c3/')) return; throw new Error(message); },
+    },
   },
 };
