@@ -9,8 +9,6 @@
   import FleetBottomBar from './FleetBottomBar.svelte';
   import FleetSecondRows from './FleetSecondRows.svelte';
   import FleetSideMenu from './FleetSideMenu.svelte';
-  import FleetCleanDrawer from './FleetCleanDrawer.svelte';
-  import NavUiDialog from '../shell/NavUiDialog.svelte';
   import { onMount } from 'svelte';
   import { navChromePlan, scrollHideStep, cleanDrawerModel, declaredNavUi, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from '../shell/navUi';
   import { navUi, loadNavUi, saveNavUi } from '../shell/navUiStore';
@@ -63,8 +61,9 @@
   </main>
   </div>
   {#if sections.length > 1}<FleetBottomBar items={sections} selected={section} clean={plan.hamburger} {hidden} />{/if}
-  {#if plan.hamburger}<FleetCleanDrawer bind:open={drawerOpen} model={drawerModel} {aiHref} {profileHref} {configsHref} onConfigsUi={() => (uiOpen = true)} />{/if}
-  <NavUiDialog bind:open={uiOpen} settings={ui} {declared} onChange={change} />
+  <!-- loaded when first needed: the shell's up-front JS has a budget -->
+  {#if plan.hamburger}{#await import('./FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} model={drawerModel} {aiHref} {profileHref} {configsHref} onConfigsUi={() => (uiOpen = true)} />{/await}{/if}
+  {#if uiOpen}{#await import('../shell/NavUiDialog.svelte') then m}<m.default bind:open={uiOpen} settings={ui} {declared} onChange={change} />{/await}{/if}
 </div>
 
 <style>

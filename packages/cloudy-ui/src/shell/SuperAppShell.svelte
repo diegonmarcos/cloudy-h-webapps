@@ -11,8 +11,6 @@
   import BottomNavIsland from './BottomNavIsland.svelte';
   import PageTabs from './PageTabs.svelte';
   import Drawer from './Drawer.svelte';
-  import FleetCleanDrawer from '../fleet/FleetCleanDrawer.svelte';
-  import NavUiDialog from './NavUiDialog.svelte';
   import { navChromePlan, scrollHideStep, cleanDrawerModel, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from './navUi';
   import { navUi, loadNavUi, saveNavUi } from './navUiStore';
   import EmptyState from '../components/EmptyState.svelte';
@@ -70,12 +68,13 @@
     {/if}
   </div>
   <BottomNavIsland items={shell.bottom} selected={section} clean={plan.hamburger} {hidden} />
+  <!-- the Clean drawer and the Configs > UI dialog are loaded when first needed: the shell's up-front JS has a budget -->
   {#if plan.hamburger}
-    <FleetCleanDrawer bind:open={drawerOpen} model={cleanModel} configsHref={shell.orbHref} onConfigsUi={() => (uiOpen = true)} />
+    {#await import('../fleet/FleetCleanDrawer.svelte') then m}<m.default bind:open={drawerOpen} model={cleanModel} configsHref={shell.orbHref} onConfigsUi={() => (uiOpen = true)} />{/await}
   {:else}
     <Drawer bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} onConfigsUi={() => (uiOpen = true)} />
   {/if}
-  <NavUiDialog bind:open={uiOpen} settings={ui} {declared} onChange={(n) => saveNavUi('cloud-superapp', declared, n)} />
+  {#if uiOpen}{#await import('./NavUiDialog.svelte') then m}<m.default bind:open={uiOpen} settings={ui} {declared} onChange={(n: NavUiSettings) => saveNavUi('cloud-superapp', declared, n)} />{/await}{/if}
 </div>
 
 <style>
