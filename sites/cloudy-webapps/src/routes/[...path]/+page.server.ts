@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { base } from '$app/paths';
 import type { EntryGenerator } from './$types';
-import { ENTRY_PATHS, superappView, appView, aboutView, shellData } from '$lib/server/nav';
+import { ENTRY_PATHS, superappView, appView, aboutView, shellData, declaredAbout } from '$lib/server/nav';
 
 // Every SuperApp section/page and every fleet app/section/page from the GENERATED routes.json (B.6): one prerendered URL each.
 export const entries: EntryGenerator = () => ENTRY_PATHS.map((p) => ({ path: p.replace(/\/$/, '') }));
@@ -19,5 +19,6 @@ export const load = ({ params }) => {
   if (!view) error(404, `No page ${path}`);
   const srv = SERVERS[`../../apps/${view.app.id}/server.ts`];
   if (srv?.load) view.data = srv.load(view);
+  else if (view.section === 'about') { const d = declaredAbout(view.app.id); if (d) view.data = { about: d }; }
   return { view, shell: null };
 };

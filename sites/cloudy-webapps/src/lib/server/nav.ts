@@ -322,6 +322,12 @@ function whatItDoes(a: App & { description?: string | null }): string {
   const first = d.match(/^.{20,}?[.!?](?=\s|$)/)?.[0] ?? d;
   return first.length > 300 ? `${first.slice(0, 297).trimEnd()}...` : first;
 }
+/** The About text of a phone-only app that declares its own `about` section (it renders inside the fleet shell, same URL), else null. */
+export function declaredAbout(appId: string): { what: string } | null {
+  const app = APPS.find((a) => a.id === appId);
+  if (!app || LINKS.get(appId)?.kind !== 'phone-only' || !app.sections.some((s) => s.id === 'about')) return null;
+  return { what: whatItDoes(app as never) };
+}
 /** /<app>/about/ : the About page of a phone-only app (#1326). */
 export function aboutView(base: string, path: string): AboutView | null {
   const parts = path.split('/').filter(Boolean);

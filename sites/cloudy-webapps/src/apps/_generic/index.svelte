@@ -4,7 +4,7 @@
   // ships) or its vendor UI when that site allows framing, else the app card with Open + Access help.
   import { EmptyState, Button, Portal } from '@cloudy/ui';
   import type { AppView } from '$lib/server/nav';
-  let { view, data }: { view: AppView; data?: { wasmHref?: string | null } } = $props();
+  let { view, data }: { view: AppView; data?: { wasmHref?: string | null; about?: { what: string } } } = $props();
 </script>
 
 {#if view.portal}
@@ -17,7 +17,10 @@
   </div>
 {:else}
   <div class="generic" data-testid="app-body">
-    {#if view.portalInfo}
+    {#if data?.about}
+      <EmptyState title={view.app.name} caption={data.about.what} />
+      <p class="about" data-testid="about-line">This app is part of the cloudy APK fleet and runs on the phone only.</p>
+    {:else if view.portalInfo}
       <EmptyState title={view.app.name} caption="A vendor web app: it opens on its own site, behind the fleet sign-in." />
       <div class="act"><Button href={view.portalHref}>Open here</Button><Button variant="outlined" href={view.portalInfo.serviceHref}>Access help</Button></div>
     {:else if !view.sections.length}
@@ -32,5 +35,6 @@
 <style>
   .generic { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; }
   .frame { position: relative; height: calc(100dvh - 220px); min-height: 360px; margin: 0 8px; border-radius: 12px; overflow: hidden; }
+  .about { text-align: center; color: var(--role-text-secondary); margin: 0 12px 24px; }
   .act { display: flex; gap: 8px; justify-content: center; padding-bottom: 24px; }
 </style>
