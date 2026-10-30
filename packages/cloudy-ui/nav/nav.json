@@ -1462,13 +1462,13 @@
                 "id": "mystudy",
                 "label": "Me-Study",
                 "icon": "ic_file_stack",
-                "target": "extapp:cloud-me#page:study/cv"
+                "target": "extapp:cloud-me#page:experiences/study"
               },
               {
                 "id": "myachieves",
                 "label": "Me-Achieves",
                 "icon": "ic_map_pin",
-                "target": "extapp:cloud-me#page:achieves/geo"
+                "target": "extapp:cloud-me#page:experiences/achieves"
               },
               {
                 "id": "me-sep-2",
@@ -5750,8 +5750,8 @@
       "default_section": "lnktree",
       "bottom_nav": [
         "health",
-        "study",
-        "achieves",
+        "experiences",
+        "roadmap",
         "lnktree",
         "duties",
         "buro",
@@ -6026,23 +6026,6 @@
           ]
         },
         {
-          "id": "study",
-          "label": "Study",
-          "icon": "ic_nav_study",
-          "pages": [
-            {
-              "id": "cv",
-              "label": "CV",
-              "icon": "ic_p_cv"
-            },
-            {
-              "id": "roadmap",
-              "label": "Roadmap",
-              "icon": "ic_p_roadmap"
-            }
-          ]
-        },
-        {
           "migration": {
             "store": "experiences_user",
             "legacy": {
@@ -6060,44 +6043,85 @@
               }
             }
           },
-          "id": "achieves",
-          "label": "Achieves",
+          "id": "experiences",
+          "label": "Experiences",
           "icon": "ic_nav_achieves",
           "pages": [
             {
-              "id": "geo",
-              "label": "Geo",
-              "icon": "ic_world"
+              "id": "work",
+              "label": "Work",
+              "icon": "ic_nav_work"
             },
             {
-              "id": "endurance",
-              "label": "Endurance",
-              "icon": "ic_nav_trips"
+              "id": "study",
+              "label": "Study",
+              "icon": "ic_nav_study",
+              "pages": [
+                {
+                  "id": "cv",
+                  "label": "CV",
+                  "icon": "ic_p_cv"
+                },
+                {
+                  "id": "roadmap",
+                  "label": "Roadmap",
+                  "icon": "ic_p_roadmap"
+                }
+              ]
             },
             {
-              "id": "growth",
-              "label": "Personal Growth",
-              "icon": "ic_p_pursuits"
-            },
+              "id": "achieves",
+              "label": "Personal Achieves",
+              "icon": "ic_nav_achieves",
+              "pages": [
+                {
+                  "id": "geo",
+                  "label": "Geo",
+                  "icon": "ic_world"
+                },
+                {
+                  "id": "endurance",
+                  "label": "Endurance",
+                  "icon": "ic_nav_trips"
+                },
+                {
+                  "id": "growth",
+                  "label": "Personal Growth",
+                  "icon": "ic_p_pursuits"
+                },
+                {
+                  "id": "community",
+                  "label": "Community",
+                  "icon": "ic_nav_me"
+                },
+                {
+                  "id": "by30",
+                  "label": "By 30",
+                  "icon": "ic_p_pursuits"
+                },
+                {
+                  "id": "by40",
+                  "label": "By 40",
+                  "icon": "ic_p_pursuits"
+                },
+                {
+                  "id": "by50",
+                  "label": "By 50",
+                  "icon": "ic_p_pursuits"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "roadmap",
+          "label": "RoadMap",
+          "icon": "ic_p_roadmap",
+          "pages": [
             {
-              "id": "community",
-              "label": "Community",
-              "icon": "ic_nav_me"
-            },
-            {
-              "id": "by30",
-              "label": "By 30",
-              "icon": "ic_p_pursuits"
-            },
-            {
-              "id": "by40",
-              "label": "By 40",
-              "icon": "ic_p_pursuits"
-            },
-            {
-              "id": "by50",
-              "label": "By 50",
-              "icon": "ic_p_pursuits"
+              "id": "folders",
+              "label": "Folders",
+              "icon": "ic_p_folder"
             }
           ]
         },
