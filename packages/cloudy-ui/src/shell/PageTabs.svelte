@@ -30,7 +30,7 @@
 
 <div class="page-tabs-bar" class:page-tabs-bar--sub={sub} class:light={surface === 'light'} class:flush={flushTop} bind:clientWidth={width} data-testid={sub ? 'page-tabs-sub' : 'page-tabs'}>
   <div class="strip" class:scroll={plan?.scrollable} role="tablist" style:--pill-text={plan ? `${plan.textPx}px` : null}>
-    {#each tabs as t, i (t.id)}
+    {#each tabs as t, i (i)}
       {#if dividers.has(i)}<span class="divider" aria-hidden="true">|</span>{/if}
       <span class="slot" style:width={plan && !plan.scrollable && !dividers.size ? `${slot}px` : null}>
         {#if t.href !== null}

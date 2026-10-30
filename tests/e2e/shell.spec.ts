@@ -28,7 +28,7 @@ test.describe('SuperApp shell', () => {
 
   test('Cloud: tabs App | WebApps | Linktree | Configs, Quickmarks tile groups from build.json', async ({ page }, info) => {
     await page.goto(`${BASE}/cloud/`);
-    await expect(page.locator('[data-testid="page-tabs"] .page-tabs__item')).toHaveText(['APP', 'WEBAPPS', 'LINKTREE', 'CONFIGS']);
+    await expect(page.locator('[data-testid="content"] [data-testid="page-tabs"] .page-tabs__item')).toHaveText(['APP', 'WEBAPPS', 'LINKTREE', 'CONFIGS']);
     await expect(page.locator('.group-title').first()).toHaveText('Quickmarks');
     await expect(page.locator('[data-group="Inboxes"] .tile__label').first()).toHaveText('Mail');
     await shot(page, info, 'cloud-apps');

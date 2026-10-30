@@ -56,6 +56,8 @@ jobs:
         run: node scripts/budget.mjs
       - name: Playwright + Chromium
         run: npx playwright install --with-deps chromium
+      - name: Write missing visual baselines (committed back on main; never overwrites one)
+        run: npx playwright test -c tests/playwright.config.ts tests/e2e/visual.spec.ts --update-snapshots=missing || true
       - name: E2E phone + tablet
         run: npx playwright test -c tests/playwright.config.ts
       - name: Upload screenshots

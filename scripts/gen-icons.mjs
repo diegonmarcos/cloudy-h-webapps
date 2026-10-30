@@ -52,11 +52,25 @@ async function fetchGlyph(g) {
   throw new Error(`Material Icons Outlined glyph not found: ${g}`);
 }
 const svgs = await pool(glyphs, 8, fetchGlyph);
+// The first row's own glyphs (libs:ui-nav-bars draws Icons.Filled.AutoAwesome / AccountCircle / MoreVert / ArrowDropDown).
+const NAVBARS = 'ab_cloud-libs-shared/libs/ui-nav-bars/src/main/kotlin/com/diegonmarcos/superapp';
+const filled = [...new Set(['navbartop1/NavBarTopFirstRow.kt', 'navbartop2/NavBarTopSecondRow.kt', 'navbarbottom/NavBarBottom.kt']
+  .flatMap((f) => [...need(`${NAVBARS}/${f}`).matchAll(/Icons\.Filled\.(\w+)/g)].map((m) => snake(m[1]))))].sort();
+async function fetchFilled(g) {
+  const r = await fetch(`https://cdn.jsdelivr.net/npm/@material-design-icons/svg@${MDI}/filled/${g}.svg`);
+  if (!r.ok) throw new Error(`Material Icons Filled glyph not found: ${g}`);
+  return r.text();
+}
+const filledSvgs = await pool(filled, 4, fetchFilled);
 const mi = glyphs.map((g, i) => {
   const s = svgs[i];
   const vb = /viewBox="([^"]+)"/.exec(s)?.[1] ?? '0 0 24 24';
   const body = s.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
   return [g, `<symbol id="mi-${g}" viewBox="${vb}" fill="currentColor">${body}</symbol>`];
+});
+const mf = filled.map((g, i) => {
+  const s = filledSvgs[i];
+  return [g, `<symbol id="mf-${g}" viewBox="${/viewBox="([^"]+)"/.exec(s)?.[1] ?? '0 0 24 24'}" fill="currentColor">${s.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')}</symbol>`];
 });
 // brand: the assistant mark (SPARKLES path, BRAND_GRADIENT across the 24x24 viewport)
 const sparkles = /SPARKLES =\s*([\s\S]*?)\n\n/.exec(kt)?.[1]?.match(/"([^"]+)"/g)?.map((s) => s.slice(1, -1)).join('') ?? '';
@@ -65,10 +79,10 @@ if (!sparkles || grad.length !== 3) throw new Error('UiIcons assistant mark not 
 const brand = `<symbol id="brand-assistant" viewBox="0 0 24 24"><defs><linearGradient id="brand-assistant-g" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">${grad.map((c, i) => `<stop offset="${i / (grad.length - 1)}" stop-color="${c}"/>`).join('')}</linearGradient></defs><path d="${sparkles}" fill="url(#brand-assistant-g)"/></symbol>`;
 
 const sprite = (rows) => `<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><!-- ${HEADER} -->\n${rows.map((r) => r[1]).join('\n')}\n</svg>\n`;
-const json = JSON.stringify({ _generated: HEADER, mdi: MDI, sa: sa.map((r) => r[0]), ui, brand: ['assistant'], fallback }, null, 2) + '\n';
+const json = JSON.stringify({ _generated: HEADER, mdi: MDI, sa: sa.map((r) => r[0]), ui, filled, brand: ['assistant'], fallback }, null, 2) + '\n';
 emit(root, {
   'packages/cloudy-ui/icons/sprite-sa.svg': sprite(sa),
-  'packages/cloudy-ui/icons/sprite-ui.svg': sprite([...mi, ['assistant', brand]]),
+  'packages/cloudy-ui/icons/sprite-ui.svg': sprite([...mi, ...mf, ['assistant', brand]]),
   'packages/cloudy-ui/icons/icons.json': json,
 }, 'gen-icons');
 console.log(CHECK ? `ok: ${sa.length} SuperApp glyphs + ${glyphs.length} Material glyphs current` : `wrote ${sa.length} SuperApp glyphs, ${Object.keys(ui).length} catalog names -> ${glyphs.length} Material glyphs`);

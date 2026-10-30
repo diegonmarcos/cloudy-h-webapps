@@ -140,6 +140,126 @@ export const tokens = {
     "title": 10.92,
     "touch": 36
   },
+  "fleet": {
+    "bottom": {
+      "BOTTOM_MARGIN": 20,
+      "CELL": 56,
+      "COLLAPSED_CELL": 44,
+      "COLLAPSED_HEIGHT": 52,
+      "HEIGHT": 64,
+      "ICON": 24,
+      "INNER_PAD": 8,
+      "LABEL": 12,
+      "LABEL_BOTTOM": 4,
+      "LIFT": 6,
+      "MAX_WIDTH": 440,
+      "RADIUS": 32,
+      "SIDE_GUTTER": 16
+    },
+    "searchhtml": {
+      "accent": {
+        "dark": "#0a84ff",
+        "light": "#007aff"
+      },
+      "border": {
+        "dark": "#ffffff1a",
+        "light": "#ffffff66"
+      },
+      "bottomMargin": 20,
+      "cell": 50,
+      "fill": {
+        "dark": "#0f172ab3",
+        "light": "#ffffff99"
+      },
+      "focusRing": 2,
+      "hairline": 1,
+      "height": 60,
+      "iconSize": 21,
+      "idle": {
+        "dark": "#94a3b8",
+        "light": "#5a5a5e"
+      },
+      "innerPad": 8,
+      "labelBottom": 4,
+      "labelSize": 9.6,
+      "lift": 6,
+      "maxWidth": 400,
+      "radius": 30,
+      "sideGutter": 16
+    },
+    "side": {
+      "EXPANDED_WIDTH": 232,
+      "ICON": 20,
+      "INDENT": 14,
+      "ITEM_HEIGHT": 44,
+      "NARROW_BELOW": 600,
+      "RADIUS": 14,
+      "RAIL_ITEM_HEIGHT": 52,
+      "RAIL_LETTERS": 3,
+      "RAIL_WIDTH": 60,
+      "SIDE": 6
+    },
+    "theme": {
+      "dark": {
+        "accent": "#0a84ff",
+        "accentOnIsland": "#7cb9ff",
+        "bottom": "#1e293b",
+        "ink": "#f8fafc",
+        "inkDim": "#94a3b8",
+        "island": "#0a0f1a",
+        "islandBorder": "#ffffff1a",
+        "onIsland": "#ffffff",
+        "onTabSelected": "#ffffff",
+        "tabSelected": "#7c3aed",
+        "tabStrip": "#ffffff14",
+        "top": "#0f172a"
+      },
+      "light": {
+        "accent": "#007aff",
+        "accentOnIsland": "#7cb9ff",
+        "bottom": "#cfdef3",
+        "ink": "#0f172a",
+        "inkDim": "#475569",
+        "island": "#1f2937",
+        "islandBorder": "#ffffff33",
+        "onIsland": "#ffffff",
+        "onTabSelected": "#ffffff",
+        "tabSelected": "#6d28d9",
+        "tabStrip": "#0000000f",
+        "top": "#e0eafc"
+      }
+    },
+    "top1": {
+      "ACTIONS_MAX_HEIGHT": 2000,
+      "DROPDOWN_MAX_HEIGHT": 520,
+      "DROPDOWN_WIDTH": 280,
+      "HEIGHT": 52,
+      "ICON": 24,
+      "ICONS_RIGHT": 3,
+      "ICON_TARGET": 44,
+      "ISLAND_PAD_H": 14,
+      "ISLAND_PAD_V": 7,
+      "ISLAND_RADIUS": 20,
+      "SLOT": 132,
+      "TITLE_SP": 13
+    },
+    "top2": {
+      "BOTTOM_INSET": 10,
+      "COMPACT_TAB_HEIGHT": 28,
+      "ICON": 16,
+      "IDLE_PAD_H": 8,
+      "LABEL": 9,
+      "SCALE_MAX": 0.75,
+      "SELECTED_PAD_H": 12,
+      "SIDE": 8,
+      "STRIP_PAD_V": 4,
+      "STRIP_RADIUS": 14,
+      "TAB_HEIGHT": 36,
+      "TAB_MIN_WIDTH": 40,
+      "TAB_RADIUS": 10,
+      "TOP_INSET": 10
+    }
+  },
   "motion": {
     "fade_in": 220,
     "fade_out": 220,
@@ -366,4 +486,4 @@ export type Tokens = typeof tokens;
 export const THEME_IDS = ["cloud","cloud_minimalist_black"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const PALETTE_ROLES = ["window","surface","surface_selected","text_primary","text_secondary","accent","hairline","tile_ink"] as const;
-export const TOKEN_COUNT = 244;
+export const TOKEN_COUNT = 338;

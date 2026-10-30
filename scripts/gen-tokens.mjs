@@ -174,6 +174,67 @@ put('color.web.background', 'color', kColor(/val FleetWebBackground = (Color\(0x
   for (const [k, d] of Object.entries(pairs)) if (dimens.has(d) && parseFloat(dimens.get(d)) !== vals[k].value) fail(`NavTokens.${k} != dimens ${d}`);
 }
 
+// ── fleet chrome (#1154): libs:ui-nav-bars specs + libs:theme-background palettes + libs:bottomnav SearchHtmlTokens ──
+/** A Kotlin `object NAME { ... }` body: `val X: Dp = 8.dp`, `TextUnit = 9.6.sp`, `const val X: Int = 3`, `Dp = A * B`,
+ *  `Dp = Other.field`, and `fun x(dark: Boolean): Color = if (dark) Color(..) else Color(..)` (-> x.dark / x.light). */
+const ktObjects = {};
+function ktObject(rel, name) {
+  const src = need(rel);
+  const start = src.indexOf(`object ${name} {`);
+  if (start < 0) fail(`object ${name} not in ${rel}`);
+  let i = src.indexOf('{', start) + 1, depth = 1;
+  while (depth && i < src.length) { if (src[i] === '{') depth++; else if (src[i] === '}') depth--; i++; }
+  const body = src.slice(start, i);
+  const vals = {};
+  const num = (expr) => {
+    expr = expr.trim();
+    let m;
+    if ((m = /^([\d.]+)\.(dp|sp)$/.exec(expr))) return [parseFloat(m[1]), m[2] === 'dp' ? 'dimension' : 'fontSize'];
+    if ((m = /^([\d.]+)f?$/.exec(expr))) return [parseFloat(m[1]), 'number'];
+    if ((m = /^(\w+)\.(\w+)$/.exec(expr)) && ktObjects[m[1]]?.[m[2]]) return ktObjects[m[1]][m[2]];
+    if ((m = /^(\w+)$/.exec(expr)) && vals[m[1]]) return vals[m[1]];
+    if ((m = /^(\w+) \* (\w+)$/.exec(expr)) && vals[m[1]] && vals[m[2]]) return [vals[m[1]][0] * vals[m[2]][0], vals[m[1]][1] === 'number' ? vals[m[2]][1] : vals[m[1]][1]];
+    return null;
+  };
+  for (const m of body.matchAll(/^\s*public (?:const )?val (\w+): (?:Dp|TextUnit|Int|Float) = (.+)$/gm)) {
+    const v = num(m[2]);
+    if (v) vals[m[1]] = v;
+  }
+  for (const m of body.matchAll(/fun (\w+)\(dark: Boolean\): Color =\s*if \(dark\) (Color\(0x[0-9A-Fa-f]{8}\)) else (Color\(0x[0-9A-Fa-f]{8}\))/g)) {
+    vals[`${m[1]}.dark`] = [kColor(m[2]), 'color'];
+    vals[`${m[1]}.light`] = [kColor(m[3]), 'color'];
+  }
+  ktObjects[name] = vals;
+  return { vals, rel };
+}
+const NAVBARS = 'ab_cloud-libs-shared/libs/ui-nav-bars/src/main/kotlin/com/diegonmarcos/superapp';
+const SEARCH_HTML = 'ab_cloud-libs-shared/libs/bottomnav/src/main/kotlin/com/diegonmarcos/superapp/bottomnav/BottomNavSearchHtml.kt';
+const THEME_BG = 'ab_cloud-libs-shared/libs/theme-background/src/main/kotlin/com/diegonmarcos/superapp/themebg/ThemeBackground.kt';
+for (const [rel, name, key, min] of [
+  [SEARCH_HTML, 'SearchHtmlTokens', 'fleet.searchhtml', 15],
+  [`${NAVBARS}/navbarbottom/NavBarBottom.kt`, 'BottomSpec', 'fleet.bottom', 12],
+  [`${NAVBARS}/navbartop1/NavBarTopFirstRow.kt`, 'TopFirstRowSpec', 'fleet.top1', 10],
+  [`${NAVBARS}/navbartop2/NavBarTopSecondRow.kt`, 'SecondRowSpec', 'fleet.top2', 12],
+  [`${NAVBARS}/navbartop2/NavSideMenu.kt`, 'SideMenuSpec', 'fleet.side', 10],
+]) {
+  const { vals } = ktObject(rel, name);
+  if (Object.keys(vals).length < min) fail(`${name}: only ${Object.keys(vals).length} values read`);
+  for (const [k, [v, t]] of Object.entries(vals)) put(`${key}.${k}`, t, v, `${rel}#${name}.${k}`);
+}
+{
+  const src = need(THEME_BG);
+  const tab = kColor(/val TAB_SELECTED: Color = (Color\(0x[0-9A-Fa-f]{8}\))/.exec(src)?.[1] ?? fail('ThemeBackground.TAB_SELECTED'));
+  for (const mode of ['DARK', 'LIGHT']) {
+    const block = new RegExp(`private val ${mode} = ThemeColors\\(([\\s\\S]*?)\\n\\s*\\)`).exec(src)?.[1] ?? fail(`ThemeBackground.${mode}`);
+    let n = 0;
+    for (const m of block.matchAll(/(\w+) = (Color\(0x[0-9A-Fa-f]{8}\)|TAB_SELECTED)/g)) {
+      put(`fleet.theme.${mode.toLowerCase()}.${m[1]}`, 'color', m[2] === 'TAB_SELECTED' ? tab : kColor(m[2]), `${THEME_BG}#ThemeBackground.${mode}.${m[1]}`);
+      n++;
+    }
+    if (n < 12) fail(`ThemeBackground.${mode}: only ${n} colours read`);
+  }
+}
+
 // ── density: KitDensity (KitComponents.kt) ─────────────────────────────────────────────────────────
 {
   const rel = `${KIT}/KitComponents.kt`;

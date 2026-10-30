@@ -22,5 +22,5 @@
   .app-top-bar { display: flex; align-items: center; gap: 12px; padding: 16px; }
   h1 { margin: 0; font: 500 var(--type-title-medium-size) / normal var(--type-family-sans); }
   .content { flex: 1; }
-  :global(html.embed) .app-top-bar { display: none; }
+  :global(html.embed) .app-top-bar, :global(html.embed) .app-frame :global(.page-tabs-bar) { display: none; }
 </style>

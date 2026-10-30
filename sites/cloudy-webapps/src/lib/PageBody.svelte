@@ -11,7 +11,7 @@
   {#if body.tiles}<Tiles groups={[{ title: '', tiles: body.tiles }]} wrap={body.wrap} />{/if}
   {#if body.stack?.length}
     {#if body.tiles || body.groups}<hr class="div" />{/if}
-    {#each body.stack as c (c.title)}
+    {#each body.stack as c, ci (ci)}
       <StackCard title={c.title} subtitle={c.subtitle} href={c.href}>
         {#each c.rows as [k, val]}<ListRow label={k}>{#snippet trailing()}<span class="val">{val}</span>{/snippet}</ListRow>{/each}
         <p class="cap">{c.caption}</p>

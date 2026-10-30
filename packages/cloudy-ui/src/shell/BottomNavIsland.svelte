@@ -20,7 +20,7 @@
   <div class="island" role="tablist" data-testid="island"
     style:width={fitted && plan ? `${plan.islandWidth}px` : null}
     style:padding-inline={plan ? `${plan.endInset}px` : null}>
-    {#each items as it, i (it.id)}
+    {#each items as it, i (i)}
       <a class="bottom-nav__item item" class:on={it.id === selected} href={it.href} role="tab" aria-selected={it.id === selected}
         aria-label={collapsed ? it.label : undefined} aria-posinset={i + 1} aria-setsize={items.length} data-testid="bottom-nav-{it.id}">
         <span class="slot" style:padding-block={fitted ? `${(T.iconSize - icon) / 2}px` : null}><Icon name={it.icon} size={icon} /></span>
