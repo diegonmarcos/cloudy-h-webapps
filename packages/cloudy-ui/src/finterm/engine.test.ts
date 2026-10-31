@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FINTERM } from './catalog';
-import { FetchError, alloc, browserReadable, drawOrder, buildUrl, dbnomicsObs, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
+import { FetchError, alloc, cboePrev, decimals, browserReadable, drawOrder, buildUrl, dbnomicsObs, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
 
 const dash = (id: string) => FINTERM.dashboards.find((d) => d.id === id) as Dashboard;
 const fred = FINTERM.sources.find((s) => s.id === 'fred')!;
@@ -224,5 +224,16 @@ describe('drawOrder (UI spec 3, checklist 9 + 17)', () => {
   it('keeps the declared order when nothing is a segment or a key row', () => {
     const mm = FINTERM.dashboards.find((d) => d.id === 'market_monitor')!;
     expect(drawOrder(mm.panels).map((p) => p.id)).toEqual(['ust', 'funding', 'equity', 'fx', 'crypto', 'next']);
+  });
+});
+
+describe('quote change (real Cboe _DJX after the close, 2026-10-31)', () => {
+  it('takes the previous close from the absolute change, never from a rolled prev_close', () => {
+    // Cboe: current_price 517.7, price_change -5.73, prev_day_close 517.7 (rolled to the price)
+    expect(cboePrev(517.7, -5.73, 517.7)).toBeCloseTo(523.43, 9);
+    expect(cboePrev(517.7, null, 517.7)).toBeNull();
+    expect(cboePrev(517.7, null, 520)).toBe(520);
+    expect(decimals(517.7)).toBe(2);
+    expect(decimals(0.92)).toBe(4);
   });
 });

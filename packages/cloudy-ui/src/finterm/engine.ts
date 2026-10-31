@@ -554,7 +554,7 @@ export function feedV1(body: string, concept: string): Got {
     const last = obs[obs.length - 1]; if (!last) continue;
     pts.push({ key: s(sr.id), label: s(sr.title) || s(sr.id), x: pts.length, value: last[1], prev: obs[obs.length - 2]?.[1] ?? null, date: last[0] });
   }
-  for (const q of objs(o.quotes)) { const p = fin(q.price); if (p !== null) pts.push({ key: s(q.symbol), label: s(q.name) || s(q.symbol), x: pts.length, value: p, prev: fin(q.prev_close), date: s(q.ts).slice(0, 16).replace('T', ' ') }); }
+  for (const q of objs(o.quotes)) { const p = fin(q.price); if (p !== null) pts.push({ key: s(q.symbol), label: s(q.name) || s(q.symbol), x: pts.length, value: p, prev: cboePrev(p, fin(q.change), fin(q.prev_close)), date: s(q.ts).slice(0, 16).replace('T', ' ') }); }
   const asof = s(o.asof); const prev = new Map<string, number>();
   if (Array.isArray(o.prev)) for (const p of objs(o.prev)) { const v = fin(p.value); if (v !== null) prev.set(s(p.label), v); }
   for (const p of objs(o.points)) { const v = fin(p.value); if (v === null) continue; const l = s(p.label); pts.push({ key: s(p.key) || l, label: l, x: fin(p.tenor_years) ?? pts.length, value: v, prev: prev.get(l) ?? null, date: asof }); }
@@ -684,7 +684,11 @@ export function eventsIn(all: Ev[], filter: Fetch['filter'], today: string): Ev[
     .sort((a, b) => a.ts.slice(0, 10).localeCompare(b.ts.slice(0, 10)) || (a.ts.length === 10 ? '' : a.ts).localeCompare(b.ts.length === 10 ? '' : b.ts) || b.importance - a.importance);
 }
 export const dots = (n: number) => { const k = Math.max(0, Math.min(3, n)); return '\u25CF'.repeat(k) + '\u25CB'.repeat(3 - k); };
-const signedSig = (d: number) => (d >= 0 ? '+' : '-') + sig(Math.abs(d));
+/** Previous close of a quote: price minus the absolute change; a prev_close equal to the price (Cboe's post-close roll) is unknown, not a 0 % change. */
+export const cboePrev = (price: number, change: number | null, prevClose: number | null): number | null =>
+  change !== null ? price - change : prevClose !== null && prevClose !== price ? prevClose : null;
+/** The instrument's display decimals: 2 for a level at or above 1, 4 below. */
+export const decimals = (level: number) => (Math.abs(level) >= 1 ? 2 : 4);
 function renderModel(panel: Panel, f: Fetch, g: Got, ctx: Ctx): PanelData {
   const columns = panel.columns ?? [];
   const base = { columns, links: [] as string[], chart: [] as ChartPoint[], asOf: '', note: '', servedBy: '' };
@@ -712,15 +716,17 @@ function renderPoints(panel: Panel, f: Fetch, all: Pt[], ctx: Ctx, base: Omit<Pa
   const bp = panel.change_unit === 'bp'; const pctUnit = panel.unit === '%';
   const v = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 1000 ? group(x) : sig(x));
   const plain = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 10000 ? Math.round(x).toLocaleString('en-US') : String(Number(x.toFixed(4))));
-  const chg = (p: Pt) => (p.prev === null ? NA : bp ? signed((p.value - p.prev) * 100, 1) : signedSig(p.value - p.prev));
+  const chg = (p: Pt) => (p.prev === null ? NA : bp ? signed((p.value - p.prev) * 100, 1) : signed(p.value - p.prev, decimals(p.value)));
   const pctOf = (p: Pt) => (p.prev === null || p.prev === 0 ? null : (p.value / p.prev - 1) * 100);
   const pctText = (p: Pt) => { const x = pctOf(p); return x === null ? NA : signed(x, 2); };
-  const rows = pts.map((p) => panel.value_columns === 'actual_previous' ? [p.label, plain(p.value), p.prev === null ? NA : plain(p.prev), p.date]
+  // a quotes table whose feed has no previous value (NY Fed latest) drops the change columns instead of drawing dashes
+  const noChange = panel.view === 'quotes' && pts.length > 0 && pts.every((p) => p.prev === null);
+  const rows = pts.map((p) => noChange ? [p.label, v(p.value), p.date] : panel.value_columns === 'actual_previous' ? [p.label, plain(p.value), p.prev === null ? NA : plain(p.prev), p.date]
     : panel.view === 'quotes' ? [p.label, v(p.value), chg(p), bp ? NA : pctText(p), p.date] : [p.label, v(p.value), bp ? chg(p) : pctText(p), p.date]);
   const chart = panel.view === 'curve' ? pts.map((p) => ({ label: p.label, x: p.x, y: p.value }))
     : panel.view === 'bars' ? pts.map((p, i) => ({ label: p.label, x: i, y: panel.chart_value === 'change_pct' ? pctOf(p) ?? 0 : p.value }))
     : panel.view === 'quotes' ? pts.map((p, i) => ({ label: p.label, x: i, y: bp ? (p.prev === null ? 0 : (p.value - p.prev) * 100) : pctOf(p) ?? 0 })) : [];
   const alerts = panel.alerts === 'price' ? priceHits(ctx.user?.alerts ?? [], pts) : [];
   const spark = pts.map((p) => (p.hist && p.hist.length > 1 ? p.hist : null));
-  return { ...base, rows, chart, asOf: pts.reduce((m, p) => (p.date > m ? p.date : m), ''), alerts, ...(spark.some(Boolean) ? { spark } : {}) };
+  return { ...base, ...(noChange ? { columns: base.columns.filter((c) => !c.startsWith('Chg')) } : {}), rows, chart, asOf: pts.reduce((m, p) => (p.date > m ? p.date : m), ''), alerts, ...(spark.some(Boolean) ? { spark } : {}) };
 }
