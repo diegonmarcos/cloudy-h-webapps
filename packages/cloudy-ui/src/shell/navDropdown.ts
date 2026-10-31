@@ -16,3 +16,11 @@ export function dropdownMaxHeight(r: DropdownRoom, t: T = tokens.nav): number {
 
 export const dropdownHeight = (content: number, cap: number): number => Math.min(content, cap);
 export const dropdownScrolls = (content: number, cap: number): boolean => content > cap;
+
+/** Svelte action for a dropdown that opens below its anchor: caps it from its own top edge, re-capped on every resize (rotation,
+ *  split screen). The list's own height wins below the cap (max-height), and it scrolls (overflow-y: auto) only past it. */
+export function fitBelow(node: HTMLElement) {
+  const fit = () => { node.style.maxHeight = dropdownMaxHeight({ windowHeight: innerHeight, anchorBottom: node.getBoundingClientRect().top }) + 'px'; };
+  fit(); addEventListener('resize', fit);
+  return { destroy: () => removeEventListener('resize', fit) };
+}

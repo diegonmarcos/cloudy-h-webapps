@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dropdownMaxHeight } from '../shell/navDropdown';
+  import { fitBelow } from '../shell/navDropdown';
   // NavBarTopSecondRows, SecondRowMode.ManyRows (nav_mode horizontal_two_rows): ONE shared strip surface, one row per group
   // (NavSection.rowGroups): the group's label + " ▾" (14sp semibold, a column as wide as the widest label) opening a list of
   // the group's pages, a "|" divider, then the group's pages as scrollable icon chips (every one named at rest).
@@ -8,14 +8,6 @@
   type G = { id: string; label: string; pages: T[] };
   let { groups, selected, compact = false }: { groups: G[]; selected: string | null; compact?: boolean } = $props();
   let open = $state<string | null>(null);
-  // the index grows to its list, capped at the room below its label (navDropdown.ts, tokens.nav.dropdown*), re-capped on resize
-  let anchor: HTMLElement | undefined;
-  let cap = $state<number | null>(null);
-  $effect(() => {
-    if (!open) return;
-    const fit = () => { cap = anchor ? dropdownMaxHeight({ windowHeight: innerHeight, anchorBottom: anchor.getBoundingClientRect().bottom }) : null; };
-    fit(); addEventListener('resize', fit); return () => removeEventListener('resize', fit);
-  });
 </script>
 
 <nav class="rows" data-testid="fleet-second-rows">
@@ -23,10 +15,10 @@
     {#each groups as g (g.id)}
       <div class="row" data-testid="frow-{g.id}">
         <div class="idx">
-          <button class="label" onclick={(e) => { anchor = e.currentTarget; open = open === g.id ? null : g.id; }} aria-expanded={open === g.id}>{g.label} ▾</button>
+          <button class="label" onclick={() => (open = open === g.id ? null : g.id)} aria-expanded={open === g.id}>{g.label} ▾</button>
           {#if open === g.id}
             <div class="scrim" onclick={() => (open = null)} aria-hidden="true"></div>
-            <div class="dd" role="menu" style={cap === null ? undefined : `max-height:${cap}px`}>{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
+            <div class="dd" role="menu" use:fitBelow>{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
           {/if}
         </div>
         <span class="bar">|</span>

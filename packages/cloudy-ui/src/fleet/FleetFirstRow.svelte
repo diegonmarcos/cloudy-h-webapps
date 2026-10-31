@@ -9,7 +9,7 @@
   type Crumb = { label: string; href: string | null };
   type Rel = { id: string; label: string; href: string | null; indent: number; selected: boolean };
   import { CONFIGS_UI_LABEL } from '../shell/navUi';
-  import { dropdownMaxHeight } from '../shell/navDropdown';
+  import { fitBelow } from '../shell/navDropdown';
   let { crumbs, related, aiHref = null, profileHref = null, configsHref = null, clean = false, onMenu = () => {}, onConfigsUi = null }: {
     crumbs: Crumb[]; related: Rel[]; aiHref?: string | null; profileHref?: string | null; configsHref?: string | null;
     /** Clean mode: the row is ONLY the top-left hamburger (the title and the icons live in the left drawer). */
@@ -18,15 +18,7 @@
     onConfigsUi?: (() => void) | null;
   } = $props();
   let open = $state(false);
-  // the dropdown grows to its list, capped at the room below the title (navDropdown.ts, tokens.nav.dropdown*); re-measured on
-  // open and on every resize (rotation, split screen), so it never runs off the screen and a short list leaves no empty space
-  let titleEl: HTMLElement | undefined;
-  let cap = $state<number | null>(null);
-  $effect(() => {
-    if (!open) return;
-    const fit = () => { cap = titleEl ? dropdownMaxHeight({ windowHeight: innerHeight, anchorBottom: titleEl.getBoundingClientRect().bottom + 4 }) : null; };
-    fit(); addEventListener('resize', fit); return () => removeEventListener('resize', fit);
-  });
+  // the dropdown grows to its list, capped at the room below it (navDropdown.ts fitBelow, tokens.nav.dropdown*)
   let room = $state(0);
   let line = $state(crumbs.map((c) => c.label).join(' / '));
   let measure: ((l: string) => number) | null = null;
@@ -48,10 +40,10 @@
     <button class="ic menu" onclick={onMenu} aria-label="Open the menu" data-testid="fleet-menu"><Icon set="fleet" name="filled:menu" /></button>
   {:else}
   <div class="left" bind:clientWidth={room}>
-    <button class="island" bind:this={titleEl} onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
+    <button class="island" onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
     {#if open}
       <div class="scrim" onclick={() => (open = false)} aria-hidden="true"></div>
-      <div class="dropdown" role="menu" data-testid="fleet-dropdown" style={cap === null ? undefined : `max-height:${cap}px`}>
+      <div class="dropdown" role="menu" data-testid="fleet-dropdown" use:fitBelow>
         <div class="crumbs">
           {#each crumbs as c, i (i)}{#if i > 0}<span class="sep"> / </span>{/if}<svelte:element this={c.href ? 'a' : 'span'} href={c.href} class:last={i === crumbs.length - 1}>{c.label}</svelte:element>{/each}
         </div>
