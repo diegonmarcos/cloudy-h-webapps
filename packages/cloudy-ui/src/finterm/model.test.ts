@@ -76,6 +76,17 @@ describe('model route order: the container /v1 first, then the public source, th
     expect(d.servedBy).toBe(src('central_banks').name);
     expect(d.rows.some((r) => r[2].includes('European Central Bank'))).toBe(true);
   });
+  it('merge: every public route that answers is combined (calendars); without merge the first answer wins', async () => {
+    const base = panel('central_bank_calendar', 'meetings');
+    const extra = JSON.stringify({ banks: [{ country: 'CH', events: [{ ts: '2026-11-02T08:30Z', title: 'SNB: rate decision' }] }] });
+    const mk = (merge: boolean) => ({ ...base, fetch: { ...base.fetch!, merge, fallbacks: [{ source: 'central_banks', provider: 'declared_events', path: 'extra.json' }] } });
+    const ctx = (): Ctx => ({ ...harness(() => null).ctx, get: async (u: string) => (u === 'asset:extra.json' ? extra : JSON.stringify((FINTERM as unknown as { declared: Record<string, unknown> }).declared[u.slice(6)])) });
+    const merged = await loadPanel(mk(true), dash('central_bank_calendar'), ctx());
+    expect(merged.rows.some((r) => r[2] === 'SNB: rate decision')).toBe(true);
+    expect(merged.rows.some((r) => r[2].startsWith('Bank of England'))).toBe(true);
+    const first = await loadPanel(mk(false), dash('central_bank_calendar'), ctx());
+    expect(first.rows.some((r) => r[2] === 'SNB: rate decision')).toBe(false);
+  });
   it('the first public route that answers wins (no merge): last month only when this month is empty', async () => {
     const x = '<m:properties><d:NEW_DATE m:type="Edm.DateTime">2026-09-30T00:00:00</d:NEW_DATE><d:BC_2YEAR m:type="Edm.Double">3.5</d:BC_2YEAR><d:BC_10YEAR m:type="Edm.Double">4.1</d:BC_10YEAR><d:BC_30YEAR m:type="Edm.Double">4.7</d:BC_30YEAR></m:properties>';
     const h = harness((u) => (u.includes('month=202610') ? '<feed/>' : u.includes('month=202609') ? x : null));
