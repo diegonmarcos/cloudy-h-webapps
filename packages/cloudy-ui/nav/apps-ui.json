@@ -8936,19 +8936,73 @@
                 "icon": "sync",
                 "items": [
                   {
-                    "id": "check_light",
-                    "kind": "check_light",
-                    "label": "Light check",
-                    "hint": "refs only",
-                    "icon": "sync",
-                    "exclusive": false
-                  },
-                  {
                     "id": "check_full",
                     "kind": "check_full",
                     "label": "Full check",
                     "hint": "working tree",
                     "icon": "search",
+                    "exclusive": false
+                  }
+                ]
+              },
+              {
+                "id": "sync",
+                "label": "Sync",
+                "icon": "cloud_sync",
+                "items": [
+                  {
+                    "id": "sync_all",
+                    "kind": "compound",
+                    "op": "sync_no_winner",
+                    "label": "Sync all",
+                    "hint": "no winner",
+                    "icon": "cloud_sync",
+                    "scope": "filtered",
+                    "confirm": true
+                  }
+                ]
+              },
+              {
+                "id": "clone",
+                "label": "Clone",
+                "icon": "download",
+                "items": [
+                  {
+                    "id": "clone_missing",
+                    "kind": "depth",
+                    "action": "clone_all_depth1",
+                    "label": "Clone missing (depth 1)",
+                    "hint": "one clone per repository",
+                    "icon": "download"
+                  }
+                ]
+              },
+              {
+                "id": "logs",
+                "label": "Logs",
+                "icon": "history",
+                "items": [
+                  {
+                    "id": "logs",
+                    "kind": "open_logs",
+                    "label": "Logs",
+                    "hint": "Repos and App logs",
+                    "icon": "history",
+                    "exclusive": false
+                  }
+                ]
+              },
+              {
+                "id": "more",
+                "label": "More",
+                "icon": "list",
+                "items": [
+                  {
+                    "id": "check_light",
+                    "kind": "check_light",
+                    "label": "Light check",
+                    "hint": "refs only",
+                    "icon": "sync",
                     "exclusive": false
                   },
                   {
@@ -8982,23 +9036,6 @@
                     "hint": "stop the status reads",
                     "icon": "restore",
                     "exclusive": false
-                  }
-                ]
-              },
-              {
-                "id": "sync",
-                "label": "Sync",
-                "icon": "cloud_sync",
-                "items": [
-                  {
-                    "id": "sync_all",
-                    "kind": "compound",
-                    "op": "sync_no_winner",
-                    "label": "Sync all",
-                    "hint": "no winner",
-                    "icon": "cloud_sync",
-                    "scope": "filtered",
-                    "confirm": true
                   },
                   {
                     "id": "pull_all",
@@ -9037,21 +9074,6 @@
                     "label": "Fetch all",
                     "icon": "sync",
                     "scope": "filtered"
-                  }
-                ]
-              },
-              {
-                "id": "clone",
-                "label": "Clone",
-                "icon": "download",
-                "items": [
-                  {
-                    "id": "clone_missing",
-                    "kind": "depth",
-                    "action": "clone_all_depth1",
-                    "label": "Clone missing (depth 1)",
-                    "hint": "one clone per repository",
-                    "icon": "download"
                   },
                   {
                     "id": "mirror_all",
@@ -9069,20 +9091,6 @@
                     "icon": "storage",
                     "danger": true,
                     "confirm": true
-                  }
-                ]
-              },
-              {
-                "id": "more",
-                "label": "⋯",
-                "icon": "list",
-                "items": [
-                  {
-                    "id": "activity_logs",
-                    "kind": "open_activity",
-                    "label": "Activity Logs",
-                    "icon": "list",
-                    "exclusive": false
                   },
                   {
                     "id": "last_report",
@@ -9110,6 +9118,28 @@
                 ]
               }
             ]
+          },
+          "logs": {
+            "title": "Logs",
+            "tabs": [
+              {
+                "id": "repos",
+                "label": "Repos"
+              },
+              {
+                "id": "app",
+                "label": "App"
+              }
+            ],
+            "labels": {
+              "commits": "Commits",
+              "history": "History",
+              "ci": "CI runs",
+              "ci_load": "Load CI runs",
+              "no_repos": "No cloned repository yet",
+              "empty": "nothing yet",
+              "loading": "reading…"
+            }
           },
           "activity_logs": {
             "max_entries": 50
