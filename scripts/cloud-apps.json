@@ -170,16 +170,16 @@
           "target": "extapp:cloud-me#page:health/home"
         },
         {
-          "id": "mystudy",
-          "label": "Me-Study",
+          "id": "myexperiences",
+          "label": "Experiences",
           "icon": "sa/ic_file_stack",
-          "target": "extapp:cloud-me#page:study/cv"
+          "target": "extapp:cloud-me#page:experiences/work"
         },
         {
-          "id": "myachieves",
-          "label": "Me-Achieves",
-          "icon": "sa/ic_map_pin",
-          "target": "extapp:cloud-me#page:achieves/personal"
+          "id": "myroadmap",
+          "label": "RoadMap",
+          "icon": "sa/ic_maps",
+          "target": "extapp:cloud-me#page:roadmap/folders"
         },
         {
           "separator": true
@@ -270,41 +270,6 @@
       "title": "Lnktree",
       "tiles": [
         {
-          "id": "omniverse",
-          "label": "Omniverse",
-          "icon": "sa/ic_world",
-          "target": "page:cloud/omniverse"
-        },
-        {
-          "separator": true
-        },
-        {
-          "id": "finterm",
-          "label": "FinTerm",
-          "icon": "sa/ic_fin",
-          "target": "section:finterm"
-        },
-        {
-          "separator": true
-        },
-        {
-          "id": "cad",
-          "label": "CAD",
-          "icon": "sa/ic_p_c3_stack",
-          "target": "page:cloud/cad"
-        },
-        {
-          "id": "sim2real",
-          "label": "Sim2Real",
-          "icon": "sa/ic_robot",
-          "target": "page:cloud/sim2real"
-        }
-      ]
-    },
-    {
-      "title": "Configs",
-      "tiles": [
-        {
           "id": "cloud-superapp",
           "label": "SuperApp",
           "icon": "sa/ic_superapp_d",
@@ -313,6 +278,41 @@
         {
           "separator": true
         },
+        {
+          "id": "omniverse",
+          "label": "Omniverse",
+          "icon": "sa/ic_p_sol_other",
+          "target": "extapp:cg-omniverse"
+        },
+        {
+          "separator": true
+        },
+        {
+          "id": "finterm",
+          "label": "FinTerm",
+          "icon": "sa/ic_p_markets_terminal",
+          "target": "extapp:capital-stack-finterminal"
+        },
+        {
+          "separator": true
+        },
+        {
+          "id": "cad",
+          "label": "CAD",
+          "icon": "sa/ic_p_sol_pro",
+          "target": "extapp:hardtech-cad"
+        },
+        {
+          "id": "sim2real",
+          "label": "Sim2Real",
+          "icon": "sa/ic_p_sol_tools",
+          "target": "extapp:hardtech-sim2real"
+        }
+      ]
+    },
+    {
+      "title": "Configs",
+      "tiles": [
         {
           "id": "configs-account",
           "label": "Account",
