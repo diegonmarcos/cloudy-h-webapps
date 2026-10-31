@@ -28,7 +28,12 @@ for (const site of ['cloudy-webapps', 'cloudy-c3']) {
   const big = files.filter((f) => f.endsWith('.js') && f.includes('/_app/') && ![...initial].some((r) => f.endsWith(r))).map((f) => [f, gz(f)]).filter(([, n]) => n > LIMIT.chunk);
   const sprite = files.find((f) => f.endsWith('sprite.svg'));
   console.log(`${site}: shell JS ${kb(shell)} (${initial.size} files) / ${kb(LIMIT.shell)}, CSS ${kb(css)} / ${kb(LIMIT.css)}${sprite ? `, sprite ${kb(statSync(sprite).size)}` : ''}`);
-  if (shell > LIMIT.shell) { console.error(`FAIL ${site}: shell JS over budget`); bad++; }
+  if (shell > LIMIT.shell) {
+    console.error(`FAIL ${site}: shell JS over budget`); bad++;
+    // what the shell is made of: each up-front script's gzip size and the test ids it draws, largest first
+    for (const [rel, n, ids] of [...initial].filter((r) => existsSync(join(dist, r))).map((r) => { const t = readFileSync(join(dist, r), 'utf8'); return [r, gz(join(dist, r)), [...new Set([...t.matchAll(/data-testid="([^"$]+)"/g)].map((m) => m[1]))].slice(0, 6)]; }).sort((a, b) => b[1] - a[1]))
+      console.error(`  ${kb(n).padStart(8)}  ${rel}  ${ids.join(' ')}`);
+  }
   if (css > LIMIT.css) { console.error(`FAIL ${site}: CSS over budget`); bad++; }
   for (const [f, n] of big) { console.error(`FAIL ${site}: chunk ${f.slice(dist.length)} ${kb(n)} > ${kb(LIMIT.chunk)}`); bad++; }
   if (sprite && statSync(sprite).size > LIMIT.sprite) { console.error(`FAIL ${site}: sprite over budget`); bad++; }
