@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { tokens } from '../../tokens/tokens';
-import { dropdownHeight, dropdownMaxHeight, dropdownScrolls } from './navDropdown';
+import { readFileSync } from 'node:fs';
+import { dropdownCapCss, dropdownHeight, dropdownMaxHeight, dropdownScrolls } from './navDropdown';
 
 const M = tokens.nav.dropdownScreenMargin, MIN = tokens.nav.dropdownMinHeight;
 const portrait = { windowHeight: 800, anchorBottom: 80, insetTop: 24, insetBottom: 48 };
@@ -34,5 +35,22 @@ describe('page-list dropdown sizing (NavDropdownSizing)', () => {
     expect(dropdownMaxHeight({ windowHeight: 300, anchorBottom: 250 })).toBe(MIN);
     expect(dropdownMaxHeight({ windowHeight: 50, anchorBottom: 40, insetTop: 24, insetBottom: 20 })).toBe(0);
     expect(dropdownMaxHeight({ windowHeight: 800, anchorBottom: 0, insetTop: 24, insetBottom: 48 })).toBe(800 - 24 - 48 - M);
+  });
+
+  // The drawn dropdowns apply the rule in CSS: both carry exactly dropdownCapCss, and that CSS computes what the function does.
+  const src = (f: string) => readFileSync(new URL(f, import.meta.url), 'utf8');
+  it('the first row and the group index draw the same cap, from the generated token variables', () => {
+    expect(src('../fleet/FleetFirstRow.svelte')).toContain(dropdownCapCss('calc(var(--fleet-top1-height) + 4px)'));
+    expect(src('../fleet/FleetSecondRows.svelte')).toContain(dropdownCapCss('var(--dd-top)'));
+  });
+  it('the CSS cap equals dropdownMaxHeight (portrait, landscape, low anchor)', () => {
+    const evalCss = (H: number, top: number, bottom: number) => {
+      const e = dropdownCapCss(String(top)).replace(/^max-height: |;$/g, '')
+        .replace('var(--nav-dropdown-min-height)', String(MIN)).replace('var(--nav-dropdown-screen-margin)', String(M))
+        .replace('env(safe-area-inset-bottom, 0px)', String(bottom)).replace('100dvh', String(H)).replaceAll('calc(', '(').replace('max(', 'Math.max(');
+      return Function(`return ${e}`)() as number;
+    };
+    for (const [H, top, bottom] of [[800, 80, 48], [400, 70, 0], [300, 250, 0], [1400, 80, 0]])
+      expect(evalCss(H, top, bottom)).toBe(dropdownMaxHeight({ windowHeight: H, anchorBottom: top, insetBottom: bottom }));
   });
 });

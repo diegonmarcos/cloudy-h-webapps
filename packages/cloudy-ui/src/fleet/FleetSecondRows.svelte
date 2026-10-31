@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { fitBelow } from '../shell/navDropdown';
   // NavBarTopSecondRows, SecondRowMode.ManyRows (nav_mode horizontal_two_rows): ONE shared strip surface, one row per group
   // (NavSection.rowGroups): the group's label + " ▾" (14sp semibold, a column as wide as the widest label) opening a list of
   // the group's pages, a "|" divider, then the group's pages as scrollable icon chips (every one named at rest).
@@ -8,6 +7,7 @@
   type G = { id: string; label: string; pages: T[] };
   let { groups, selected, compact = false }: { groups: G[]; selected: string | null; compact?: boolean } = $props();
   let open = $state<string | null>(null);
+  let ddTop = $state(0); // the open index's top edge: its cap is the room below it (navDropdown.ts dropdownCapCss)
 </script>
 
 <nav class="rows" data-testid="fleet-second-rows">
@@ -15,10 +15,10 @@
     {#each groups as g (g.id)}
       <div class="row" data-testid="frow-{g.id}">
         <div class="idx">
-          <button class="label" onclick={() => (open = open === g.id ? null : g.id)} aria-expanded={open === g.id}>{g.label} ▾</button>
+          <button class="label" onclick={(e) => { ddTop = e.currentTarget.getBoundingClientRect().bottom; open = open === g.id ? null : g.id; }} aria-expanded={open === g.id}>{g.label} ▾</button>
           {#if open === g.id}
             <div class="scrim" onclick={() => (open = null)} aria-hidden="true"></div>
-            <div class="dd" role="menu" use:fitBelow>{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
+            <div class="dd" role="menu" style="--dd-top:{ddTop}px">{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
           {/if}
         </div>
         <span class="bar">|</span>
@@ -49,7 +49,8 @@
   .lbl { padding-left: 6px; font: 500 var(--fleet-top2-label) / normal var(--type-family-sans); white-space: nowrap; }
   .on .lbl { font-weight: 700; }
   .scrim { position: fixed; inset: 0; z-index: 30; }
-  .dd { position: absolute; z-index: 31; top: 100%; left: 0; width: 240px; overflow-y: auto; background: var(--f-island); border-radius: 12px; box-shadow: 0 8px 24px #0008; }
+  .dd { position: absolute; z-index: 31; top: 100%; left: 0; width: 240px; overflow-y: auto;
+    max-height: max(var(--nav-dropdown-min-height), calc(100dvh - var(--dd-top) - env(safe-area-inset-bottom, 0px) - var(--nav-dropdown-screen-margin))); background: var(--f-island); border-radius: 12px; box-shadow: 0 8px 24px #0008; }
   .dd a, .dd span { display: block; padding: 12px 16px; color: var(--f-on-island); text-decoration: none; font: 400 14px var(--type-family-sans); }
   .dd .on { color: var(--f-accent-on-island); font-weight: 700; }
 </style>
