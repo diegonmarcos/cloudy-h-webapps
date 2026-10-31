@@ -11,7 +11,7 @@
   import BottomNavIsland from './BottomNavIsland.svelte';
   import PageTabs from './PageTabs.svelte';
   import Drawer from './Drawer.svelte';
-  import { scrollHideGestureStep, scrollHideStart, gestureDown, gestureUp, DEFAULT_NAV_UI } from './navUi';
+  import { scrollHideStep, DEFAULT_NAV_UI, type ChromeState } from './navUi';
   import EmptyState from '../components/EmptyState.svelte';
   import { swipe } from './gestures';
   import { trackLayout } from './layout';
@@ -29,13 +29,10 @@
   onMount(() => trackLayout());
   // scroll-hide (NavUiDecl, on by default): a downward scroll hides ALL bars (top row, island) until an upward scroll reveals them.
   // The SuperApp stays Classic: its Clean mode and Configs > UI follow with the SuperApp's own Android host (nav-shape.json nav_ui.pending).
-  // Per gesture (scrollHideGestureStep): the touch that hid the bars cannot bring them back; lift, then scroll up.
-  let sm = $state(scrollHideStart());
-  const hidden = $derived(sm.chrome === 'hidden');
+  let chrome = $state<ChromeState>('shown');
+  const hidden = $derived(chrome === 'hidden');
   let lastY = 0;
-  const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - lastY; lastY = y; sm = scrollHideGestureStep(sm, y <= 0 ? -1 : d, DEFAULT_NAV_UI.scrollHide); };
-  const onDown = () => (sm = gestureDown(sm));
-  const onUp = () => (sm = gestureUp(sm));
+  const onScroll = (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - lastY; lastY = y; chrome = scrollHideStep(chrome, y <= 0 ? -1 : d, DEFAULT_NAV_UI.scrollHide); };
 
   const tabSwipe = (dir: -1 | 1) => {
     const i = tabs.findIndex((t) => t.id === tabSelected);
@@ -50,7 +47,7 @@
   <div class="strip-wrap" bind:clientHeight={stripH}><StatusStrip chips={shell.chips} right={shell.right} battery={shell.battery} /></div>
   <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} {hidden} />
   <div class="panes" class:split={!atHome}>
-    <main class="pane master content" onscroll={onScroll} ontouchstart={onDown} ontouchend={onUp} ontouchcancel={onUp} use:swipe={{ onTab: tabSwipe, onEdge: () => (drawerOpen = true) }} data-testid="content">
+    <main class="pane master content" onscroll={onScroll} use:swipe={{ onTab: tabSwipe, onEdge: () => (drawerOpen = true) }} data-testid="content">
       {#if tabs.length}<PageTabs {tabs} selected={tabSelected} />{/if}
       {#if subtabs.length}<PageTabs tabs={subtabs} selected={subSelected} sub />{/if}
       {@render children()}
