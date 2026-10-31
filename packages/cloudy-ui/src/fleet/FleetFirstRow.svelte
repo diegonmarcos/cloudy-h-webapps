@@ -47,7 +47,7 @@
         </div>
         {#if related.length}<hr />{/if}
         {#each related as r, i (i)}
-          <svelte:element this={r.href ? 'a' : 'span'} class="item" class:on={r.selected} href={r.href} role="menuitem" style:padding-left="{16 + 16 * r.indent}px">{r.label}</svelte:element>
+          <svelte:element this={r.href ? 'a' : 'span'} class="item" class:on={r.selected} class:child={!r.selected && r.indent > 0} href={r.href} role="menuitem" style:padding-left="{16 + 16 * r.indent}px">{r.label}</svelte:element>
         {/each}
         {#if onConfigsUi}<hr /><button class="item cfg" role="menuitem" onclick={() => { open = false; onConfigsUi(); }} data-testid="fleet-configs-ui">{CONFIGS_UI_LABEL}</button>{/if}
       </div>
@@ -76,11 +76,13 @@
   /* grows to its list, capped at the room below it (navDropdown.ts dropdownCapCss: 100dvh = rotation and split screen) */
   .dropdown { position: absolute; z-index: 31; top: calc(100% + 4px); left: 4px; width: var(--fleet-top1-dropdown-width); overflow-y: auto;
     max-height: max(var(--nav-dropdown-min-height), calc(100dvh - calc(var(--fleet-top1-height) + 4px) - env(safe-area-inset-bottom, 0px) - var(--nav-dropdown-screen-margin)));
-    background: var(--f-island); border-radius: 12px; box-shadow: 0 8px 24px #0008; color: var(--f-on-island); padding-bottom: 8px; }
+    background: var(--f-island); border-radius: 12px; box-shadow: 0 8px 24px #0008; color: var(--nav-dropdown-on-surface); padding-bottom: 8px; }
   .crumbs { padding: 8px 16px; white-space: nowrap; overflow-x: auto; font: 400 13px var(--type-family-sans); }
   .crumbs a, .crumbs span { color: var(--f-on-island); text-decoration: none; }
   .crumbs .last { color: var(--f-accent-on-island); font-weight: 700; }
   hr { border: 0; height: 1px; background: var(--f-island-border); margin: 0; }
-  .item { display: block; padding: 12px 16px; font: 400 14px var(--type-family-sans); color: var(--f-on-island); text-decoration: none; }
-  .item.on { color: var(--f-accent-on-island); font-weight: 700; }
+  /* every entry (parent, child, selected, Configs) in NavTokens' on-surface ink; hierarchy by indent, weight and alpha */
+  .item { display: block; padding: 12px 16px; font: 400 14px var(--type-family-sans); color: var(--nav-dropdown-on-surface); text-decoration: none; }
+  .item.child { opacity: var(--nav-dropdown-child-alpha); }
+  .item.on { font-weight: 700; }
 </style>

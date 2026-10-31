@@ -247,8 +247,13 @@
   --nav-clean-drawer-width: 320px;
   --nav-clean-icon-size: 22px;
   --nav-collapse-ms: 220ms;
+  --nav-dropdown-child-alpha: 0.87;
+  --nav-dropdown-disabled-alpha: 0.6;
   --nav-dropdown-min-height: 96px;
+  --nav-dropdown-on-surface: #ffffff;
   --nav-dropdown-screen-margin: 16px;
+  --nav-dropdown-surface-dark: #0a0f1a;
+  --nav-dropdown-surface-light: #1f2937;
   --nav-end-inset: 6px;
   --nav-fit-icon-label-gap: 4px;
   --nav-fit-icon-size: 20px;
