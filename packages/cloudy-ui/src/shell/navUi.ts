@@ -67,6 +67,18 @@ export function scrollHideGestureStep(m: ScrollHideMachine, dy: number, scrollHi
   return { ...m, gesture: g, chrome, latch };
 }
 
+/** THE one feed both shells spread on their scroller (`<main {...feed}>`): scroll, touchstart, touchend and touchcancel drive
+ *  the per-gesture machine; [hidden] is told every change. [enabled] reads scroll-hide in force (Configs > UI). */
+export function scrollFeed(enabled: () => boolean, hidden: (on: boolean) => void) {
+  let m = scrollHideStart(), last = 0;
+  const put = (n: ScrollHideMachine) => { m = n; hidden(n.chrome === 'hidden'); };
+  const up = () => put(gestureUp(m));
+  return {
+    onscroll: (e: Event) => { const y = (e.currentTarget as HTMLElement).scrollTop, d = y - last; last = y; put(scrollHideGestureStep(m, y <= 0 ? -1 : d, enabled())); },
+    ontouchstart: () => put(gestureDown(m)), ontouchend: up, ontouchcancel: up,
+  };
+}
+
 // ── persistence (the `nav_ui` store of the app): fail-soft like the Android prefs ──
 export const NAV_UI_KEY = (appId: string) => `nav_ui:${appId}`;
 

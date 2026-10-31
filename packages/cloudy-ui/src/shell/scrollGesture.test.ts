@@ -40,3 +40,19 @@ describe('scroll-hide per gesture (NavUi.kt chromeGestureStep)', () => {
     expect(step(gestureDown(scrollHideStart()), 40, false).chrome).toBe('shown');
   });
 });
+
+describe('scrollFeed: the one feed both shells spread on their scroller', () => {
+  it('hides on a downward touch, ignores its reversal, restores on a new upward touch', async () => {
+    const { scrollFeed } = await import('./navUi');
+    let hidden = false;
+    const f = scrollFeed(() => true, (h) => (hidden = h));
+    const el = { scrollTop: 0 };
+    const scroll = (y: number) => { el.scrollTop = y; f.onscroll({ currentTarget: el } as unknown as Event); };
+    f.ontouchstart(); scroll(100);
+    expect(hidden).toBe(true);
+    scroll(60);
+    expect(hidden).toBe(true);
+    f.ontouchend(); f.ontouchstart(); scroll(30);
+    expect(hidden).toBe(false);
+  });
+});

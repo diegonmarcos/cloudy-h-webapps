@@ -10,7 +10,7 @@
   import FleetSecondRows from './FleetSecondRows.svelte';
   import FleetSideMenu from './FleetSideMenu.svelte';
   import { onMount } from 'svelte';
-  import { navChromePlan, scrollHideGestureStep, scrollHideStart, gestureDown, gestureUp, declaredNavUi, DEFAULT_NAV_UI, type NavUiSettings } from '../shell/navUi';
+  import { navChromePlan, scrollFeed, declaredNavUi, DEFAULT_NAV_UI, type NavUiSettings } from '../shell/navUi';
   import { navUi, loadNavUi } from '../shell/navUiStore';
   type Tab = { id: string; label: string; icon: string; href: string | null };
   let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], navUiDecl = null, children }: {
@@ -22,7 +22,6 @@
     mode?: string; groups?: { id: string; label: string; pages: Tab[] }[]; sideItems?: { id: string; label: string; icon: string; depth: number; heading: boolean; href: string | null }[];
   } = $props();
   let width = $state(0);
-  let last = 0;
   // The nav UI choice of THIS app (Configs > UI): the declared default, then the user's saved choice (and a ?nav= override).
   const declared: NavUiSettings = declaredNavUi(navUiDecl); // build.json::ui.nav_ui does not change while the shell is mounted
   let ui = $state<NavUiSettings>(DEFAULT_NAV_UI);
@@ -30,16 +29,10 @@
   onMount(() => { loadNavUi(app, declared); });
   const plan = $derived(navChromePlan(ui.mode));
   // scroll-hide: a downward scroll hides ALL bars (first row, second rows, bottom) until an upward scroll reveals them
-  // per gesture (scrollHideGestureStep): the touch that hid them cannot bring them back; only a new touch scrolling up does
-  let sm = $state(scrollHideStart());
-  const hidden = $derived(sm.chrome === 'hidden');
-  const onScroll = (e: Event) => {
-    const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y;
-    sm = scrollHideGestureStep(sm, y <= 0 ? -1 : d, ui.scrollHide);
-  };
-  const onDown = () => (sm = gestureDown(sm));
-  const onUp = () => (sm = gestureUp(sm));
-  $effect(() => { if (!ui.scrollHide) sm = { ...sm, chrome: 'shown', latch: null }; });
+  // per gesture (navUi scrollFeed, shared with SuperAppShell): the touch that hid them cannot bring them back
+  let hidden = $state(false);
+  const feed = scrollFeed(() => ui.scrollHide, (h) => (hidden = h));
+  $effect(() => { if (!ui.scrollHide) hidden = false; });
   let drawerOpen = $state(false);
   let uiOpen = $state(false);
 
@@ -49,7 +42,7 @@
   <div class="top" class:away={hidden}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} clean={plan.hamburger} onMenu={() => (drawerOpen = true)} onConfigsUi={() => (uiOpen = true)} /></div>
   <div class="body" bind:clientWidth={width}>
   {#if plan.secondRow && mode === 'vertical_side_menu' && sideItems.length}<FleetSideMenu items={sideItems} selected={subtab ?? tab} narrow={width > 0 && width < 600} />{/if}
-  <main class="content" onscroll={onScroll} ontouchstart={onDown} ontouchend={onUp} ontouchcancel={onUp} data-testid="fleet-content">
+  <main class="content" {...feed} data-testid="fleet-content">
     {#if plan.secondRow}
     <div class="rows" class:away={hidden}>
     {#if mode === 'horizontal_two_rows' && groups.length}<FleetSecondRows {groups} selected={tab} compact={false} />
