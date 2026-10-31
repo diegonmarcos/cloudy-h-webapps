@@ -211,7 +211,6 @@
   --fleet-theme-light-tab-strip: #0000000f;
   --fleet-theme-light-top: #e0eafc;
   --fleet-top1-actions-max-height: 2000px;
-  --fleet-top1-dropdown-max-height: 520px;
   --fleet-top1-dropdown-width: 280px;
   --fleet-top1-height: 52px;
   --fleet-top1-icon: 24px;
@@ -248,6 +247,8 @@
   --nav-clean-drawer-width: 320px;
   --nav-clean-icon-size: 22px;
   --nav-collapse-ms: 220ms;
+  --nav-dropdown-min-height: 96px;
+  --nav-dropdown-screen-margin: 16px;
   --nav-end-inset: 6px;
   --nav-fit-icon-label-gap: 4px;
   --nav-fit-icon-size: 20px;

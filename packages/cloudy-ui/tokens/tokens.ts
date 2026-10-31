@@ -294,7 +294,6 @@ export const tokens = {
     },
     "top1": {
       "ACTIONS_MAX_HEIGHT": 2000,
-      "DROPDOWN_MAX_HEIGHT": 520,
       "DROPDOWN_WIDTH": 280,
       "HEIGHT": 52,
       "ICON": 24,
@@ -338,6 +337,8 @@ export const tokens = {
     "cleanDrawerWidth": 320,
     "cleanIconSize": 22,
     "collapseMs": 220,
+    "dropdownMinHeight": 96,
+    "dropdownScreenMargin": 16,
     "endInset": 6,
     "fitIconLabelGap": 4,
     "fitIconSize": 20,
@@ -563,4 +564,4 @@ export type Tokens = typeof tokens;
 export const THEME_IDS = ["cloud","cloud_minimalist_black"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const PALETTE_ROLES = ["window","surface","surface_selected","text_primary","text_secondary","accent","hairline","tile_ink"] as const;
-export const TOKEN_COUNT = 403;
+export const TOKEN_COUNT = 404;

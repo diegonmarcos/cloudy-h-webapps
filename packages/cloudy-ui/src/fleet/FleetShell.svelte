@@ -10,7 +10,7 @@
   import FleetSecondRows from './FleetSecondRows.svelte';
   import FleetSideMenu from './FleetSideMenu.svelte';
   import { onMount } from 'svelte';
-  import { navChromePlan, scrollHideStep, declaredNavUi, DEFAULT_NAV_UI, type ChromeState, type NavUiSettings } from '../shell/navUi';
+  import { navChromePlan, scrollHideGestureStep, scrollHideStart, gestureDown, gestureUp, declaredNavUi, DEFAULT_NAV_UI, type NavUiSettings } from '../shell/navUi';
   import { navUi, loadNavUi } from '../shell/navUiStore';
   type Tab = { id: string; label: string; icon: string; href: string | null };
   let { app, background = 'dark', crumbs, related, sections, section, tabs = [], tab = null, subtabs = [], subtab = null, aiHref = null, profileHref = null, configsHref = null, mode = 'horizontal_one_row', groups = [], sideItems = [], navUiDecl = null, children }: {
@@ -30,13 +30,16 @@
   onMount(() => { loadNavUi(app, declared); });
   const plan = $derived(navChromePlan(ui.mode));
   // scroll-hide: a downward scroll hides ALL bars (first row, second rows, bottom) until an upward scroll reveals them
-  let chrome = $state<ChromeState>('shown');
-  const hidden = $derived(chrome === 'hidden');
+  // per gesture (scrollHideGestureStep): the touch that hid them cannot bring them back; only a new touch scrolling up does
+  let sm = $state(scrollHideStart());
+  const hidden = $derived(sm.chrome === 'hidden');
   const onScroll = (e: Event) => {
     const y = (e.currentTarget as HTMLElement).scrollTop; const d = y - last; last = y;
-    chrome = scrollHideStep(chrome, y <= 0 ? -1 : d, ui.scrollHide);
+    sm = scrollHideGestureStep(sm, y <= 0 ? -1 : d, ui.scrollHide);
   };
-  $effect(() => { if (!ui.scrollHide) chrome = 'shown'; });
+  const onDown = () => (sm = gestureDown(sm));
+  const onUp = () => (sm = gestureUp(sm));
+  $effect(() => { if (!ui.scrollHide) sm = { ...sm, chrome: 'shown', latch: null }; });
   let drawerOpen = $state(false);
   let uiOpen = $state(false);
 
@@ -46,7 +49,7 @@
   <div class="top" class:away={hidden}><FleetFirstRow {crumbs} {related} {aiHref} {profileHref} {configsHref} clean={plan.hamburger} onMenu={() => (drawerOpen = true)} onConfigsUi={() => (uiOpen = true)} /></div>
   <div class="body" bind:clientWidth={width}>
   {#if plan.secondRow && mode === 'vertical_side_menu' && sideItems.length}<FleetSideMenu items={sideItems} selected={subtab ?? tab} narrow={width > 0 && width < 600} />{/if}
-  <main class="content" onscroll={onScroll} data-testid="fleet-content">
+  <main class="content" onscroll={onScroll} ontouchstart={onDown} ontouchend={onUp} ontouchcancel={onUp} data-testid="fleet-content">
     {#if plan.secondRow}
     <div class="rows" class:away={hidden}>
     {#if mode === 'horizontal_two_rows' && groups.length}<FleetSecondRows {groups} selected={tab} compact={false} />

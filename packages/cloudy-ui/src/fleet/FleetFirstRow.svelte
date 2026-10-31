@@ -9,6 +9,7 @@
   type Crumb = { label: string; href: string | null };
   type Rel = { id: string; label: string; href: string | null; indent: number; selected: boolean };
   import { CONFIGS_UI_LABEL } from '../shell/navUi';
+  import { dropdownMaxHeight } from '../shell/navDropdown';
   let { crumbs, related, aiHref = null, profileHref = null, configsHref = null, clean = false, onMenu = () => {}, onConfigsUi = null }: {
     crumbs: Crumb[]; related: Rel[]; aiHref?: string | null; profileHref?: string | null; configsHref?: string | null;
     /** Clean mode: the row is ONLY the top-left hamburger (the title and the icons live in the left drawer). */
@@ -17,6 +18,11 @@
     onConfigsUi?: (() => void) | null;
   } = $props();
   let open = $state(false);
+  // the dropdown grows to its list, capped at the room below the title (navDropdown.ts, tokens.nav.dropdown*); re-measured on
+  // open and on every resize (rotation, split screen), so it never runs off the screen and a short list leaves no empty space
+  let titleEl = $state<HTMLElement | null>(null);
+  let winH = $state(0);
+  const cap = $derived(open && titleEl && winH ? dropdownMaxHeight({ windowHeight: winH, anchorBottom: titleEl.getBoundingClientRect().bottom + 4 }) : null);
   let room = $state(0);
   let line = $state(crumbs.map((c) => c.label).join(' / '));
   let measure: ((l: string) => number) | null = null;
@@ -31,17 +37,17 @@
   $effect(() => { void room; void crumbs; fit(); });
 </script>
 
-<svelte:window onkeydown={(e) => { if (e.key === 'Escape') open = false; }} />
+<svelte:window bind:innerHeight={winH} onkeydown={(e) => { if (e.key === 'Escape') open = false; }} />
 
 <div class="app-top-bar first-row" class:clean data-testid="fleet-first-row">
   {#if clean}
     <button class="ic menu" onclick={onMenu} aria-label="Open the menu" data-testid="fleet-menu"><Icon set="fleet" name="filled:menu" /></button>
   {:else}
   <div class="left" bind:clientWidth={room}>
-    <button class="island" onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
+    <button class="island" bind:this={titleEl} onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
     {#if open}
       <div class="scrim" onclick={() => (open = false)} aria-hidden="true"></div>
-      <div class="dropdown" role="menu" data-testid="fleet-dropdown">
+      <div class="dropdown" role="menu" data-testid="fleet-dropdown" style:max-height={cap === null ? null : `${cap}px`}>
         <div class="crumbs">
           {#each crumbs as c, i (i)}{#if i > 0}<span class="sep"> / </span>{/if}<svelte:element this={c.href ? 'a' : 'span'} href={c.href} class:last={i === crumbs.length - 1}>{c.label}</svelte:element>{/each}
         </div>
@@ -73,7 +79,7 @@
   .cfg { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; }
   .ic { width: var(--fleet-top1-icon-target); height: var(--fleet-top1-icon-target); display: grid; place-items: center; color: var(--f-ink); }
   .scrim { position: fixed; inset: 0; z-index: 30; }
-  .dropdown { position: absolute; z-index: 31; top: calc(100% + 4px); left: 4px; width: var(--fleet-top1-dropdown-width); max-height: var(--fleet-top1-dropdown-max-height); overflow-y: auto;
+  .dropdown { position: absolute; z-index: 31; top: calc(100% + 4px); left: 4px; width: var(--fleet-top1-dropdown-width); overflow-y: auto;
     background: var(--f-island); border-radius: 12px; box-shadow: 0 8px 24px #0008; color: var(--f-on-island); padding-bottom: 8px; }
   .crumbs { padding: 8px 16px; white-space: nowrap; overflow-x: auto; font: 400 13px var(--type-family-sans); }
   .crumbs a, .crumbs span { color: var(--f-on-island); text-decoration: none; }
