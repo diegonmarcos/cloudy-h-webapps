@@ -67,8 +67,12 @@ test('each of the 28 dashboards renders: every panel is data or a placeholder th
     await expect(page.getByTestId('finterm-dash'), d.id).toHaveAttribute('data-dash', d.id);
     await settle(page);
     const panels = page.getByTestId('finterm-panel');
-    await expect(panels, d.id).toHaveCount(d.panels.length);
-    for (const [i, p] of d.panels.entries()) {
+    // drawn panels (UI spec 3, engine drawOrder): a segment_of panel lives inside its card, key rows come last
+    const shown = (d.panels as any[]).filter((p) => !p.segment_of);
+    const live = (p: any) => !!p.fetch || (!p.placeholder && p.view === 'alloc');
+    const drawn = [...shown.filter(live), ...shown.filter((p) => !live(p))];
+    await expect(panels, d.id).toHaveCount(drawn.length);
+    for (const [i, p] of drawn.entries()) {
       const panel = panels.nth(i);
       const state = (await panel.getAttribute('data-state'))!;
       expect(state, `${d.id}/${p.id}`).toMatch(/^(data|placeholder-(keyed|user-mapped|no-connector|blocked))$/);

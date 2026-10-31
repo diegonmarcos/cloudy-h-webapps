@@ -218,8 +218,8 @@ describe('placeholders say why', () => {
 
 describe('drawOrder (UI spec 3, checklist 9 + 17)', () => {
   const yc = FINTERM.dashboards.find((d) => d.id === 'yield_curves')!;
-  it('draws the FRED curve inside the Treasury card and the key rows last', () => {
-    expect(drawOrder(yc.panels).map((p) => p.id)).toEqual(['ust_official', 'euro', 'sovereigns']);
+  it('draws the Treasury curve inside the FRED card and the key rows last', () => {
+    expect(drawOrder(yc.panels).map((p) => p.id)).toEqual(['ust', 'euro', 'sovereigns']);
   });
   it('keeps the declared order when nothing is a segment or a key row', () => {
     const mm = FINTERM.dashboards.find((d) => d.id === 'market_monitor')!;
