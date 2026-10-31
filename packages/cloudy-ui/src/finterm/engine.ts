@@ -5,6 +5,8 @@
 // source or one a browser cannot reach is a dashed placeholder with its reason. A source declared `cors: false` (FRED and IMF send no
 // Access-Control-Allow-Origin) is never asked from the browser: the engine goes straight to the next source, so the page never waits on it.
 
+import { TABLE_DERIVES, tablePanel } from './tables';
+
 export type Obs = { date: string; value: number };
 export type ChartPoint = { label: string; x: number; y: number };
 export type PanelData = { columns: string[]; rows: string[][]; links: string[]; chart: ChartPoint[]; asOf: string; note: string; servedBy: string; alerts?: string[]; /** per row, the recent values (oldest first) for a sparkline, when the source gives history */ spark?: (number[] | null)[] };
@@ -230,6 +232,7 @@ export async function loadPanel(panel: Panel, dash: Dashboard, ctx: Ctx): Promis
   const f = panel.fetch;
   const source = ctx.sources.find((s) => s.id === panel.source);
   if (!f || !source) throw new Error(`panel ${panel.id} has no fetch`);
+  if (TABLE_DERIVES.includes(panel.derive ?? '')) return tablePanel(panel, dash, source, f, ctx);
   if (MODEL_DERIVES.includes(panel.derive ?? '')) return modelPanel(panel, dash, source, f, ctx);
   const fred = ['latest_curve', 'forward_grid', 'level_change', 'fx_spot', 'fx_cross'].includes(panel.derive ?? '');
   if (!fred && !browserReadable(source)) throw blocked(source); // no request: the source is known to be CORS-blocked
@@ -563,7 +566,7 @@ export function feedV1(body: string, concept: string): Got {
   const facts = objs(o.facts?.[concept]).flatMap((x): [string, string, number][] => { const v = fin(x.val); return v === null ? [] : [[s(x.fy), s(x.end), v]]; }).sort((a, b) => (a[0] < b[0] ? -1 : 1));
   facts.forEach(([fy, end, v], i) => pts.push({ key: fy, label: fy, x: i, value: v, prev: facts[i - 1]?.[2] ?? null, date: end }));
   const events = objs(o.events).map((e) => ev({ ts: s(e.ts), country: s(e.country), title: s(e.title), importance: Number(e.importance ?? 0), consensus: s(e.consensus), actual: s(e.actual), previous: s(e.previous), kind: s(e.kind) || 'economic' }));
-  const bars = objs(o.bars).flatMap((b): Bar[] => { const c = fin(b.c); return c === null ? [] : [{ date: s(b.t).slice(0, 10), o: fin(b.o) ?? c, h: fin(b.h) ?? c, l: fin(b.l) ?? c, c }]; }).sort((a, b) => (a.date < b.date ? -1 : 1));
+  const bars = objs(o.bars).flatMap((b): Bar[] => { const c = fin(b.c) ?? fin(b.close); return c === null ? [] : [{ date: (s(b.t) || s(b.date)).slice(0, 10), o: fin(b.o) ?? fin(b.open) ?? c, h: fin(b.h) ?? fin(b.high) ?? c, l: fin(b.l) ?? fin(b.low) ?? c, c }]; }).sort((a, b) => (a.date < b.date ? -1 : 1));
   const kv = o.profile && typeof o.profile === 'object' ? Object.keys(o.profile).sort().map((k) => [k, s(o.profile[k])] as [string, string]) : [];
   const filings = objs(o.filings);
   return { points: pts, events, bars, kv, rows: filings.map((f) => [s(f.title) || s(f.form), s(f.form), s(f.filed)]), links: filings.map((f) => s(f.url)) };

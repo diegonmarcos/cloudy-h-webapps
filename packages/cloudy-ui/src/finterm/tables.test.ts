@@ -1,0 +1,90 @@
+import { describe, expect, it } from 'vitest';
+import { FINTERM } from './catalog';
+import { FetchError, forwardRate, loadPanel, NA, sig, type Ctx, type Dashboard } from './engine';
+import { cell, maxDrawdown1y, perfFormat, perfRow, PERF_COLUMNS, rebalanced, trailing, vol1y, weighted, type Close } from './tables';
+
+// #1370 the per-item tables (port of Performance.kt / Tables.kt): Performance.row, daily rebalancing, GDP weights, container first, CORS skip.
+const dash = (id: string) => FINTERM.dashboards.find((d) => d.id === id) as Dashboard;
+const panel = (d: string, p: string) => dash(d).panels.find((x) => x.id === p)!;
+const fin = FINTERM.sources.find((s) => s.id === 'cloud_fincept')!;
+const MESH = FINTERM.mesh[fin.fleet_endpoint!].replace(/\/+$/, '');
+
+function harness(answer: (url: string) => string | null, meshUp: boolean) {
+  const asked: string[] = [];
+  const ctx: Ctx = {
+    today: '2026-10-30', sources: FINTERM.sources, mesh: FINTERM.mesh, reachable: async () => meshUp,
+    get: async (url) => { asked.push(url); const a = answer(url); if (a === null) throw new FetchError('blocked', 'Failed to fetch'); return a; },
+  };
+  return { ctx, asked };
+}
+const bars = (...b: Close[]) => JSON.stringify({ bars: b.map(([t, c]) => ({ t, c })) });
+
+describe('Performance.row port', () => {
+  it('period-to-date bases are the last close before the period; trailing bases on or before; over a year is CAGR', () => {
+    const s: Close[] = [['2016-10-28', 50], ['2023-10-30', 80], ['2025-10-30', 100], ['2025-12-31', 104], ['2026-09-30', 105], ['2026-10-23', 108], ['2026-10-30', 110]];
+    const r = perfRow(s);
+    expect(r[PERF_COLUMNS.indexOf('WTD')]).toBeCloseTo(110 / 108 - 1, 12);
+    expect(r[PERF_COLUMNS.indexOf('MTD')]).toBeCloseTo(110 / 105 - 1, 12);
+    expect(r[PERF_COLUMNS.indexOf('YTD')]).toBeCloseTo(110 / 104 - 1, 12);
+    expect(r[PERF_COLUMNS.indexOf('1Y')]).toBeCloseTo(0.1, 12);
+    expect(r[PERF_COLUMNS.indexOf('3Y')]).toBeCloseTo(Math.pow(110 / 80, 1 / 3) - 1, 12);
+    expect(r[PERF_COLUMNS.indexOf('10Y')]).toBeCloseTo(Math.pow(110 / 50, 1 / 10) - 1, 12);
+    expect(trailing(s, 25)).toBeNull();
+    expect(perfFormat(0.1)).toBe('+10.00%');
+    expect(perfFormat(null)).toBe(NA);
+  });
+  it('risk columns', () => {
+    expect(maxDrawdown1y([['2026-01-01', 100], ['2026-02-01', 120], ['2026-03-01', 90], ['2026-04-01', 100]])).toBeCloseTo(-0.25, 12);
+    expect(vol1y(Array.from({ length: 30 }, (_, i) => [`2026-01-${String(i + 1).padStart(2, '0')}`, 100] as Close))).toBe(0);
+    expect(vol1y([['2026-01-01', 100]])).toBeNull();
+  });
+  it('the portfolio is rebalanced daily, not bought and held', () => {
+    const v = rebalanced([[60, [['d1', 100], ['d2', 110], ['d3', 121]]], [40, [['d1', 100], ['d2', 100], ['d3', 100]]]]);
+    expect(v[1][1]).toBeCloseTo(106, 9);
+    expect(v[2][1]).toBeCloseTo(106 * (0.6 * 1.1 + 0.4), 9);
+  });
+  it('GDP weights renormalise over the countries with a value; forward cells come from forwardRate', () => {
+    expect(weighted([[30507, 4], [4744, 2]])).toBeCloseTo((30507 * 4 + 4744 * 2) / 35251, 12);
+    expect(weighted([[30507, null], [4744, 2]])).toBe(2);
+    const c: [number, number][] = [[1, 3], [2, 4], [10, 5]];
+    expect(cell(c, 5, false, 1)).toBeNull();
+    expect(cell(c, 2, true, 1)).toBeCloseTo(forwardRate(c, 1, 2), 12);
+  });
+});
+
+describe('table panels end to end', () => {
+  it('a performance table reads the container per item and keeps an unanswered item as a dashed row with its reason', async () => {
+    const { ctx } = harness((u) => (u.startsWith(`${MESH}/v1/history?symbol=XLK`) ? bars(['2025-10-30', 100], ['2026-10-30', 110]) : null), true);
+    const d = await loadPanel(panel('eq_dm_us', 'sectors'), dash('eq_dm_us'), ctx);
+    const xlk = d.rows.find((r) => r[0] === 'Technology (XLK)')!;
+    expect(xlk[2 + PERF_COLUMNS.indexOf('1Y')]).toBe('+10.00%');
+    expect(xlk[1]).toBe(sig(110));
+    expect(d.rows.find((r) => r[0] === 'Financials (XLF)')!.slice(1).every((x) => x === NA)).toBe(true);
+    expect(d.note).toContain('Financials (XLF): ');
+  });
+  it('off the mesh a Cboe-only table asks nothing and is the mesh-only key row; Coinbase is read in the browser', async () => {
+    const { ctx, asked } = harness(() => null, false);
+    await expect(loadPanel(panel('eq_dm_us', 'sectors'), dash('eq_dm_us'), ctx)).rejects.toMatchObject({ kind: 'blocked' });
+    expect(asked).toEqual([]);
+    const cb = harness((u) => (u.includes('/products/BTC-USD/candles') ? JSON.stringify([[Date.UTC(2026, 9, 30) / 1000, 1, 1, 1, 70000, 1], [Date.UTC(2026, 8, 30) / 1000, 1, 1, 1, 50000, 1]]) : null), false);
+    const d = await loadPanel(panel('commodities', 'digital'), dash('commodities'), cb.ctx);
+    expect(d.rows[0][0]).toBe('Bitcoin');
+    expect(d.rows[0][2 + PERF_COLUMNS.indexOf('MTD')]).toBe('+40.00%');
+  });
+  it('the yields matrix leads with GDP-weighted averages and names the countries with no curve', async () => {
+    const curve = (y: number) => JSON.stringify({ asof: '2026-10-29', points: [{ key: '3M', label: '3M', tenor_years: 0.25, value: y }, { key: '10Y', label: '10Y', tenor_years: 10, value: y + 1 }] });
+    const { ctx } = harness((u) => (u === `${MESH}/v1/curves/US` ? curve(4) : u === `${MESH}/v1/curves/DE` ? curve(2) : null), true);
+    const d = await loadPanel(panel('yields_matrix', 'spot'), dash('yields_matrix'), ctx);
+    expect(d.rows.slice(0, 3).map((r) => r[0])).toEqual(['World avg', 'DM avg', 'EM avg']);
+    expect(d.rows[1][1]).toBe(((30507 * 4 + 4744 * 2) / 35251).toFixed(2));
+    expect(d.rows[2][1]).toBe(NA);
+    expect(d.rows.length).toBe(25);
+    expect(d.note).toContain('no curve: ');
+  });
+  it('model portfolio performance: the portfolio row then each leg with its proxy', async () => {
+    const { ctx } = harness((u) => (u.includes('symbol=AGG') ? bars(['2026-10-29', 100], ['2026-10-30', 101]) : u.includes('symbol=ACWI') ? bars(['2026-10-29', 100], ['2026-10-30', 110]) : null), true);
+    const d = await loadPanel(panel('mp_60_40', 'perf'), dash('mp_60_40'), ctx);
+    expect(d.rows.map((r) => r[0])).toEqual(['Portfolio 60/40', 'Bonds 60% (AGG)', 'Equity 40% (ACWI)']);
+    expect(d.rows[0][1]).toBe(sig(100 * (0.6 * 1.01 + 0.4 * 1.1)));
+  });
+});
