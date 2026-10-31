@@ -8822,6 +8822,7 @@
         {
           "id": "explorer",
           "label": "Explorer",
+          "title_row": false,
           "icon": "folder",
           "pages": [
             {
@@ -8861,6 +8862,7 @@
         {
           "id": "manage",
           "label": "Manage",
+          "title_row": false,
           "icon": "storage",
           "pages": [
             {
@@ -8878,16 +8880,19 @@
         {
           "id": "agents",
           "label": "Agents",
+          "title_row": false,
           "icon": "smart_toy"
         },
         {
           "id": "ai",
           "label": "AI",
+          "title_row": false,
           "icon": "auto_awesome"
         },
         {
           "id": "home",
           "label": "Home",
+          "title_row": false,
           "icon": "home"
         },
         {
@@ -8911,11 +8916,13 @@
         {
           "id": "fsync",
           "label": "Fsync",
+          "title_row": false,
           "icon": "sync"
         },
         {
           "id": "mounts",
           "label": "Mounts",
+          "title_row": false,
           "icon": "lan",
           "pages": [
             {
@@ -8933,6 +8940,7 @@
         {
           "id": "configs",
           "label": "Configs",
+          "title_row": false,
           "icon": "settings",
           "pages": [
             {
