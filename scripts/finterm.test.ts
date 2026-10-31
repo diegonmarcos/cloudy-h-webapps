@@ -82,10 +82,10 @@ describe('gen-finterm --check (the CI drift guard)', () => {
 });
 
 describe('the committed web FinTerm declarations', () => {
-  it('17 dashboards: FI 4, EQ 1, EX 2, NW 1, PM 9 (the APK entries), each with at least one panel', () => {
+  it('28 dashboards: FI 7, EQ 5, EX 4, NW 3, PM 9 (the APK entries), each with at least one panel', () => {
     const by = (t: string) => fin.dashboards.filter((d: { tab: string }) => d.tab === t).length;
-    expect([by('fi'), by('eq'), by('ex'), by('nw'), by('pm')]).toEqual([4, 1, 2, 1, 9]);
-    expect(fin.dashboards).toHaveLength(17);
+    expect([by('fi'), by('eq'), by('ex'), by('nw'), by('pm')]).toEqual([7, 5, 4, 3, 9]);
+    expect(fin.dashboards).toHaveLength(28);
     for (const d of fin.dashboards) expect(d.panels.length, d.id).toBeGreaterThan(0);
   });
   it('every panel is a live fetch, a dashed placeholder or a static allocation; every source named exists', () => {
@@ -96,9 +96,9 @@ describe('the committed web FinTerm declarations', () => {
     }
   });
   it('the mesh base is derived from the cloudy-u-containers declaration, never a public host', () => {
-    const svc = J('scripts/fallback-services.json').services.find((s: { slug: string }) => s.slug === 'fin-api');
-    expect(fin.mesh['fin-api']).toBe(`https://${svc.mesh}`);
-    expect(svc.hosts).not.toContain(new URL(fin.mesh['fin-api']).host);
+    const svc = J('scripts/fallback-services.json').services.find((s: { slug: string }) => s.slug === 'capital-stack-finterminal-api');
+    expect(fin.mesh['capital-stack-finterminal-api']).toBe(`https://${svc.mesh}`);
+    expect(svc.hosts).not.toContain(new URL(fin.mesh['capital-stack-finterminal-api']).host);
   });
   it('the Backend (mesh) link is derived too: lock badge data, no typed url in the mapping', () => {
     const map = J('data/app-links.json').links.find((l: { id: string }) => l.id === fin.app_id);
@@ -107,7 +107,7 @@ describe('the committed web FinTerm declarations', () => {
     const l = J('packages/cloudy-ui/nav/app-links.json').links.find((x: { id: string }) => x.id === fin.app_id);
     expect(l.kind).toBe('webapp');
     expect(l.href).toBe(`/cloud-webapps/${fin.app_id}/`);
-    expect(l.backend).toMatchObject({ label: 'Backend (mesh)', mesh: true, href: `${fin.mesh['fin-api']}/api/v1/info` });
+    expect(l.backend).toMatchObject({ label: 'Backend (mesh)', mesh: true, href: `${fin.mesh['capital-stack-finterminal-api']}/api/v1/info` });
     expect(l.alias_ids).toBeUndefined();
     expect(J('data/app-links.json').links.find((x: { id: string }) => x.id === fin.app_id).alias_ids).toContain('capital-finterm');
   });
