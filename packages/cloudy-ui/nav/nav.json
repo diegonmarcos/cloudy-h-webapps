@@ -1467,7 +1467,7 @@
               {
                 "id": "myroadmap",
                 "label": "RoadMap",
-                "icon": "ic_maps",
+                "icon": "ic_tree",
                 "target": "extapp:cloud-me#page:roadmap/folders"
               },
               {
