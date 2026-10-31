@@ -9031,7 +9031,10 @@
         "my-pm"
       ],
       "top_bar": null,
-      "nav_ui": null,
+      "nav_ui": {
+        "mode": "clean",
+        "scroll_hide": true
+      },
       "configs_ui": [
         "nav_ui"
       ],

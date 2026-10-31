@@ -9377,6 +9377,10 @@
       }
     },
     "capital-stack-finterminal": {
+      "nav_ui": {
+        "mode": "clean",
+        "scroll_hide": true
+      },
       "configs_ui": [
         "nav_ui"
       ],
