@@ -10,12 +10,17 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const LIMIT = { shell: 60 * 1024, chunk: 40 * 1024, css: 30 * 1024, sprite: 80 * 1024 };
+// Ratchet (optimisation pass, 2026-10-31): measured size + a small margin per site, so savings cannot silently grow back.
+// Measured: webapps shell 55.7 / CSS 21.1, c3 shell 52.1 / CSS 8.6, biggest lazy chunk 37.5, sprite 56.4 (raw) kB. Lower, never raise.
+const K = 1024;
+const LIMITS = { 'cloudy-webapps': { shell: 57.5 * K, css: 22.5 * K }, 'cloudy-c3': { shell: 53.5 * K, css: 9.5 * K } };
+const LIMIT = { shell: 60 * K, chunk: 39 * K, css: 30 * K, sprite: 58 * K };
 const gz = (f) => gzipSync(readFileSync(f), { level: 9 }).length;
 const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? walk(p) : [p]; });
 const kb = (n) => (n / 1024).toFixed(1) + ' kB';
 let bad = 0;
 for (const site of ['cloudy-webapps', 'cloudy-c3']) {
+  Object.assign(LIMIT, LIMITS[site]);
   const dist = join(root, 'sites', site, 'dist');
   if (!existsSync(join(dist, 'index.html'))) { console.error(`FAIL ${site}: no dist/index.html (build first)`); bad++; continue; }
   const html = readFileSync(join(dist, 'index.html'), 'utf8');
