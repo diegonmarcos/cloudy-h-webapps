@@ -80,13 +80,15 @@ test('each of the 28 dashboards renders: every panel is data or a placeholder th
   }
 });
 
-test('a blocked public source is a dashed placeholder saying "Mesh only / CORS" (no proxy)', async ({ page }) => {
+test('a blocked public source is one compact row: via your FinTerminal server, mesh only / CORS (no proxy)', async ({ page }) => {
   await net(page);
   await page.goto(`${BASE}/${fin.app_id}/fi/yield-curves/`);
   await settle(page);
   const ust = page.locator('[data-panel="ust"]');
   await expect(ust).toHaveAttribute('data-state', 'placeholder-blocked');
   await expect(ust.getByTestId('finterm-note')).toContainText('Mesh only / CORS');
+  await expect(ust.getByTestId('finterm-note')).toContainText('Via your FinTerminal server');
+  await expect(ust.locator('td')).toHaveCount(0); // no table of dashes
 });
 
 test('FI Yield Curves: FRED is cors false so the web goes straight to DBnomics; chart, table, last updated and attribution', async ({ page }, info) => {
@@ -106,8 +108,11 @@ test('FI Yield Curves: FRED is cors false so the web goes straight to DBnomics; 
   await expect(ust.getByTestId('finterm-chart')).toBeVisible();
   await expect(ust.getByTestId('finterm-table').locator('tbody tr')).toHaveCount(11);
   await expect(ust.getByTestId('finterm-asof')).toHaveText('2026-10-28');
-  // the separator keeps its spaces: "Last updated: 2026-10-28 · Source: DBnomics"
-  await expect(ust.getByTestId('finterm-meta')).toHaveText(`Last updated: 2026-10-28 · Source: ${dbn.name}`);
+  // one footer line: "● 09:15 · as of 2026-10-28 · FRED ↗ · via DBnomics" (the declared source is attributed, the route that served it named)
+  await expect(ust.getByTestId('finterm-meta')).toContainText('as of 2026-10-28');
+  await expect(ust.getByTestId('finterm-meta')).toContainText(`via ${dbn.name}`);
+  // terminal chart card: gridlines + right-edge labels, and the table pins its header and sorts on tap
+  await expect(ust.locator('[data-testid="finterm-table"] th').first()).toBeVisible();
   expect(asked).not.toContain(new URL(fred.endpoint).host);
   await expect(ust.getByTestId('finterm-attr')).toContainText(fred.name);
   // the keyed panel of the same dashboard stays dashed
@@ -133,7 +138,7 @@ test('on the mesh fin-api serves first: the topic answer wins and the page says 
   await settle(page);
   const ust = page.locator('[data-panel="ust"]');
   await expect(ust).toHaveAttribute('data-state', 'data');
-  await expect(ust.getByTestId('finterm-meta')).toContainText(`Source: ${api.name}`);
+  await expect(ust.getByTestId('finterm-meta')).toContainText(`via ${api.name}`);
   expect(asked).not.toContain(new URL(src('fred').endpoint).host);
 });
 

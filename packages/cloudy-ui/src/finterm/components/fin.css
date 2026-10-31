@@ -1,0 +1,21 @@
+/* FinTerm visual system (UI spec 1.1-1.4): dark terminal tokens. Colour means direction or importance only. */
+.fin {
+  --fin-canvas: #0B1016; --fin-surface: #121A23; --fin-raised: #1A2532; --fin-hairline: #243040;
+  --fin-text: #E6EDF3; --fin-text2: #9AA7B4; --fin-text3: #6E7B89;
+  --fin-up: #2FD37A; --fin-down: #F26D6D; --fin-flat: #9AA7B4; --fin-accent: #5AA7FF; --fin-amber: #F5B740;
+  --fin-imp1: #6E7B89; --fin-imp2: #F5B740; --fin-imp3: #F26D6D;
+  --fin-flash-up: #163B2A; --fin-flash-down: #3F1E24; --fin-skeleton: #1F2A36; --fin-skeleton-hi: #26323F;
+  --fin-sans: var(--type-family-sans, Roboto, system-ui, sans-serif);
+  --fin-mono: var(--type-family-mono, "Noto Sans Mono", ui-monospace, monospace);
+  color: var(--fin-text); font-family: var(--fin-sans);
+}
+.fin .num { font-family: var(--fin-mono); font-variant-numeric: tabular-nums lining-nums; }
+.fin .up { color: var(--fin-up); } .fin .down { color: var(--fin-down); } .fin .flat { color: var(--fin-flat); }
+.fin .lbl { font: 500 11px/16px var(--fin-sans); letter-spacing: .4px; text-transform: uppercase; color: var(--fin-text2); }
+.fin .cap { font: 400 11px/16px var(--fin-sans); color: var(--fin-text3); }
+.fin .sym { font: 600 13px/16px var(--fin-sans); letter-spacing: .2px; }
+@keyframes fin-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@keyframes fin-flash-up { 0% { background: transparent; } 14% { background: var(--fin-flash-up); } 57% { background: var(--fin-flash-up); } 100% { background: transparent; } }
+@keyframes fin-flash-down { 0% { background: transparent; } 14% { background: var(--fin-flash-down); } 57% { background: var(--fin-flash-down); } 100% { background: transparent; } }
+.fin .flash-up { animation: fin-flash-up 700ms cubic-bezier(.4,0,.2,1); } .fin .flash-down { animation: fin-flash-down 700ms cubic-bezier(.4,0,.2,1); }
+@media (prefers-reduced-motion: reduce) { .fin .flash-up, .fin .flash-down { animation: none; } .fin .sk { animation: none !important; } }

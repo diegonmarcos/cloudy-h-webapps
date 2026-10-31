@@ -7,7 +7,7 @@
 
 export type Obs = { date: string; value: number };
 export type ChartPoint = { label: string; x: number; y: number };
-export type PanelData = { columns: string[]; rows: string[][]; links: string[]; chart: ChartPoint[]; asOf: string; note: string; servedBy: string; alerts?: string[] };
+export type PanelData = { columns: string[]; rows: string[][]; links: string[]; chart: ChartPoint[]; asOf: string; note: string; servedBy: string; alerts?: string[]; /** per row, the recent values (oldest first) for a sparkline, when the source gives history */ spark?: (number[] | null)[] };
 
 export type Feed = { tab: string; entries: string[] };
 export type Source = {
@@ -170,13 +170,15 @@ export const forwardCurve = (curve: [number, number][], length: number, maxStart
 
 // ------------------------------------------------------------------ format
 
-export const num = (v: number, d: number) => (Number.isFinite(v) ? v.toFixed(d) : '-');
+/** Missing value (never a bare "-", which reads as a sign): the em dash. */
+export const NA = '\u2014';
+export const num = (v: number, d: number) => (Number.isFinite(v) ? v.toFixed(d) : NA);
 export const group = (v: number) => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-export const sig = (v: number) => (!Number.isFinite(v) ? '-' : Math.abs(v) >= 100 ? v.toFixed(2) : Math.abs(v) >= 1 ? v.toFixed(4) : v.toFixed(5));
-const signed = (v: number, d: number) => (v >= 0 ? '+' : '') + v.toFixed(d);
-const change = (last: Obs, prev: Obs | undefined, scale: number, d: number) => (prev ? signed((last.value - prev.value) * scale, d) : '-');
+export const sig = (v: number) => (!Number.isFinite(v) ? NA : Math.abs(v) >= 100 ? v.toFixed(2) : Math.abs(v) >= 1 ? v.toFixed(4) : v.toFixed(5));
+const signed = (v: number, d: number) => { const t = v.toFixed(d); return Number(t) === 0 ? Math.abs(0).toFixed(d) : (v > 0 ? '+' : '') + t; };
+const change = (last: Obs, prev: Obs | undefined, scale: number, d: number) => (prev ? signed((last.value - prev.value) * scale, d) : NA);
 const pct = (last: Obs, prev?: Obs) => (!prev || prev.value === 0 ? null : (last.value / prev.value - 1) * 100);
-const pctChange = (last: Obs, prev?: Obs) => { const p = pct(last, prev); return p === null ? '-' : signed(p, 2); };
+const pctChange = (last: Obs, prev?: Obs) => { const p = pct(last, prev); return p === null ? NA : signed(p, 2); };
 const years = (v: number) => (v === Math.floor(v) ? String(v) : num(v, 1));
 
 // ------------------------------------------------------------------ engine
@@ -307,7 +309,7 @@ function derived(panel: Panel, f: Fetch, series: FredSeries[], asOf: string, not
       const usd: Record<string, number> = { USD: 1 };
       for (const s of series) if (s.last.value > 0) usd[s.spec.ccy ?? ''] = s.spec.quote === 'usd_per' ? s.last.value : 1 / s.last.value;
       const names = Object.keys(usd);
-      return mk(names.map((i) => [i, ...names.map((j) => (i === j ? '-' : sig(usd[i] / usd[j])))]), [], [...columns, ...names]);
+      return mk(names.map((i) => [i, ...names.map((j) => (i === j ? NA : sig(usd[i] / usd[j])))]), [], [...columns, ...names]);
     }
   }
 }
@@ -358,7 +360,7 @@ export function failureFor(panel: Panel, sources: Source[], e: unknown): Placeho
 // container's /v1 answer covers it on the mesh): nyfed_rates, treasury_xml, sdmx_json, jsonstat, bls_series, frankfurter_rates,
 // coinbase_exchange, polymarket_events, sec_submissions, declared_events, finterm_v1.
 
-export type Pt = { key: string; label: string; x: number; value: number; prev: number | null; date: string };
+export type Pt = { key: string; label: string; x: number; value: number; prev: number | null; date: string; hist?: number[] };
 export type Ev = { ts: string; country: string; title: string; importance: number; consensus: string; actual: string; previous: string; kind: string };
 export type Bar = { date: string; o: number; h: number; l: number; c: number };
 export type Got = { points: Pt[]; events: Ev[]; bars: Bar[]; kv: [string, string][]; rows: string[][]; links: string[] };
@@ -416,7 +418,7 @@ export function feedTreasury(body: string): Got {
   const last = days[days.length - 1];
   if (!last) return got();
   const prev = days[days.length - 2]?.[1];
-  return got({ points: [...last[1].entries()].map(([k, v], i) => ({ key: k, label: k, x: i, value: v, prev: prev?.get(k) ?? null, date: last[0] })) });
+  return got({ points: [...last[1].entries()].map(([k, v], i) => ({ key: k, label: k, x: i, value: v, prev: prev?.get(k) ?? null, date: last[0], hist: days.map((d) => d[1].get(k)).filter((x): x is number => x !== undefined) })) });
 }
 export function feedSdmx(body: string, keyDim: string): Got {
   const top = JSON.parse(body);
@@ -487,7 +489,7 @@ export function feedFrankfurter(body: string): Got {
   if (!keys.length) return got();
   if (rates[keys[0]] && typeof rates[keys[0]] === 'object') {
     const dates = keys.sort(); const last = rates[dates[dates.length - 1]]; const prev = dates.length > 1 ? rates[dates[dates.length - 2]] : undefined;
-    return got({ points: Object.keys(last).sort().map((c, i) => ({ key: c, label: c, x: i, value: Number(last[c]), prev: prev && Number.isFinite(prev[c]) ? prev[c] : null, date: dates[dates.length - 1] })) });
+    return got({ points: Object.keys(last).sort().map((c, i) => ({ key: c, label: c, x: i, value: Number(last[c]), prev: prev && Number.isFinite(prev[c]) ? prev[c] : null, date: dates[dates.length - 1], hist: dates.map((d) => Number(rates[d]?.[c])).filter(Number.isFinite) })) });
   }
   return got({ points: keys.sort().map((c, i) => ({ key: c, label: c, x: i, value: Number(rates[c]), prev: null, date: s(o.date) })) });
 }
@@ -696,14 +698,15 @@ function renderPoints(panel: Panel, f: Fetch, all: Pt[], ctx: Ctx, base: Omit<Pa
   const bp = panel.change_unit === 'bp'; const pctUnit = panel.unit === '%';
   const v = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 1000 ? group(x) : sig(x));
   const plain = (x: number) => (pctUnit ? num(x, 2) : Math.abs(x) >= 10000 ? Math.round(x).toLocaleString('en-US') : String(Number(x.toFixed(4))));
-  const chg = (p: Pt) => (p.prev === null ? '-' : bp ? signed((p.value - p.prev) * 100, 1) : signedSig(p.value - p.prev));
+  const chg = (p: Pt) => (p.prev === null ? NA : bp ? signed((p.value - p.prev) * 100, 1) : signedSig(p.value - p.prev));
   const pctOf = (p: Pt) => (p.prev === null || p.prev === 0 ? null : (p.value / p.prev - 1) * 100);
-  const pctText = (p: Pt) => { const x = pctOf(p); return x === null ? '-' : signed(x, 2); };
-  const rows = pts.map((p) => panel.value_columns === 'actual_previous' ? [p.label, plain(p.value), p.prev === null ? '-' : plain(p.prev), p.date]
-    : panel.view === 'quotes' ? [p.label, v(p.value), chg(p), bp ? '-' : pctText(p), p.date] : [p.label, v(p.value), bp ? chg(p) : pctText(p), p.date]);
+  const pctText = (p: Pt) => { const x = pctOf(p); return x === null ? NA : signed(x, 2); };
+  const rows = pts.map((p) => panel.value_columns === 'actual_previous' ? [p.label, plain(p.value), p.prev === null ? NA : plain(p.prev), p.date]
+    : panel.view === 'quotes' ? [p.label, v(p.value), chg(p), bp ? NA : pctText(p), p.date] : [p.label, v(p.value), bp ? chg(p) : pctText(p), p.date]);
   const chart = panel.view === 'curve' ? pts.map((p) => ({ label: p.label, x: p.x, y: p.value }))
     : panel.view === 'bars' ? pts.map((p, i) => ({ label: p.label, x: i, y: panel.chart_value === 'change_pct' ? pctOf(p) ?? 0 : p.value }))
     : panel.view === 'quotes' ? pts.map((p, i) => ({ label: p.label, x: i, y: bp ? (p.prev === null ? 0 : (p.value - p.prev) * 100) : pctOf(p) ?? 0 })) : [];
   const alerts = panel.alerts === 'price' ? priceHits(ctx.user?.alerts ?? [], pts) : [];
-  return { ...base, rows, chart, asOf: pts.reduce((m, p) => (p.date > m ? p.date : m), ''), alerts };
+  const spark = pts.map((p) => (p.hist && p.hist.length > 1 ? p.hist : null));
+  return { ...base, rows, chart, asOf: pts.reduce((m, p) => (p.date > m ? p.date : m), ''), alerts, ...(spark.some(Boolean) ? { spark } : {}) };
 }

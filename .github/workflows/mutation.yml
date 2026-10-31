@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar | finterm-drift | finterm-order | finterm-csv | finterm-url | finterm-tab | finterm-placeholder | finterm-fred | finterm-model-merge | finterm-v1-first | finterm-window | finterm-cors-model | finterm-alert-side | finterm-declared'
+        description: 'island-width | trailing-slash | plan-island | page-route | calc-keypad | portal-flag | client-order | c3-route | old-url | baseline-bar | finterm-drift | finterm-order | finterm-csv | finterm-url | finterm-tab | finterm-placeholder | finterm-fred | finterm-model-merge | finterm-v1-first | finterm-window | finterm-cors-model | finterm-alert-side | finterm-declared | finterm-beat | finterm-sign | finterm-cadence | finterm-sort | finterm-trim'
         required: true
 permissions:
   contents: read
@@ -35,7 +35,12 @@ jobs:
             finterm-csv)    sed -i "s/\['observation_date', 'date'\].includes(head\[0\].toLowerCase())/true/" packages/cloudy-ui/src/finterm/engine.ts ;;
             finterm-url)    sed -i "2i const FRED_URL = 'https://fred.stlouisfed.org/graph/fredgraph.csv';" packages/cloudy-ui/src/finterm/engine.ts ;;
             finterm-tab)    sed -i 's#href: `${own.href}${dash.tab}/${dash.slug}/`#href: own.href#' sites/cloudy-webapps/src/lib/server/nav.ts ;;
-            finterm-placeholder) sed -i 's#<p class="note" data-testid="finterm-note">{st.ph.note}</p>#<p class="note" data-testid="finterm-note"></p>#' packages/cloudy-ui/src/finterm/Dashboard.svelte ;;
+            finterm-placeholder) sed -i 's#data-testid="finterm-note">{note}</span>#data-testid="finterm-note"></span>#' packages/cloudy-ui/src/finterm/components/FinKeyRow.svelte ;;
+            finterm-beat)        sed -i "s/return (a > f) === (better === 'higher') ? 'up' : 'down';/return (a > f) ? 'up' : 'down';/" packages/cloudy-ui/src/finterm/fin.ts ;;
+            finterm-sign)        sed -i "s/  if (Number(t) === 0) return t + suffix;//" packages/cloudy-ui/src/finterm/fin.ts ;;
+            finterm-cadence)     sed -i "s/  \[\/^(coinbase|kraken)\$\/, 15_000, MIN\],//" packages/cloudy-ui/src/finterm/fin.ts ;;
+            finterm-sort)        sed -i "s/if (x !== null \&\& y !== null \&\& dir === 'desc') c = -c;//" packages/cloudy-ui/src/finterm/fin.ts ;;
+            finterm-trim)        sed -i "s/if (Array.isArray(d\[k\])) d\[k\] = d\[k\].slice(-keep);/if (Array.isArray(d[k])) d[k] = d[k];/" packages/cloudy-ui/src/finterm/fin.ts ;;
             finterm-fred)   sed -i "s/\[\['id', id\], \['cosd'/[['series', id], ['cosd'/" packages/cloudy-ui/src/finterm/engine.ts ;;
             finterm-model-merge) sed -i "s/      if (!f.merge) break;/      break;/" packages/cloudy-ui/src/finterm/engine.ts ;;
             finterm-v1-first)    sed -i "s/  if (api \&\& f.primary?.api) {/  if (false \&\& api \&\& f.primary?.api) {/" packages/cloudy-ui/src/finterm/engine.ts ;;
