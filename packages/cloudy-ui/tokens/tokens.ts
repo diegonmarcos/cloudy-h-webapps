@@ -401,7 +401,7 @@ export const tokens = {
     "topRowFill": "#00000000",
     "ui": {
       "cleanDrawerActions": "ai,profile,settings",
-      "cleanDrawerRows": "page_dropdown,actions,sub_page_dropdown",
+      "cleanDrawerRows": "page_dropdown,actions,sub_page_dropdown,app_actions",
       "defaultMode": "classic",
       "modes": "classic,clean",
       "scrollHideDefault": 1

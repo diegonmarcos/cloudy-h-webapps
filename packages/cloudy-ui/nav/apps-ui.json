@@ -4630,7 +4630,8 @@
     "cloud-notes": {
       "nav_ui": {
         "mode": "clean",
-        "scroll_hide": true
+        "scroll_hide": true,
+        "actions": "drawer"
       },
       "configs_ui": [
         "nav_ui"
