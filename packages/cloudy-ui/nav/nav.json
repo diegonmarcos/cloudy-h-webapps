@@ -8889,6 +8889,7 @@
           "id": "git",
           "label": "Git",
           "icon": "commit",
+          "title_row": false,
           "pages": [
             {
               "id": "me",

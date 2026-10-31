@@ -8897,6 +8897,7 @@
           "top_bar": {
             "search": true,
             "search_placeholder": "Search repositories",
+            "search_height_dp": 40,
             "counters": [
               "cloned",
               "needs_you",
