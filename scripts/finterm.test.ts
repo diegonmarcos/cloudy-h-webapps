@@ -82,10 +82,10 @@ describe('gen-finterm --check (the CI drift guard)', () => {
 });
 
 describe('the committed web FinTerm declarations', () => {
-  it('28 dashboards: FI 7, EQ 5, EX 4, NW 3, PM 9 (the APK entries), each with at least one panel', () => {
+  it('32 dashboards: FI 9, EQ 7, EX 4, NW 3, PM 9 (the APK entries), each with at least one panel', () => {
     const by = (t: string) => fin.dashboards.filter((d: { tab: string }) => d.tab === t).length;
-    expect([by('fi'), by('eq'), by('ex'), by('nw'), by('pm')]).toEqual([7, 5, 4, 3, 9]);
-    expect(fin.dashboards).toHaveLength(28);
+    expect([by('fi'), by('eq'), by('ex'), by('nw'), by('pm')]).toEqual([9, 7, 4, 3, 9]);
+    expect(fin.dashboards).toHaveLength(32);
     for (const d of fin.dashboards) expect(d.panels.length, d.id).toBeGreaterThan(0);
   });
   it('every panel is a live fetch, a dashed placeholder or a static allocation; every source named exists', () => {

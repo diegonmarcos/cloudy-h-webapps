@@ -99,7 +99,7 @@ describe('model route order: the container /v1 first, then the public source, th
   });
   it('a panel whose every route is CORS-closed is blocked without a request', async () => {
     const h = harness(() => '{}');
-    await expect(loadPanel(panel('market_monitor', 'equity'), dash('market_monitor'), h.ctx)).rejects.toMatchObject({ kind: 'blocked' });
+    await expect(loadPanel(panel('world_equity_indices', 'cboe'), dash('world_equity_indices'), h.ctx)).rejects.toMatchObject({ kind: 'blocked' });
     expect(h.asked).toEqual([]);
   });
   it('one request per item; a failing item is skipped; all failing keeps the block reason', async () => {

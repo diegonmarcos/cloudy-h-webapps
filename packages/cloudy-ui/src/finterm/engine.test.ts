@@ -223,7 +223,7 @@ describe('drawOrder (UI spec 3, checklist 9 + 17)', () => {
   });
   it('keeps the declared order when nothing is a segment or a key row', () => {
     const mm = FINTERM.dashboards.find((d) => d.id === 'market_monitor')!;
-    expect(drawOrder(mm.panels).map((p) => p.id)).toEqual(['ust', 'funding', 'equity', 'fx', 'crypto', 'next']);
+    expect(drawOrder(mm.panels).map((p) => p.id)).toEqual(['ust', 'funding', 'fx', 'crypto', 'next']);
   });
 });
 
