@@ -123,7 +123,10 @@ test('on the mesh fin-api serves first: the topic answer wins and the page says 
     asked.push(u.host);
     if (u.host !== base.host) return null;
     if (u.pathname === api.paths!.health) return { body: '{"status":"ok"}', type: 'application/json' };
-    const id = /econ:fred:([^/]+)/.exec(decodeURIComponent(u.pathname))![1];
+    // the model panels of the same dashboard ask the container's /v1 surface too (#1351): only the topic peeks are answered here
+    const m = /econ:fred:([^/]+)/.exec(decodeURIComponent(u.pathname));
+    if (!m) return null;
+    const id = m[1];
     return { body: JSON.stringify({ series_id: id, observations: [{ date: '2099-01-01', value: 3.5 }] }), type: 'application/json' };
   });
   await page.goto(`${BASE}/${fin.app_id}/fi/yield-curves/`);
