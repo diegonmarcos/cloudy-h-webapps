@@ -106,7 +106,7 @@ describe('model route order: the container /v1 first, then the public source, th
     const h = harness((u) => (u.includes('/BTC-USD/') ? JSON.stringify({ open: '100', last: '110' }) : null));
     const d = await loadPanel(panel('market_monitor', 'crypto'), dash('market_monitor'), h.ctx);
     expect(h.asked.length).toBe(3);
-    expect(d.rows).toEqual([['Bitcoin', '110.00', '+10.0000', '+10.00', '24h']]);
+    expect(d.rows).toEqual([['Bitcoin', '110.00', '+10.00', '+10.00', '24h']]);
     await expect(loadPanel(panel('market_monitor', 'crypto'), dash('market_monitor'), harness(() => null).ctx)).rejects.toMatchObject({ kind: 'blocked' });
   });
   it('the container route needs the declared /v1 path and an answering mesh', async () => {

@@ -175,10 +175,10 @@ describe('CORS-blocked sources are skipped straight to the next source (FRED and
     expect(d.servedBy).toBe(dbn.name);
     expect(h.calls.filter((c) => c.startsWith('public')).length).toBe(11);
   });
-  it('a panel whose only source is cors false (US equity indices on FRED, IMF) is blocked with NO request', async () => {
+  it('a panel whose only source is cors false (credit OAS on FRED, IMF) is blocked with NO request', async () => {
     const h = harness({ meshUp: false, sources: FINTERM.sources });
-    const us = dash('world_equity_indices').panels.find((p) => p.source === 'fred' && p.fetch)!;
-    const e1 = await loadPanel(us, dash('world_equity_indices'), h.ctx).then(() => null, (e) => e);
+    const us = dash('credit').panels.find((p) => p.id === 'oas')!;
+    const e1 = await loadPanel(us, dash('credit'), h.ctx).then(() => null, (e) => e);
     expect(e1).toBeInstanceOf(FetchError);
     expect(failureFor(us, FINTERM.sources, e1).reason).toBe('blocked');
     const imfDash = FINTERM.dashboards.find((d) => d.panels.some((p) => p.source === 'imf' && p.fetch))!;
