@@ -6,7 +6,8 @@
   let col = $state(-1);
   let dir = $state<'asc' | 'desc' | 'none'>('none');
   let all = $state(false);
-  const isNum = (j: number) => rows.length > 0 && rows.every((r) => parseNum(r[j]) !== null || r[j] === DASH || r[j] === '' || r[j] === '-') && !/date|period|as of|time/i.test(columns[j] ?? '');
+  // the first column is the row's label (a tenor like 1M parses as a number but is text: left-aligned), as in the APK's FinLogic.colTypes
+  const isNum = (j: number) => j > 0 && rows.length > 0 && rows.every((r) => parseNum(r[j]) !== null || r[j] === DASH || r[j] === '' || r[j] === '-') && !/date|period|as of|time/i.test(columns[j] ?? '');
   const isChg = (j: number) => /chg|change|bp|1d|1w|1m|diff|surprise|%\s*$/i.test(columns[j] ?? '') && !/rate %|yield %|level/i.test(columns[j] ?? '') && rows.some((r) => /^[+-]/.test(r[j] ?? ''));
   const isDate = (j: number) => /date|period|as of/i.test(columns[j] ?? '');
   function sortBy(j: number) {
@@ -18,7 +19,7 @@
 </script>
 <div class="scroll" data-testid="finterm-table-wrap">
   <table data-testid="finterm-table">
-    <thead><tr>{#each columns as c, j}<th class:n={isNum(j) || isChg(j)} aria-sort={col === j && dir !== 'none' ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" onclick={() => sortBy(j)}>{c}{#if col === j && dir !== 'none'}<span class="sg">{dir === 'asc' ? '▲' : '▼'}</span>{/if}</button></th>{/each}</tr></thead>
+    <thead><tr>{#each columns as c, j}<th class:n={isNum(j) || isChg(j) || isDate(j)} aria-sort={col === j && dir !== 'none' ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" onclick={() => sortBy(j)}>{c}{#if col === j && dir !== 'none'}<span class="sg">{dir === 'asc' ? '▲' : '▼'}</span>{/if}</button></th>{/each}</tr></thead>
     <tbody>
       {#each sorted as { r, i }, k (i)}
         <tr class:hide={!all && k >= limit}>
