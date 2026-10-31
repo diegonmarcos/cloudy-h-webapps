@@ -1461,7 +1461,7 @@
                 "id": "myroadmap",
                 "label": "RoadMap",
                 "icon": "ic_tree",
-                "target": "extapp:cloud-me#page:roadmap/folders"
+                "target": "extapp:cloud-me#page:tasks/roadmaps"
               },
               {
                 "id": "me-sep-2",
@@ -1472,7 +1472,7 @@
                 "id": "myduties",
                 "label": "Me-Duties",
                 "icon": "ic_check_all",
-                "target": "extapp:cloud-me#page:duties/tasks"
+                "target": "extapp:cloud-me#page:tasks/backlogs"
               },
               {
                 "id": "myburo",
@@ -5756,9 +5756,9 @@
       "bottom_nav": [
         "health",
         "experiences",
-        "roadmap",
+        "tasks",
         "lnktree",
-        "duties",
+        "inventory",
         "buro",
         "llc"
       ],
@@ -6119,14 +6119,19 @@
           ]
         },
         {
-          "id": "roadmap",
-          "label": "RoadMap",
-          "icon": "ic_p_roadmap",
+          "id": "tasks",
+          "label": "Tasks",
+          "icon": "checklist",
           "pages": [
             {
-              "id": "folders",
-              "label": "Folders",
-              "icon": "ic_p_folder"
+              "id": "roadmaps",
+              "label": "RoadMaps",
+              "icon": "ic_p_roadmap"
+            },
+            {
+              "id": "backlogs",
+              "label": "Backlogs",
+              "icon": "checklist"
             }
           ]
         },
@@ -6255,14 +6260,132 @@
           ]
         },
         {
-          "id": "duties",
-          "label": "Duties",
-          "icon": "checklist",
+          "id": "inventory",
+          "nav_mode": "horizontal_two_rows",
+          "label": "Inventory",
+          "icon": "inventory_2",
+          "groups": [
+            {
+              "id": "city",
+              "label": "City",
+              "icon": "map",
+              "pages": [
+                "housing",
+                "household",
+                "transport",
+                "parking"
+              ]
+            },
+            {
+              "id": "buro",
+              "label": "Büro",
+              "icon": "ic_nav_buro",
+              "pages": [
+                "utilities",
+                "taxes",
+                "insurance",
+                "contracts",
+                "banking",
+                "subscriptions"
+              ]
+            },
+            {
+              "id": "lifestyle",
+              "label": "Lifestyle",
+              "icon": "star",
+              "pages": [
+                "leisure",
+                "food",
+                "care",
+                "clothing",
+                "electronics",
+                "education"
+              ]
+            }
+          ],
           "pages": [
             {
-              "id": "tasks",
-              "label": "Tasks",
-              "icon": "checklist"
+              "id": "housing",
+              "label": "Housing",
+              "icon": "home"
+            },
+            {
+              "id": "household",
+              "label": "Household",
+              "icon": "inventory_2"
+            },
+            {
+              "id": "transport",
+              "label": "Transport",
+              "icon": "route"
+            },
+            {
+              "id": "parking",
+              "label": "Parking",
+              "icon": "place"
+            },
+            {
+              "id": "utilities",
+              "label": "Utilities",
+              "icon": "bolt"
+            },
+            {
+              "id": "taxes",
+              "label": "Taxes",
+              "icon": "account_balance"
+            },
+            {
+              "id": "insurance",
+              "label": "Insurance",
+              "icon": "security"
+            },
+            {
+              "id": "contracts",
+              "label": "Contracts",
+              "icon": "description"
+            },
+            {
+              "id": "banking",
+              "label": "Banking",
+              "icon": "account_balance_wallet"
+            },
+            {
+              "id": "subscriptions",
+              "label": "Subscriptions",
+              "icon": "update"
+            },
+            {
+              "id": "leisure",
+              "label": "Leisure",
+              "icon": "fitness_center"
+            },
+            {
+              "id": "food",
+              "label": "Food",
+              "icon": "restaurant",
+              "separator_before": true
+            },
+            {
+              "id": "care",
+              "label": "Care",
+              "icon": "monitor_heart"
+            },
+            {
+              "id": "clothing",
+              "label": "Clothing",
+              "icon": "person",
+              "separator_before": true
+            },
+            {
+              "id": "electronics",
+              "label": "Electronics",
+              "icon": "devices"
+            },
+            {
+              "id": "education",
+              "label": "Education",
+              "icon": "menu_book",
+              "separator_before": true
             }
           ]
         },
@@ -8362,7 +8485,7 @@
       "description": "Diego's Cloud Store — the constellation app store as its own APK (#865). Hosts libs:appstore: the Cloud fleet list (install, update, download-all, auto-update on Wi-Fi), the phone's installed apps (stop, uninstall, sources) and the apps mesh. It also runs the background fleet pass that keeps every constellation app updated, Cloud SuperApp and itself included. Split out of cloud-superapp so the store ships and updates on its own.",
       "kind": "app",
       "wasm": "cloud-store",
-      "default_section": "search",
+      "default_section": "cloud",
       "bottom_nav": [
         "cloud",
         "phone",
@@ -8981,14 +9104,14 @@
       "icon": "ic_p_sol_other",
       "group": "Lnktree",
       "category": "android",
-      "description": "CG-Omniverse: the CG area's Android app behind the SuperApp's Cloud > Lnktree row. Three pages on the shared bottom nav: Galaxy (opens the CG Galaxy web app, read from the registry), Game Store and VR Store (planned, greyed). The pages are declared in build.json::ui and drawn by declared kinds; the address of Galaxy is read at build time from the SuperApp's own declarations, none is typed here.",
+      "description": "CG-Omniverse: the CG area's Android app behind the SuperApp's Cloud > Lnktree row. Three pages on the shared bottom nav: Avatar (a 3D avatar configurator: three.js in a WebView over bundled assets, options declared in data/avatar.json, the configuration saved and backed up), Galaxy (a Store world loaded full screen in a WebView, WebGL on) and Store (the worlds of data/store.json, generated from data/fwa.md, with Type / Dimension / Device multi-select filters). The pages are declared in build.json::ui and drawn by declared kinds.",
       "kind": "app",
       "wasm": null,
-      "default_section": "galaxy",
+      "default_section": "avatar",
       "bottom_nav": [
+        "avatar",
         "galaxy",
-        "game-store",
-        "vr-store"
+        "store"
       ],
       "top_bar": null,
       "nav_ui": null,
@@ -8997,21 +9120,21 @@
       ],
       "sections": [
         {
+          "id": "avatar",
+          "label": "Avatar",
+          "icon": "person",
+          "pages": []
+        },
+        {
           "id": "galaxy",
           "label": "Galaxy",
           "icon": "public",
           "pages": []
         },
         {
-          "id": "game-store",
-          "label": "Game Store",
-          "icon": "play_circle",
-          "pages": []
-        },
-        {
-          "id": "vr-store",
-          "label": "VR Store",
-          "icon": "devices",
+          "id": "store",
+          "label": "Store",
+          "icon": "apps",
           "pages": []
         },
         {

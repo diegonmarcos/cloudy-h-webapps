@@ -9346,27 +9346,22 @@
         "nav_ui"
       ],
       "stacks": {
+        "avatar": [
+          {
+            "kind": "avatar",
+            "title": "Avatar"
+          }
+        ],
         "galaxy": [
           {
-            "title": "Galaxy",
-            "subtitle": "CG Galaxy: the 3D galaxy worlds web app",
-            "url": "https://diegonmarcos.github.io/galaxy/"
+            "kind": "galaxy",
+            "title": "Galaxy"
           }
         ],
-        "game-store": [
+        "store": [
           {
-            "title": "Game Store",
-            "subtitle": "Games in one place",
-            "planned": true,
-            "note": "Planned: no game store yet"
-          }
-        ],
-        "vr-store": [
-          {
-            "title": "VR Store",
-            "subtitle": "VR experiences in one place",
-            "planned": true,
-            "note": "Planned: no VR store yet"
+            "kind": "store",
+            "title": "Store"
           }
         ],
         "about": [
