@@ -6,7 +6,7 @@
   import { onMount, onDestroy } from 'svelte';
   import './components/fin.css';
   import { FINTERM, sourceOf } from './catalog';
-  import { alertRule, alertSymbol, alloc, failureFor, loadPanel, placeholderFor, ruleText, FetchError, type AlertRule, type Ctx, type Dashboard, type Panel, type PanelData, type Placeholder, type UserLists } from './engine';
+  import { alertRule, alertSymbol, alloc, drawOrder, failureFor, loadPanel, placeholderFor, ruleText, FetchError, type AlertRule, type Ctx, type Dashboard, type Panel, type PanelData, type Placeholder, type UserLists } from './engine';
   import { trimBody, betterWhen, beatMiss, dirOf, isStale, nextDelay, parseNum, refreshPolicy, signedFmt, DASH, type SearchItem } from './fin';
   import Skel from './components/Skel.svelte';
   import FinFooter from './components/FinFooter.svelte';
@@ -178,8 +178,9 @@
   const hhmm = (t: number) => new Date(t).toTimeString().slice(0, 5);
   const footState = (st: State): 'fresh' | 'stale' | 'error' | 'none' => (st.phase !== 'data' ? 'none' : st.lastGood ? 'error' : st.stale || isStale(st.at, now, '') && false ? 'stale' : 'fresh');
   const staleOf = (p: Panel, st: State) => st.phase === 'data' && (st.stale || isStale(st.at, now, p.source));
-  const isKpi = (p: Panel) => p.view === 'quotes' && (p.change_unit === 'bp' || p.unit === '%');
-  const isHeat = (p: Panel) => p.view === 'quotes' && dash.id === 'market_monitor' && p.source === 'frankfurter';
+  // UI spec 6.3: a quotes panel declares how it is drawn (`display`: kpi | rows | heat), the same declaration the APK reads.
+  const isKpi = (p: Panel) => p.view === 'quotes' && (p.display ? p.display === 'kpi' : p.change_unit === 'bp' || p.unit === '%');
+  const isHeat = (p: Panel) => p.view === 'quotes' && (p.display ? p.display === 'heat' : dash.id === 'market_monitor' && p.source === 'frankfurter');
   const assetOf = (p: Panel): SearchItem['kind'] => (/coinbase|kraken/.test(p.source) ? 'CR' : /frankfurter|fx/.test(p.source + p.id + dash.id) ? 'FX' : /cboe|equity|stooq|sec/.test(p.source + dash.id) ? 'EQ' : /energy|commod|eia/.test(p.id + dash.id) ? 'CO' : /calendar|forexfactory/.test(p.source + dash.id) ? 'EV' : 'FI');
   const short = (s: string) => s.replace(/ per USD$/, '').replace(/^UST /, 'UST');
   function rowsOf(p: Panel, d: PanelData): Row[] {
@@ -206,10 +207,13 @@
   };
   const tape = $derived.by((): TapeItem[] => {
     const out: TapeItem[] = [];
+    // UI spec 2.1: the tape carries the panels that declare `tape` (any quotes panel when a dashboard declares none)
+    const declared = dash.panels.some((p) => p.tape);
+    const miss = (v?: string) => !v || v === DASH || v === '-';
     for (const p of dash.panels) {
       const st = states[p.id];
-      if (p.view !== 'quotes' || st?.phase !== 'data') continue;
-      for (const r of st.data.rows) out.push({ sym: short(r[0] ?? ''), last: r[1] ?? DASH, pct: p.change_unit === 'bp' ? `${r[2] ?? DASH}bp` : r[3] && r[3] !== DASH ? r[3] : r[2] ?? DASH });
+      if (p.view !== 'quotes' || st?.phase !== 'data' || (declared && !p.tape)) continue;
+      for (const r of st.data.rows) out.push({ sym: short(r[0] ?? ''), last: r[1] ?? DASH, pct: p.change_unit === 'bp' ? (miss(r[2]) ? DASH : `${r[2]} bp`) : !miss(r[3]) ? r[3]! : miss(r[2]) ? DASH : r[2]! });
     }
     return out.slice(0, 12);
   });
@@ -274,7 +278,7 @@
       {/if}
     </section>
   {/if}
-  {#each dash.panels as p (p.id)}
+  {#each drawOrder(dash.panels) as p (p.id)}
     {@const st = states[p.id] ?? { phase: 'loading' }}
     {@const at = attribution(p)}
     {@const ph = st.phase === 'placeholder'}
@@ -296,7 +300,7 @@
           {#each d.alerts ?? [] as a}<p class="alert" data-testid="finterm-alert">🔔 {a}</p>{/each}
           {#if p.view === 'quotes'}
             {#if isHeat(p)}
-              <div data-testid="finterm-quotes"><FinHeat tiles={d.rows.map((r) => ({ sym: short(r[0] ?? ''), last: r[1] ?? '', pct: r[3] ?? DASH }))} scale={1} onOpen={(i) => openQuote(p, d, i)} /><span class="sr-only">{d.rows.map((r) => r[0]).join(', ')}</span></div>
+              <div data-testid="finterm-quotes"><FinHeat tiles={d.rows.map((r) => ({ sym: short(r[0] ?? ''), last: r[1] ?? '', pct: r[3] ?? DASH }))} scale={p.heat_scale ?? 1} onOpen={(i) => openQuote(p, d, i)} /><span class="sr-only">{d.rows.map((r) => r[0]).join(', ')}</span></div>
             {:else if isKpi(p)}
               <FinKpi tiles={kpisOf(p, d)} onOpen={(i) => openQuote(p, d, i)} />
             {:else}
@@ -321,7 +325,7 @@
               {/if}
             {/if}
           {/if}
-          {#if d.note}<p class="nt cap"><span class="ad"></span>{d.note}</p>{/if}
+          {#if d.note && !(p.view === 'calendar' && !d.rows.length)}<p class="nt cap"><span class="ad"></span>{d.note}</p>{/if}
           <FinFooter state={footState(st)} fetched={hhmm(st.at)} asOf={d.asOf} name={at.name} docs={at.docs} via={d.servedBy && d.servedBy !== at.name ? d.servedBy : ''} onRefresh={() => loadOne(p, true)} />
         {/if}
       {/if}

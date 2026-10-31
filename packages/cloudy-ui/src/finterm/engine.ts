@@ -31,8 +31,22 @@ export type Fetch = {
 export type Panel = {
   id: string; title: string; source: string; view: string; derive?: string; fetch?: Fetch; columns?: string[]; unit?: string; chart_value?: string; change_unit?: string;
   value_columns?: string; alerts?: string;
-  placeholder?: { columns: string[]; rows: number };
+  /** A source with no key / connector yet: drawn as one key row (UI spec 2; the dashed columns/rows layout is gone, checklist 1). */
+  placeholder?: { reason?: string; note?: string };
+  /** UI spec 6.3: drawn as a source chip of another panel's card (Yield Curves: FRED inside the Treasury card), never alone. */
+  segment_of?: string; segment_label?: string;
+  display?: string; tape?: boolean; heat_scale?: number; limit?: number;
 };
+
+/**
+ * The panels in drawing order (UI spec 3, checklist 17; same rule as the APK's Dashboards.drawOrder): live and allocation panels in
+ * their declared order, the key rows (no source yet) at the bottom; a panel declared `segment_of` another is not drawn alone.
+ */
+export function drawOrder(panels: Panel[]): Panel[] {
+  const shown = panels.filter((p) => !p.segment_of);
+  const live = (p: Panel) => !!p.fetch || (!p.placeholder && p.view === 'alloc');
+  return [...shown.filter(live), ...shown.filter((p) => !live(p))];
+}
 export type Dashboard = { id: string; slug: string; entry: string; tab: string; subtitle: string; panels: Panel[]; model_portfolio?: { legs: [string, number][] } };
 export type Catalog = { mesh: Record<string, string>; sources: Source[]; dashboards: Dashboard[]; declared?: Record<string, unknown> };
 

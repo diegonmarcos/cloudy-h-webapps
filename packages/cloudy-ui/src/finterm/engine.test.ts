@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FINTERM } from './catalog';
-import { FetchError, alloc, browserReadable, buildUrl, dbnomicsObs, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
+import { FetchError, alloc, browserReadable, drawOrder, buildUrl, dbnomicsObs, failureFor, forwardRate, loadPanel, parseDbnomics, parseFinceptSeries, parseFredCsv, parseGdelt, parseImf, parseWorldBank, placeholderFor, primaryRoute, seen, yieldAt, type Ctx, type Dashboard } from './engine';
 
 const dash = (id: string) => FINTERM.dashboards.find((d) => d.id === id) as Dashboard;
 const fred = FINTERM.sources.find((s) => s.id === 'fred')!;
@@ -213,5 +213,16 @@ describe('placeholders say why', () => {
     expect(by('world_equity_indices', 'world').note).toMatch(/no keys/);
     expect(by('yield_curves', 'sovereigns').reason).toBe('user-mapped');
     expect(by('news', 'gov').reason).toBe('no-connector');
+  });
+});
+
+describe('drawOrder (UI spec 3, checklist 9 + 17)', () => {
+  const yc = FINTERM.dashboards.find((d) => d.id === 'yield_curves')!;
+  it('draws the FRED curve inside the Treasury card and the key rows last', () => {
+    expect(drawOrder(yc.panels).map((p) => p.id)).toEqual(['ust_official', 'euro', 'sovereigns']);
+  });
+  it('keeps the declared order when nothing is a segment or a key row', () => {
+    const mm = FINTERM.dashboards.find((d) => d.id === 'market_monitor')!;
+    expect(drawOrder(mm.panels).map((p) => p.id)).toEqual(['ust', 'funding', 'equity', 'fx', 'crypto', 'next']);
   });
 });
