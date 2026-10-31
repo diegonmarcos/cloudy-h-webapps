@@ -10,7 +10,6 @@
   import TopRow from './TopRow.svelte';
   import BottomNavIsland from './BottomNavIsland.svelte';
   import PageTabs from './PageTabs.svelte';
-  import Drawer from './Drawer.svelte';
   import { scrollFeed, DEFAULT_NAV_UI } from './navUi';
   import EmptyState from '../components/EmptyState.svelte';
   import { swipe } from './gestures';
@@ -25,6 +24,12 @@
   } = $props();
 
   let drawerOpen = $state(false);
+  // the drawer is a lazy chunk (not first paint): mounted closed on first use, opened two frames later so it still slides in
+  let drawerUsed = $state(false);
+  const openDrawer = () => {
+    drawerUsed = true;
+    import('./Drawer.svelte').then(() => requestAnimationFrame(() => requestAnimationFrame(() => (drawerOpen = true))));
+  };
   let stripH = $state(0);
   onMount(() => trackLayout());
   // scroll-hide (NavUiDecl, on by default): a downward scroll hides ALL bars (top row, island) until an upward scroll reveals them.
@@ -44,9 +49,9 @@
 <div class="shell" data-section={section} data-home={atHome ? '1' : '0'} style:--strip-h={stripH ? `${stripH}px` : null}>
   <Window />
   <div class="strip-wrap" bind:clientHeight={stripH}><StatusStrip chips={shell.chips} right={shell.right} battery={shell.battery} /></div>
-  <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={() => (drawerOpen = true)} {hidden} />
+  <TopRow {atHome} {backHref} {historyBack} orbHref={shell.orbHref} islandHref={shell.islandHref} onMenu={openDrawer} {hidden} />
   <div class="panes" class:split={!atHome}>
-    <main class="pane master content" {...feed} use:swipe={{ onTab: tabSwipe, onEdge: () => (drawerOpen = true) }} data-testid="content">
+    <main class="pane master content" {...feed} use:swipe={{ onTab: tabSwipe, onEdge: openDrawer }} data-testid="content">
       {#if tabs.length}<PageTabs {tabs} selected={tabSelected} />{/if}
       {#if subtabs.length}<PageTabs tabs={subtabs} selected={subSelected} sub />{/if}
       {@render children()}
@@ -59,7 +64,7 @@
     {/if}
   </div>
   <BottomNavIsland items={shell.bottom} selected={section} {hidden} />
-  <Drawer bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} />
+  {#if drawerUsed}{#await import('./Drawer.svelte') then m}<m.default bind:open={drawerOpen} rows={shell.drawer} tabs={drawerTabs} selectedTab={atHome ? 'home' : section} app={shell.app} />{/await}{/if}
 </div>
 
 <style>

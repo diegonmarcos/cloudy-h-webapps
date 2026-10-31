@@ -18,8 +18,7 @@
   import FinChart from './components/FinChart.svelte';
   import FinCalendar from './components/FinCalendar.svelte';
   import FinTape, { type TapeItem } from './components/FinTape.svelte';
-  import FinSearch from './components/FinSearch.svelte';
-  import FinQuote, { type Quote } from './components/FinQuote.svelte';
+  import type { Quote } from './components/FinQuote.svelte';
   import FinNews from './components/FinNews.svelte';
 
   let { dash }: { dash: Dashboard } = $props();
@@ -150,6 +149,9 @@
   let root = $state('');
   let searchOpen = $state(false);
   let quote = $state<Quote | null>(null);
+  let usedSearch = false, usedQuote = false; // sticky, plain lets: set once, read only through the deriveds below
+  const searchUsed = $derived.by(() => { if (searchOpen) usedSearch = true; return usedSearch; });
+  const quoteUsed = $derived.by(() => { if (quote) usedQuote = true; return usedQuote; });
   let clock: ReturnType<typeof setInterval>;
   const onKey = (e: KeyboardEvent) => {
     const t = e.target as HTMLElement | null;
@@ -327,8 +329,9 @@
   {/each}
   <p class="cap src">Data: {[...new Set(dash.panels.map((p) => attribution(p).name))].join(' · ')}. Delayed or end-of-day; not investment advice. Auto refresh per source; press R to refresh, / to search.</p>
 </div>
-<FinSearch items={catalogue} bind:open={searchOpen} onPick={pick} />
-<FinQuote bind:q={quote} {watched} onStar={toggleStar} />
+<!-- search and the quote card are overlays, not first paint: lazy chunks mounted on first use, kept mounted after -->
+{#if searchUsed}{#await import('./components/FinSearch.svelte') then m}<m.default items={catalogue} bind:open={searchOpen} onPick={pick} />{/await}{/if}
+{#if quoteUsed}{#await import('./components/FinQuote.svelte') then m}<m.default bind:q={quote} {watched} onStar={toggleStar} />{/await}{/if}
 
 <style>
   .dash { padding: 8px 12px 96px; display: flex; flex-direction: column; gap: 8px; background: var(--fin-canvas); min-height: 100%; box-sizing: border-box; }

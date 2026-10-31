@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "sideEffects": [
+    "**/*.css",
+    "./src/styles.ts"
+  ],
   "description": "Generated design tokens, the Android-mimic shell and the Kit* component ports shared by cloudy-webapps and cloudy-c3 (#1320). Consumed as source (Svelte 5 + TS) through the npm workspace.",
   "svelte": "./src/index.ts",
   "types": "./src/index.ts",
