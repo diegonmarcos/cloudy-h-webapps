@@ -20,9 +20,13 @@
   let open = $state(false);
   // the dropdown grows to its list, capped at the room below the title (navDropdown.ts, tokens.nav.dropdown*); re-measured on
   // open and on every resize (rotation, split screen), so it never runs off the screen and a short list leaves no empty space
-  let titleEl = $state<HTMLElement | null>(null);
-  let winH = $state(0);
-  const cap = $derived(open && titleEl && winH ? dropdownMaxHeight({ windowHeight: winH, anchorBottom: titleEl.getBoundingClientRect().bottom + 4 }) : null);
+  let titleEl: HTMLElement | undefined;
+  let cap = $state<number | null>(null);
+  $effect(() => {
+    if (!open) return;
+    const fit = () => { cap = titleEl ? dropdownMaxHeight({ windowHeight: innerHeight, anchorBottom: titleEl.getBoundingClientRect().bottom + 4 }) : null; };
+    fit(); addEventListener('resize', fit); return () => removeEventListener('resize', fit);
+  });
   let room = $state(0);
   let line = $state(crumbs.map((c) => c.label).join(' / '));
   let measure: ((l: string) => number) | null = null;
@@ -37,7 +41,7 @@
   $effect(() => { void room; void crumbs; fit(); });
 </script>
 
-<svelte:window bind:innerHeight={winH} onkeydown={(e) => { if (e.key === 'Escape') open = false; }} />
+<svelte:window onkeydown={(e) => { if (e.key === 'Escape') open = false; }} />
 
 <div class="app-top-bar first-row" class:clean data-testid="fleet-first-row">
   {#if clean}
@@ -47,7 +51,7 @@
     <button class="island" bind:this={titleEl} onclick={() => (open = !open)} aria-expanded={open} aria-haspopup="menu" data-testid="fleet-title"><h1>{line}</h1></button>
     {#if open}
       <div class="scrim" onclick={() => (open = false)} aria-hidden="true"></div>
-      <div class="dropdown" role="menu" data-testid="fleet-dropdown" style:max-height={cap === null ? null : `${cap}px`}>
+      <div class="dropdown" role="menu" data-testid="fleet-dropdown" style={cap === null ? undefined : `max-height:${cap}px`}>
         <div class="crumbs">
           {#each crumbs as c, i (i)}{#if i > 0}<span class="sep"> / </span>{/if}<svelte:element this={c.href ? 'a' : 'span'} href={c.href} class:last={i === crumbs.length - 1}>{c.label}</svelte:element>{/each}
         </div>

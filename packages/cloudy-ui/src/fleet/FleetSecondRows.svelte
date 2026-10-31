@@ -9,22 +9,24 @@
   let { groups, selected, compact = false }: { groups: G[]; selected: string | null; compact?: boolean } = $props();
   let open = $state<string | null>(null);
   // the index grows to its list, capped at the room below its label (navDropdown.ts, tokens.nav.dropdown*), re-capped on resize
-  let anchorBottom = $state(0);
-  let winH = $state(0);
-  const cap = $derived(winH ? dropdownMaxHeight({ windowHeight: winH, anchorBottom }) : null);
+  let anchor: HTMLElement | undefined;
+  let cap = $state<number | null>(null);
+  $effect(() => {
+    if (!open) return;
+    const fit = () => { cap = anchor ? dropdownMaxHeight({ windowHeight: innerHeight, anchorBottom: anchor.getBoundingClientRect().bottom }) : null; };
+    fit(); addEventListener('resize', fit); return () => removeEventListener('resize', fit);
+  });
 </script>
-
-<svelte:window bind:innerHeight={winH} />
 
 <nav class="rows" data-testid="fleet-second-rows">
   <div class="box">
     {#each groups as g (g.id)}
       <div class="row" data-testid="frow-{g.id}">
         <div class="idx">
-          <button class="label" onclick={(e) => { anchorBottom = e.currentTarget.getBoundingClientRect().bottom; open = open === g.id ? null : g.id; }} aria-expanded={open === g.id}>{g.label} ▾</button>
+          <button class="label" onclick={(e) => { anchor = e.currentTarget; open = open === g.id ? null : g.id; }} aria-expanded={open === g.id}>{g.label} ▾</button>
           {#if open === g.id}
             <div class="scrim" onclick={() => (open = null)} aria-hidden="true"></div>
-            <div class="dd" role="menu" style:max-height={cap === null ? null : `${cap}px`}>{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
+            <div class="dd" role="menu" style={cap === null ? undefined : `max-height:${cap}px`}>{#each g.pages as p (p.id)}<svelte:element this={p.href ? 'a' : 'span'} href={p.href} class:on={p.id === selected} role="menuitem">{p.label}</svelte:element>{/each}</div>
           {/if}
         </div>
         <span class="bar">|</span>
