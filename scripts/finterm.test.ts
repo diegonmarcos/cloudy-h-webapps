@@ -128,7 +128,15 @@ describe('no hand-typed URLs in the web terminal code', () => {
     }
   });
   it('every endpoint in the declarations is https (or wss) and every request address is endpoint + path', () => {
-    for (const s of fin.sources) if (s.endpoint) expect(s.endpoint, s.id).toMatch(/^(https|wss):\/\//);
-    for (const d of fin.dashboards) for (const p of d.panels) if (p.fetch?.path) expect(p.fetch.path, `${d.id}/${p.id}`).toMatch(/^\//);
+    // 'asset:' is a data file declared in the app (declared_events, #1351), embedded under `declared`: never fetched over the network
+    const asset = new Set(fin.sources.filter((s: { endpoint: string; connector?: string }) => s.endpoint === 'asset:' && s.connector === 'declared_events').map((s: { id: string }) => s.id));
+    for (const s of fin.sources) if (s.endpoint && !asset.has(s.id)) expect(s.endpoint, s.id).toMatch(/^(https|wss):\/\//);
+    for (const d of fin.dashboards) for (const p of d.panels) {
+      const routes = p.fetch ? [{ source: p.source, path: p.fetch.path }, ...(p.fetch.fallbacks ?? [])] : [];
+      for (const r of routes) if (r.path) {
+        if (asset.has(r.source)) expect(Object.keys(fin.declared ?? {}), `${d.id}/${p.id}`).toContain(r.path);
+        else expect(r.path, `${d.id}/${p.id}`).toMatch(/^\//);
+      }
+    }
   });
 });

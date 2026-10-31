@@ -95,7 +95,8 @@ if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
     doc = buildFinterm({
       sources: JSON.parse(need(`${dir}/data/sources.json`)), dashboards: JSON.parse(need(`${dir}/data/dashboards.json`)), build: JSON.parse(need(`${dir}/build.json`)),
       services: JSON.parse(readFileSync(join(root, 'scripts/fallback-services.json'), 'utf8')), appId,
-      declared: { 'central-banks.json': JSON.parse(need(`${dir}/data/central-banks.json`)) },
+      // a declared data file is read when the app has it; a panel naming one that is missing fails the render (buildFinterm)
+      declared: Object.fromEntries(['central-banks.json'].flatMap((n) => { const t = readRaw(`${dir}/data/${n}`); return t == null ? [] : [[n, JSON.parse(t)]]; })),
     });
   } catch (e) { console.error('FAIL', e.message); process.exit(1); }
   emit(root, { [OUT]: JSON.stringify(doc, null, 2) + '\n', [OUT_APP]: JSON.stringify({ _generated: HEADER, app_id: doc.app_id }, null, 2) + '\n' }, 'gen-finterm');
